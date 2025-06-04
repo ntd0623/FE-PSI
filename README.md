@@ -21,39 +21,59 @@ Dự án React sử dụng Vite làm build tool, SCSS và Tailwind CSS để ph�
 
 1. **Clone repository**
 
-```bash
-git clone https://github.com/ntd0623/FE-PSI.git
-cd FE-PSI
-```
+   ```bash
+   git clone https://github.com/ntd0623/FE-PSI.git
+   cd FE-PSI
+   ```
 
 2. **Cài đặt dependencies**
+
+   ```bash
    npm install
+   ```
 
-# hoặc
+   hoặc
 
-    yarn install
+   ```bash
+   yarn install
+   ```
 
 3. **Tạo file biến môi trường**
-   cp .env
+
+   Tạo file `.env` với nội dung:
+
+   ```
    VITE_BACKEND_URL=http://localhost:8080
    VITE_APP_NAME=ReactPsiApp
    VITE_PORT=8080
+   ```
 
 4. **Chạy ứng dụng**
 
+   ```bash
    npm run dev
+   ```
 
-# hoặc
+   hoặc
 
-    yarn dev
+   ```bash
+   yarn dev
+   ```
 
 5. **Chuyển nhánh**
-   git checkout <Tên nhánh cần chuyển>
 
-6. **Tạo nhánh**
+   ```bash
+   git checkout <Tên-nhánh-cần-chuyển>
+   ```
 
-   git checkout -b "<Tên nhánh cần tạo>"
+6. **Tạo nhánh mới**
+
+   ```bash
+   git checkout -b <Tên-nhánh-cần-tạo>
+   ```
+
+---
 
 <p style="color:red; font-weight:bold;">
-Lưu ý: Không code trên nhánh <code>master</code>. Nhánh <code>main</code> phải để chỉ có <code>readme.md</code>. Khi làm một chức năng mới phải chuyển nhánh và pull về cũng như khi xong chức năng phải đẩy code lên GitHub.
+Lưu ý: Không code trên nhánh <code>master</code>. Nhánh <code>main</code> chỉ để chứa file <code>README.md</code>. Khi làm chức năng mới, phải chuyển sang nhánh mới, pull code về, và khi xong chức năng phải đẩy code lên GitHub đúng quy trình.
 </p>
