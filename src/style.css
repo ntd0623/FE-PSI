@@ -1,0 +1,206 @@
+/* Reset cơ bản */
+* {
+  box-sizing: border-box;
+}
+body {
+  font-family: Arial, sans-serif;
+  margin: 0; padding: 0;
+  background: #f9f9f9;
+  color: #333;
+}
+.container {
+  max-width: 900px;
+  margin: 20px auto;
+  padding: 10px;
+  background: white;
+  border-radius: 6px;
+  box-shadow: 0 0 6px #ccc;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #007bff;
+  padding: 10px 20px;
+  color: white;
+}
+.navbar a {
+  color: white;
+  margin-left: 15px;
+  text-decoration: none;
+  font-weight: bold;
+}
+.navbar a:hover {
+  text-decoration: underline;
+}
+.navbar-logo {
+  display: flex;
+  align-items: center;
+}
+
+.logo-img {
+  width: 40px;
+  height: 40px;
+  margin-right: 10px;
+}
+
+.site-name {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+
+/* Form tạo CV */
+.cv-form label {
+  display: block;
+  margin-bottom: 10px;
+}
+.cv-form input,
+.cv-form textarea {
+  width: 100%;
+  padding: 8px;
+  margin-top: 4px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+}
+.cv-form button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.cv-form button:hover {
+  background: #0056b3;
+}
+
+/* Danh sách CV */
+.cv-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.cv-list th, .cv-list td {
+  padding: 12px;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+}
+.cv-list button {
+  margin-right: 10px;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.cv-list button:hover {
+  opacity: 0.8;
+}
+.cv-list button:nth-child(1) {
+  background-color: #28a745; /* XEM */
+  color: white;
+}
+.cv-list button:nth-child(2) {
+  background-color: #dc3545; /* XÓA */
+  color: white;
+}
+
+/* Xem CV */
+.cv-view .cv-content p {
+  margin: 8px 0;
+}
+.cv-view button {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background: #007bff;
+  border: none;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.cv-view button:hover {
+  background: #0056b3;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .navbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .navbar div {
+    margin-top: 10px;
+  }
+  .cv-list table, .cv-list thead, .cv-list tbody, .cv-list th, .cv-list td, .cv-list tr {
+    display: block;
+  }
+  .cv-list tr {
+    margin-bottom: 15px;
+    border-bottom: 2px solid #ddd;
+  }
+  .cv-list td {
+    padding-left: 50%;
+    position: relative;
+  }
+  .cv-list td::before {
+    position: absolute;
+    top: 12px;
+    left: 10px;
+    width: 45%;
+    white-space: nowrap;
+    font-weight: bold;
+    content: attr(data-label);
+  }
+}
+/* Avatar trong form tạo CV */
+.cv-form .avatar-preview {
+  margin: 15px 0;
+  text-align: center;
+}
+.cv-form .avatar-preview img {
+  width: 120px;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease;
+}
+.cv-form .avatar-preview img:hover {
+  transform: scale(1.05);
+}
+
+/* Input chọn file ảnh */
+.cv-form input[type="file"] {
+  margin-top: 8px;
+  font-size: 1rem;
+  padding: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+}
+
+/* Avatar trong trang xem CV */
+.cv-view .avatar {
+  text-align: center;
+  margin: 20px 0;
+}
+.cv-view .avatar img {
+  width: 150px;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 2px solid #ccc;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Responsive avatar */
+@media (max-width: 600px) {
+  .cv-form .avatar-preview img,
+  .cv-view .avatar img {
+    width: 100px;
+    height: 100px;
+  }
+}
