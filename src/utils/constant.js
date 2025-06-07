@@ -1,6 +1,8 @@
 // Khai báo đường dẫn
 export const path = {
-    HOME: "/"
+    HOME: "/",
+    ADMIN: "/admin",
+    VIEW: "/view/:id"
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",

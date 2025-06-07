@@ -1,21 +1,24 @@
-import { useState } from "react";
-import "./App.css";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./Home/HomePage";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+// import CvForm from "../container/System/";
+import CvList from "../container/System/CvList";
+// import CvView from "./container/Home/CvView/CvView";
+// import Navbar from "../";
 import { path } from "../utils/constant";
-function App() {
-  const [count, setCount] = useState(0);
-
+export default function App() {
   return (
     <>
-      <BrowserRouter>
+      {/* <Navbar /> */}
+      <div className="container">
         <Routes>
-          <Route path={path.HOME} element={<Home />} />
+          {/* Trang tạo CV */}
+          {/* <Route path={path.HOME} element={<CvForm />} /> */}
+          {/* Trang quản lý CV */}
+          <Route path={path.ADMIN} element={<CvList />} />{" "}
+          {/* Trang xem/in CV */}
+          {/* <Route path={path.VIEW} element={<CvView />} />{" "} */}
         </Routes>
-      </BrowserRouter>
+      </div>
     </>
   );
 }
-
-export default App;
