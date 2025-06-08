@@ -1,21 +1,21 @@
-import { useState } from "react";
-import "./App.css";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./Home/HomePage";
-import { path } from "../utils/constant";
-function App() {
-  const [count, setCount] = useState(0);
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import CvForm from "./Home/CvForm/CvForm";
+import CvList from "./System/CvList";
+import CvView from "./Home/CvView/CvView";
+import Navbar from "../components/Navbar";
 
+export default function App() {
   return (
-    <>
-      <BrowserRouter>
+    <Router>
+      <Navbar />
+      <div className="container">
         <Routes>
-          <Route path={path.HOME} element={<Home />} />
+          <Route path="/" element={<CvForm />} />
+          <Route path="/admin" element={<CvList />} />
+          <Route path="/view/:id" element={<CvView />} />
         </Routes>
-      </BrowserRouter>
-    </>
+      </div>
+    </Router>
   );
 }
-
-export default App;
