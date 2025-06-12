@@ -1,0 +1,372 @@
+import React, { useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Menu,
+  User,
+  FileText,
+  Building2,
+  BarChart3,
+  Settings,
+  LogOut,
+} from "lucide-react";
+
+const CVManagementSystem = () => {
+  const [selectedFilter, setSelectedFilter] = useState("Tất cả các đợt");
+  const [selectedStatus, setSelectedStatus] = useState("Tất cả trạng thái");
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Mock data for demonstration
+  const listStudent = [
+    {
+      id: 1,
+      fullName: "Nguyễn Văn An",
+      email: "vanguyen@student.aou.vn",
+      university: "Đại học Bách Khoa",
+      major: "Công nghệ thông tin",
+      gpa: "3.2",
+      avatar: "N",
+      Cv: {
+        statusCv: "S2",
+        submission_date: "2024-01-15",
+        dataStatus: { value_VI: "Chờ duyệt" },
+      },
+    },
+    {
+      id: 2,
+      fullName: "Trần Thị Bình",
+      email: "binhtran@student.edu.vn",
+      university: "Đại học Quốc gia",
+      major: "Khoa học máy tính",
+      gpa: "3.5",
+      avatar: "T",
+      Cv: {
+        statusCv: "S3",
+        submission_date: "2024-01-14",
+        dataStatus: { value_VI: "Từ chối" },
+      },
+    },
+    {
+      id: 3,
+      fullName: "Phạm Thu Dung",
+      email: "dungpham@student.edu.vn",
+      university: "Đại học Kinh tế",
+      major: "Hệ thống thông tin",
+      gpa: "3.6",
+      avatar: "P",
+      Cv: {
+        statusCv: "S4",
+        submission_date: "2024-01-13",
+        dataStatus: { value_VI: "Chờ đợt sau" },
+      },
+    },
+  ];
+
+  const counts = {
+    submitted: 1,
+    approved: 1,
+    rejected: 1,
+    review: 1,
+  };
+
+  const menuItems = [
+    { icon: BarChart3, label: "Tổng quan", active: false },
+    { icon: FileText, label: "Quản lý CV", active: true },
+    { icon: User, label: "Trắc Nghiệm", active: false },
+    { icon: Building2, label: "Quản lý đợt thực tập", active: false },
+    { icon: Building2, label: "Quản lý doanh nghiệp", active: false },
+    { icon: BarChart3, label: "Báo cáo thống kê", active: false },
+    { icon: Settings, label: "Cài đặt hệ thống", active: false },
+  ];
+
+  const statusCards = [
+    {
+      count: counts.submitted,
+      label: "Đã nộp",
+      color: "bg-yellow-100 text-yellow-800",
+    },
+    {
+      count: counts.approved,
+      label: "Đã yêu cầu",
+      color: "bg-green-100 text-green-800",
+    },
+    {
+      count: counts.rejected,
+      label: "Từ chối",
+      color: "bg-red-100 text-red-800",
+    },
+    {
+      count: counts.review,
+      label: "Đang xem xét",
+      color: "bg-blue-100 text-blue-800",
+    },
+  ];
+
+  const getAvatarColor = (name) => {
+    const colors = [
+      "bg-blue-500",
+      "bg-green-500",
+      "bg-purple-500",
+      "bg-pink-500",
+      "bg-indigo-500",
+      "bg-yellow-500",
+    ];
+    return colors[name.charCodeAt(0) % colors.length];
+  };
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "S2":
+        return "bg-yellow-100 text-yellow-800";
+      case "S3":
+        return "bg-red-100 text-red-800";
+      case "S4":
+        return "bg-blue-100 text-blue-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  return (
+    <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+      {/* Sidebar */}
+      <div
+        className={`fixed inset-y-0 z-30 w-64 bg-white shadow-lg transform transition-transform duration-200 ease-in-out md:relative md:translate-x-0 ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        {/* Header sidebar button close on mobile */}
+        <div className="p-4 shadow-sm flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-gray-800">Menu Chức Năng</h1>
+          <button
+            onClick={() => setIsSidebarOpen(false)}
+            className="md:hidden text-gray-700 focus:outline-none"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+        </div>
+        <nav className="mt-4">
+          {menuItems.map((item, index) => (
+            <div
+              key={index}
+              className={`flex items-center px-4 py-3 mx-2 rounded-lg cursor-pointer transition-colors ${
+                item.active
+                  ? "bg-blue-500 text-white"
+                  : "text-gray-700 hover:bg-gray-100"
+              }`}
+            >
+              <item.icon className="w-5 h-5 mr-3" />
+              <span className="text-sm font-medium">{item.label}</span>
+            </div>
+          ))}
+        </nav>
+        <div className="absolute bottom-4 left-4 right-4">
+          <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
+            <LogOut className="w-5 h-5 mr-3" />
+            <span className="text-sm">Đăng xuất</span>
+          </button>
+        </div>
+      </div>
+
+      {/* Main content */}
+      <div className="flex-1 overflow-y-auto bg-gray-50">
+        {/* Header */}
+        <div className="bg-white shadow-sm px-4 py-4 flex justify-center items-center sticky top-0">
+          <div className="flex items-center">
+            <button
+              className="block md:hidden mr-3"
+              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+            >
+              <Menu className="w-5 h-5 text-gray-700" />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-800">
+              Hệ thống quản lý CV thực tập
+            </h1>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-6" style={{ background: "#EEEEEE" }}>
+          <div
+            className="mb-6 bg-white rounded-lg p-5 flex flex-col"
+            style={{
+              boxShadow: "0 0 15px 5px rgba(0,0,0,0.05)",
+            }}
+          >
+            <h1 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              Danh sách CV ứng tuyển
+            </h1>
+            {/* Filters */}
+            <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-2 sm:space-y-0 mb-6 justify-end">
+              <select
+                className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+              >
+                <option>Tất cả các đợt</option>
+                <option>Đợt 1 - 2024</option>
+                <option>Đợt 2 - 2024</option>
+              </select>
+
+              <select
+                className="px-4 py-2 border border-gray-300 rounded-lg bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                value={selectedStatus}
+                onChange={(e) => setSelectedStatus(e.target.value)}
+              >
+                <option>Tất cả trạng thái</option>
+                <option>Chưa xử lý</option>
+                <option>Đã chấp nhận</option>
+                <option>Đã từ chối</option>
+                <option>Chờ đợt sau</option>
+              </select>
+            </div>
+
+            {/* Status cards */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+              {statusCards.map((card, index) => (
+                <div
+                  key={index}
+                  className={`${card.color} p-4 rounded-lg text-center`}
+                >
+                  <div className="text-2xl font-bold mb-1">{card.count}</div>
+                  <div className="text-sm font-medium">{card.label}</div>
+                </div>
+              ))}
+            </div>
+
+            {/* Student Cards */}
+            <div className="space-y-6">
+              {listStudent.map((student) => (
+                <div
+                  key={student.id}
+                  className="bg-white rounded-lg p-6"
+                  style={{
+                    boxShadow: "0 0 15px 5px rgba(0,0,0,0.08)", // đổ bóng đều xung quanh
+                  }}
+                >
+                  <div className="flex flex-col md:flex-row md:justify-between gap-6">
+                    {/* LEFT: Thông tin sinh viên (chiếm phần lớn) */}
+                    <div className="flex-1 flex items-start space-x-4">
+                      {/* Avatar chữ cái đầu */}
+                      <div
+                        className={`w-12 h-12 rounded-full ${getAvatarColor(
+                          student.fullName
+                        )} flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}
+                      >
+                        {student.avatar}
+                      </div>
+
+                      {/* Nội dung */}
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                          {student.fullName}
+                        </h3>
+                        <p className="text-sm text-gray-600 mb-3">
+                          {student.email}
+                        </p>
+
+                        {/* Grid thông tin */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                          <div>
+                            <span className="text-gray-500 font-medium block">
+                              TRƯỜNG
+                            </span>
+                            <p className="text-gray-900">
+                              {student.university}
+                            </p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 font-medium block">
+                              CHUYÊN NGÀNH
+                            </span>
+                            <p className="text-gray-900">{student.major}</p>
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                          <div>
+                            <span className="text-gray-500 font-medium">
+                              GPA
+                            </span>
+                            <p className="text-gray-900">{student.gpa}</p>
+                          </div>
+                          <div>
+                            <span className="text-gray-500 font-medium block">
+                              THỜI GIAN NỘP
+                            </span>
+                            <p className="text-gray-900">2024-01-15</p>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-sm mb-4">
+                          <div className="flex items-center gap-5">
+                            <span className="text-gray-600 bg-gray-100 px-3 py-1 rounded-3xl text-sm font-medium">
+                              Đợt 1 - 2024
+                            </span>
+                            <span
+                              className={`inline-block px-2 py-1 text-xs font-medium rounded-3xl ${getStatusColor(
+                                student?.Cv?.statusCv
+                              )}`}
+                            >
+                              {student?.Cv?.dataStatus?.value_VI}
+                            </span>
+                          </div>
+                        </div>
+                        {/* Actions */}
+                        <div className="flex flex-wrap gap-6 my-8">
+                          <button className="bg-green-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-green-700 transition-colors">
+                            Chấp nhận
+                          </button>
+                          <button className="bg-red-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-red-700 transition-colors">
+                            Từ chối
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* RIGHT: CV Preview */}
+                    <div className="w-full md:w-60 bg-gray-50 rounded-xl p-4 flex flex-col justify-between">
+                      <span className="text-xs text-gray-500 font-medium mb-2">
+                        CV PREVIEW
+                      </span>
+                      <div className="bg-white border border-gray-200 rounded-md h-40 flex items-center justify-center mb-4">
+                        <span className="text-sm font-semibold text-gray-700 text-center">
+                          CV {student.fullName}
+                        </span>
+                      </div>
+                      <div className="flex flex-col space-y-1">
+                        <button className="bg-purple-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-purple-700">
+                          Tải xuống
+                        </button>
+                        <button className="bg-blue-600 text-white rounded px-3 py-1 hover:bg-blue-700 text-xs font-medium transition-colors duration-200">
+                          Xem đầy đủ
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Pagination */}
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 space-y-4 sm:space-y-0">
+              <button className="bg-green-500 text-white px-6 py-2 rounded-lg font-medium hover:bg-green-600 transition-colors">
+                Next page →
+              </button>
+              <div className="flex items-center space-x-2">
+                <span className="text-sm text-gray-500">1 of 2</span>
+                <button className="p-1 rounded hover:bg-gray-100">
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <button className="p-1 rounded hover:bg-gray-100">
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default CVManagementSystem;

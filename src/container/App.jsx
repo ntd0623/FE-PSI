@@ -1,21 +1,22 @@
-import { useState } from "react";
-import "./App.css";
-import ReactDOM from "react-dom/client";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Home from "./Home/HomePage";
+import React from "react";
+import { Routes, Route } from "react-router-dom";
+import CVManagementSystem from "./System/CvManagement";
+import FormCV from "./FormCV/FormCV";
+import PreviewCV from "./FormCV/PreviewCV";
 import { path } from "../utils/constant";
-function App() {
-  const [count, setCount] = useState(0);
-
+import "../styles/tailwind.css";
+import toast, { Toaster } from "react-hot-toast";
+export default function App() {
   return (
     <>
-      <BrowserRouter>
+      <div className="container">
         <Routes>
-          <Route path={path.HOME} element={<Home />} />
+          <Route path={path.CV_MANAGEMENT} element={<CVManagementSystem />} />{" "}
+          <Route path={path.FORM_CV} element={<FormCV />} />{" "}
+          <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
         </Routes>
-      </BrowserRouter>
+      </div>
+      <Toaster position="top-right" />
     </>
   );
 }
-
-export default App;
