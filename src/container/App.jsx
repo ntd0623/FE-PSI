@@ -1,24 +1,22 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
-// import CvForm from "../container/System/";
-import CvList from "../container/System/CvList";
-// import CvView from "./container/Home/CvView/CvView";
-// import Navbar from "../";
+import CVManagementSystem from "./System/CvManagement";
+import FormCV from "./FormCV/FormCV";
+import PreviewCV from "./FormCV/PreviewCV";
 import { path } from "../utils/constant";
+import "../styles/tailwind.css";
+import toast, { Toaster } from "react-hot-toast";
 export default function App() {
   return (
     <>
-      {/* <Navbar /> */}
       <div className="container">
         <Routes>
-          {/* Trang tạo CV */}
-          {/* <Route path={path.HOME} element={<CvForm />} /> */}
-          {/* Trang quản lý CV */}
-          <Route path={path.ADMIN} element={<CvList />} />{" "}
-          {/* Trang xem/in CV */}
-          {/* <Route path={path.VIEW} element={<CvView />} />{" "} */}
+          <Route path={path.CV_MANAGEMENT} element={<CVManagementSystem />} />{" "}
+          <Route path={path.FORM_CV} element={<FormCV />} />{" "}
+          <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
         </Routes>
       </div>
+      <Toaster position="top-right" />
     </>
   );
 }

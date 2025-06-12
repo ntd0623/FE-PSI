@@ -1,0 +1,60 @@
+@media print {
+    body {
+        background: white !important;
+    }
+
+    .print\:hidden {
+        display: none !important;
+    }
+
+    .print\:w-full {
+        width: 100% !important;
+    }
+
+    .print\:block {
+        display: block !important;
+    }
+
+    .shadow,
+    .shadow-xl {
+        box-shadow: none !important;
+    }
+
+    .bg-gray-50 {
+        background: white !important;
+    }
+
+    .min-h-screen {
+        min-height: auto !important;
+    }
+
+    // 👇 Thêm phần này để căn giữa nội dung khi in
+    .print-center {
+        margin-left      : auto !important;
+        margin-right     : auto !important;
+        width            : 210mm !important; // Khổ A4 ngang: ~210mm
+        page-break-inside: avoid !important;
+    }
+
+    .skill-badge {
+        display      : inline-block !important;
+        font-size    : 12px !important;
+        color        : white !important;
+        padding      : 2px 8px !important;
+        border-radius: 9999px !important;
+        margin       : 2px 4px 2px 0 !important;
+    }
+
+    .bg-purple-700 {
+        background-color: #6b21a8 !important;
+    }
+
+    .bg-green-600 {
+        background-color: #16a34a !important;
+    }
+
+    .bg-yellow-500 {
+        background-color: #eab308 !important;
+        color           : black !important; // Màu chữ đen cho dễ đọc trên nền vàng
+    }
+}

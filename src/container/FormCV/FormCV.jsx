@@ -1,0 +1,1020 @@
+import React, { useState, useRef, useEffect } from "react";
+import { User, Plus, X } from "lucide-react";
+import { getBase64 } from "../../utils/CommonUtils";
+import { useNavigate } from "react-router-dom";
+import { navigateToCVPreview } from "../../utils/navigateWithState";
+import { getAllCode, createCV } from "../../services/studentService";
+import Lightbox from "yet-another-react-lightbox";
+import "yet-another-react-lightbox/styles.css";
+import toast from "react-hot-toast";
+const FormCV = () => {
+  const defaultFormData = {
+    fullName: "",
+    email: "",
+    phone: "",
+    birthDay: "",
+    gender: "",
+    degree: "",
+    address: "",
+    university: "",
+    major: "",
+    gpa: "",
+    graduationYear: "",
+    careerGoal: "",
+    achievements: "",
+    references: "",
+    skills: {
+      programming: [],
+      softSkills: [],
+      languages: [],
+    },
+    experience: [],
+    projects: [],
+  };
+  // list gender load api
+  const [listGender, setListGender] = useState("");
+  // list degree load api
+  const [listDegree, setListDegree] = useState("");
+  // Flag fetch
+  const hasFetched = useRef(false);
+  // Form data
+  const [formData, setFormData] = useState({
+    fullName: "",
+    email: "",
+    phone: "",
+    gender: "",
+    address: "",
+    university: "",
+    major: "",
+    degree: "",
+    gpa: "",
+    graduationYear: "",
+    projects: [
+      {
+        name: "",
+        technologies: "",
+        description: "",
+        link: "",
+      },
+    ],
+    experience: [
+      {
+        nameCompany: "",
+        position: "",
+        startDate: "",
+        endDate: "",
+        description: "",
+        link: "",
+      },
+    ],
+    skills: {
+      programming: [],
+      softSkills: [],
+      languages: [],
+    },
+    careerGoal: "",
+    achievements: "",
+    references: "",
+  });
+  //BirthDay data
+  const [birthDay, setBirthDay] = useState("");
+  //Skill data
+  const [skillInputs, setSkillInputs] = useState({
+    programming: "",
+    softSkills: "",
+    languages: "",
+  });
+  // Avatar
+  const [avatar, setAvatar] = useState("");
+  // Preview Avatar
+  const [imageFile, setImageFile] = useState(null);
+  const [isOpenPreview, setIsOpenPreview] = useState(false);
+  const fileInputRef = useRef(null);
+
+  //fetch api
+
+  useEffect(() => {
+    if (hasFetched.current) return; // if fetched return
+    hasFetched.current = true;
+    // Call API once times when mount component
+    const fetchData = async () => {
+      try {
+        const listGender = await getAllCode("GENDER");
+        const listDegree = await getAllCode("DEGREE");
+        setListGender(listGender.data);
+        setListDegree(listDegree.data);
+      } catch (error) {
+        console.error("Lỗi khi fetch data:", error);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  // handle change Avatar
+  const handleOnChangeImage = async (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      const objectUrl = URL.createObjectURL(file);
+      const base64 = await getBase64(file);
+
+      setAvatar(base64);
+      setImageFile(objectUrl);
+    }
+  };
+  // Open Dialog
+  const handleButtonClick = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click(); // Mở hộp thoại chọn ảnh
+    }
+  };
+  // Process Preview Avartar
+  const openPreview = () => {
+    if (imageFile) {
+      setIsOpenPreview(true);
+    }
+  };
+  // setState Input
+  const handleInputChange = (field, value) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+  //setState Project
+  const handleProjectChange = (index, field, value) => {
+    const newProjects = [...formData.projects];
+    newProjects[index][field] = value;
+    setFormData((prev) => ({
+      ...prev,
+      projects: newProjects,
+    }));
+  };
+  //setExperience
+  const handleExperienceChange = (index, field, value) => {
+    const newExperience = [...formData.experience];
+    newExperience[index][field] = value;
+    setFormData((prev) => ({
+      ...prev,
+      experience: newExperience,
+    }));
+  };
+  // processs add info experience
+  const addExperience = () => {
+    setFormData((prev) => ({
+      ...prev,
+      experience: [
+        ...prev.experience,
+        {
+          nameCompany: "",
+          position: "",
+          startDate: "",
+          endDate: "",
+          description: "",
+          link: "",
+        },
+      ],
+    }));
+  };
+  //Delete Experience
+  const removeExperience = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      experience: prev.experience.filter((_, i) => i !== index),
+    }));
+  };
+  // process add info project
+  const addProject = () => {
+    setFormData((prev) => ({
+      ...prev,
+      projects: [
+        ...prev.projects,
+        { name: "", technologies: "", description: "", link: "" },
+      ],
+    }));
+  };
+  // remove project
+  const removeProject = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      projects: prev.projects.filter((_, i) => i !== index),
+    }));
+  };
+  // add Info Skill
+  const addSkill = (category) => {
+    const skill = skillInputs[category].trim();
+    if (skill) {
+      setFormData((prev) => ({
+        ...prev,
+        skills: {
+          ...prev.skills,
+          [category]: [...prev.skills[category], skill],
+        },
+      }));
+      setSkillInputs((prev) => ({
+        ...prev,
+        [category]: "",
+      }));
+    }
+  };
+  // remove skill
+  const removeSkill = (category, index) => {
+    setFormData((prev) => ({
+      ...prev,
+      skills: {
+        ...prev.skills,
+        [category]: prev.skills[category].filter((_, i) => i !== index),
+      },
+    }));
+  };
+  // setState Input
+  const handleSkillInputChange = (category, value) => {
+    setSkillInputs((prev) => ({
+      ...prev,
+      [category]: value,
+    }));
+  };
+  // Enter add new Skill
+  const handleSkillKeyPress = (e, category) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      addSkill(category);
+    }
+  };
+  // handle Submit
+  const handleSubmit = async () => {
+    console.log("Check state: ", formData, avatar);
+    const cv = await createCV({
+      userID: 1,
+      fullName: formData.fullName,
+      email: formData.email,
+      phoneNumber: formData.phone,
+      birthDay: birthDay,
+      genderID: formData.gender,
+      degreeID: formData.degree,
+      address: formData.address,
+      school_name: formData.university,
+      major: formData.major,
+      gpa: formData.gpa,
+      graduationYear: formData.graduationYear,
+      career_objective: formData.careerGoal,
+      archivements: formData.achievements,
+      references: formData.references,
+      skills: formData.skills,
+      experience: formData.experience,
+      projects: formData.projects,
+      image: avatar,
+    });
+    if (cv && cv.errCode === 0) {
+      toast.success("Tạo CV thành công !");
+      setFormData(defaultFormData);
+      setAvatar(null);
+      setImageFile(null);
+    }
+  };
+  // get color skill
+  const getSkillBadgeColor = (category) => {
+    switch (category) {
+      case "programming":
+        return "bg-blue-100 text-blue-800";
+      case "softSkills":
+        return "bg-green-100 text-green-800";
+      case "languages":
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+  // get color button skill
+  const getButtonColor = (category) => {
+    switch (category) {
+      case "programming":
+        return "bg-blue-600 hover:bg-blue-700";
+      case "softSkills":
+        return "bg-green-600 hover:bg-green-700";
+      case "languages":
+        return "bg-yellow-600 hover:bg-yellow-700";
+      default:
+        return "bg-gray-600 hover:bg-gray-700";
+    }
+  };
+
+  // Navigate Preview CV
+  const navigate = useNavigate();
+  const handlePreview = () => {
+    const degreeValue = listDegree.find(
+      (item) => item?.key === formData.degree
+    );
+    const cvData = {
+      formData,
+      avatar,
+      birthDay,
+      degreeValue,
+    };
+    localStorage.setItem("cvData", JSON.stringify(cvData));
+    navigateToCVPreview(navigate, cvData);
+  };
+  useEffect(() => {
+    const stored = localStorage.getItem("cvData");
+
+    if (stored && stored !== "undefined") {
+      try {
+        const parsed = JSON.parse(stored);
+
+        setFormData(parsed.formData || {});
+        setAvatar(parsed.avatar || "");
+        setBirthDay(parsed.birthDay || "");
+      } catch (error) {
+        console.error("Lỗi khi parse JSON từ localStorage:", error);
+      }
+    }
+  }, []);
+  return (
+    <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 border-b border-gray-200 pb-3">
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">
+            Tạo CV Thực Tập Sinh
+          </h1>
+          <button className="text-blue-600 hover:text-blue-800 text-sm self-start sm:self-auto">
+            Thực tập sinh
+          </button>
+        </div>
+
+        {/* Profile */}
+        <div className="mb-8">
+          <div className="flex flex-col items-center mb-6">
+            {/* Vòng tròn Avatar preview */}
+            <div
+              className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden cursor-pointer"
+              onClick={openPreview}
+            >
+              {imageFile ? (
+                <img
+                  src={imageFile}
+                  alt="Avatar preview"
+                  className="object-cover w-full h-full"
+                />
+              ) : (
+                <User size={32} className="text-gray-400" />
+              )}
+            </div>
+
+            {/* Nút tải ảnh */}
+            <button
+              onClick={handleButtonClick}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
+            >
+              Tải ảnh lên
+            </button>
+
+            {/* File input bị ẩn */}
+            <input
+              type="file"
+              accept="image/*"
+              ref={fileInputRef}
+              className="hidden"
+              onChange={handleOnChangeImage}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Họ và tên *
+              </label>
+              <input
+                type="text"
+                value={formData.fullName}
+                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                placeholder="Nhập họ và tên"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Email *
+              </label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                placeholder="Nhập email"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Số điện thoại *
+              </label>
+              <input
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => handleInputChange("phone", e.target.value)}
+                placeholder="Nhập số điện thoại"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Ngày sinh
+              </label>
+              <input
+                type="date"
+                value={birthDay}
+                onChange={(e) => setBirthDay(e.target.value)}
+                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Giới tính
+              </label>
+              <select
+                value={formData.gender}
+                onChange={(e) => handleInputChange("gender", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Chọn giới tính
+                </option>
+                {listGender &&
+                  listGender.length > 0 &&
+                  listGender.map((item, index) => {
+                    return (
+                      <option key={index} value={item.key}>
+                        {item.value_VI}
+                      </option>
+                    );
+                  })}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Địa chỉ
+              </label>
+              <input
+                type="text"
+                value={formData.address}
+                onChange={(e) => handleInputChange("address", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Education */}
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
+              2
+            </div>
+            <h2 className="text-lg font-semibold">Học vấn</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Trường đại học *
+              </label>
+              <input
+                type="text"
+                value={formData.university}
+                onChange={(e) =>
+                  handleInputChange("university", e.target.value)
+                }
+                placeholder="Tên trường đại học"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Chuyên ngành *
+              </label>
+              <input
+                type="text"
+                value={formData.major}
+                onChange={(e) => handleInputChange("major", e.target.value)}
+                placeholder="Chuyên ngành học"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Bằng cấp
+              </label>
+              <select
+                value={formData.degree}
+                onChange={(e) => handleInputChange("degree", e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="" disabled>
+                  Chọn bằng cấp
+                </option>
+                {listDegree &&
+                  listDegree.length > 0 &&
+                  listDegree.map((item, index) => {
+                    return (
+                      <option key={index} value={item.key}>
+                        {item.value_VI}
+                      </option>
+                    );
+                  })}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                GPA
+              </label>
+              <input
+                type="text"
+                value={formData.gpa}
+                onChange={(e) => handleInputChange("gpa", e.target.value)}
+                placeholder="VD: 3.5/4.0"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Năm tốt nghiệp (dự kiến)
+              </label>
+              <input
+                type="text"
+                value={formData.graduationYear}
+                onChange={(e) =>
+                  handleInputChange("graduationYear", e.target.value)
+                }
+                placeholder="2024"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* Experience */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
+                3
+              </div>
+              <h2 className="text-lg font-semibold">Kinh nghiệm làm việc</h2>
+            </div>
+            <button
+              onClick={addExperience}
+              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
+            >
+              <Plus size={16} className="mr-2" />
+              Thêm kinh nghiệm
+            </button>
+          </div>
+
+          {formData.experience &&
+            formData.experience.length > 0 &&
+            formData.experience.map((exp, index) => (
+              <div
+                key={index}
+                className="border border-gray-200 rounded-lg p-4 mb-4"
+              >
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-medium">Kinh nghiệm {index + 1}</h3>
+                  {formData.experience.length > 1 && (
+                    <button
+                      onClick={() => removeExperience(index)}
+                      className="text-red-600 hover:text-red-800"
+                    >
+                      Xóa
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Công ty/Tổ chức
+                    </label>
+                    <input
+                      type="text"
+                      value={exp.nameCompany}
+                      onChange={(e) =>
+                        handleExperienceChange(
+                          index,
+                          "nameCompany",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Tên công ty"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Vị trí
+                    </label>
+                    <input
+                      type="text"
+                      value={exp.position}
+                      onChange={(e) =>
+                        handleExperienceChange(
+                          index,
+                          "position",
+                          e.target.value
+                        )
+                      }
+                      placeholder="Vị trí công việc"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Ngày Bắt Đầu
+                    </label>
+                    <input
+                      type="date"
+                      value={exp.startDate}
+                      onChange={(e) =>
+                        handleExperienceChange(
+                          index,
+                          "startDate",
+                          e.target.value
+                        )
+                      }
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                      Ngày Kết Thúc
+                    </label>
+                    <input
+                      type="date"
+                      value={exp.endDate}
+                      onChange={(e) =>
+                        handleExperienceChange(index, "endDate", e.target.value)
+                      }
+                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Mô tả công việc
+                  </label>
+                  <textarea
+                    value={exp.description}
+                    onChange={(e) =>
+                      handleExperienceChange(
+                        index,
+                        "description",
+                        e.target.value
+                      )
+                    }
+                    rows={3}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+            ))}
+        </div>
+
+        {/* Skills - Updated Section */}
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
+              4
+            </div>
+            <h2 className="text-lg font-semibold">Kỹ năng</h2>
+          </div>
+
+          <div className="space-y-6">
+            {/* Programming Skills */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Kỹ năng kỹ thuật
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.skills.programming &&
+                  formData.skills.programming.length > 0 &&
+                  formData.skills.programming.map((skill, index) => (
+                    <span
+                      key={index}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
+                        "programming"
+                      )}`}
+                    >
+                      {skill}
+                      <button
+                        onClick={() => removeSkill("programming", index)}
+                        className="ml-2 text-current hover:text-red-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={skillInputs.programming}
+                  onChange={(e) =>
+                    handleSkillInputChange("programming", e.target.value)
+                  }
+                  onKeyPress={(e) => handleSkillKeyPress(e, "programming")}
+                  placeholder="VD: JavaScript, Python"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={() => addSkill("programming")}
+                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
+                    "programming"
+                  )}`}
+                >
+                  Thêm
+                </button>
+              </div>
+            </div>
+
+            {/* Soft Skills */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Kỹ năng mềm
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.skills.softSkills &&
+                  formData.skills.softSkills.length > 0 &&
+                  formData.skills.softSkills.map((skill, index) => (
+                    <span
+                      key={index}
+                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
+                        "softSkills"
+                      )}`}
+                    >
+                      {skill}
+                      <button
+                        onClick={() => removeSkill("softSkills", index)}
+                        className="ml-2 text-current hover:text-red-600"
+                      >
+                        <X size={12} />
+                      </button>
+                    </span>
+                  ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={skillInputs.softSkills}
+                  onChange={(e) =>
+                    handleSkillInputChange("softSkills", e.target.value)
+                  }
+                  onKeyPress={(e) => handleSkillKeyPress(e, "softSkills")}
+                  placeholder="VD: Teamwork, Communication"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={() => addSkill("softSkills")}
+                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
+                    "softSkills"
+                  )}`}
+                >
+                  Thêm
+                </button>
+              </div>
+            </div>
+
+            {/* Languages */}
+            <div>
+              <h3 className="text-sm font-medium text-gray-700 mb-3">
+                Ngôn ngữ
+              </h3>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {formData.skills.languages.map((skill, index) => (
+                  <span
+                    key={index}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
+                      "languages"
+                    )}`}
+                  >
+                    {skill}
+                    <button
+                      onClick={() => removeSkill("languages", index)}
+                      className="ml-2 text-current hover:text-red-600"
+                    >
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={skillInputs.languages}
+                  onChange={(e) =>
+                    handleSkillInputChange("languages", e.target.value)
+                  }
+                  onKeyPress={(e) => handleSkillKeyPress(e, "languages")}
+                  placeholder="VD: Tiếng Anh (TOEIC 800)"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <button
+                  onClick={() => addSkill("languages")}
+                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
+                    "languages"
+                  )}`}
+                >
+                  Thêm
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Projects */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center">
+              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
+                5
+              </div>
+              <h2 className="text-lg font-semibold">Dự Án</h2>
+            </div>
+            <button
+              onClick={addProject}
+              className="bg-blue-600 text-white px-4 py-2 shadow-sm rounded-md hover:bg-blue-700 flex items-center"
+            >
+              <Plus size={16} className="mr-2" />
+              Thêm dự án
+            </button>
+          </div>
+
+          {formData.projects.map((project, index) => (
+            <div
+              key={index}
+              className="border border-gray-200 rounded-lg p-4 mb-4"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="font-medium">Dự án {index + 1}</h3>
+                {formData.projects.length > 1 && (
+                  <button
+                    onClick={() => removeProject(index)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Xóa
+                  </button>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Tên dự án
+                  </label>
+                  <input
+                    type="text"
+                    value={project.name}
+                    onChange={(e) =>
+                      handleProjectChange(index, "name", e.target.value)
+                    }
+                    placeholder="Tên dự án"
+                    className="w-full px-3 py-2 border shadow-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Công nghệ sử dụng
+                  </label>
+                  <input
+                    type="text"
+                    value={project.technologies}
+                    onChange={(e) =>
+                      handleProjectChange(index, "technologies", e.target.value)
+                    }
+                    placeholder="VD: React, Node.js, MongoDB"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Link dự án
+                </label>
+                <input
+                  type="url"
+                  value={project.link}
+                  onChange={(e) =>
+                    handleProjectChange(index, "link", e.target.value)
+                  }
+                  placeholder="https://github.com/..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-3">
+                  Mô tả dự án
+                </label>
+                <textarea
+                  value={project.description}
+                  onChange={(e) =>
+                    handleProjectChange(index, "description", e.target.value)
+                  }
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+        {/* Add Information */}
+        <div className="mb-8">
+          <div className="flex items-center mb-6">
+            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
+              6
+            </div>
+            <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
+          </div>
+
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Mục tiêu nghề nghiệp
+              </label>
+              <textarea
+                value={formData.careerGoal}
+                onChange={(e) =>
+                  handleInputChange("careerGoal", e.target.value)
+                }
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Thành tích & Giải thưởng
+              </label>
+              <textarea
+                value={formData.achievements}
+                onChange={(e) =>
+                  handleInputChange("achievements", e.target.value)
+                }
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-3">
+                Người tham khảo
+              </label>
+              <textarea
+                value={formData.references}
+                onChange={(e) =>
+                  handleInputChange("references", e.target.value)
+                }
+                rows={3}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+        </div>
+        {/* Buttons */}
+        <div className="flex justify-between">
+          <button
+            onClick={handlePreview}
+            className="border border-blue-600 text-blue-600 px-6 py-2 rounded-md hover:bg-blue-50"
+          >
+            Xem trước CV
+          </button>
+          <button
+            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
+            onClick={() => handleSubmit()}
+          >
+            Gửi CV cho Admin
+          </button>
+        </div>
+      </div>
+      {/* Lightbox for image preview */}
+      <Lightbox
+        open={isOpenPreview}
+        close={() => setIsOpenPreview(false)}
+        slides={[{ src: imageFile }]}
+      />
+    </div>
+  );
+};
+
+export default FormCV;
