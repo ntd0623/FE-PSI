@@ -12,7 +12,12 @@ import {
 } from "lucide-react";
 import { getStatusColor } from "../../utils/statusHelper";
 import { STATUS_CV } from "../../utils/constant";
-import { getAllCode, getInfoCvStudent } from "../../services/studentService";
+import {
+  getAllCode,
+  getInfoCvStudent,
+  updateStatusCV,
+} from "../../services/studentService";
+import toast from "react-hot-toast";
 
 const CVManagementSystem = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
@@ -22,23 +27,24 @@ const CVManagementSystem = () => {
   const [listIntership, setListInternship] = useState("");
   const [listStudent, setListStudent] = useState("");
   const hasFetched = useRef(false);
+
+  const fetchData = async () => {
+    const listStatusCV = await getAllCode("CV_STATUS");
+    const listIntership = await getAllCode("INTERNSHIP_BATCHES");
+    const listStudent = await getInfoCvStudent();
+    if (
+      listStatusCV.errCode === 0 &&
+      listIntership.errCode === 0 &&
+      listStudent.errCode === 0
+    ) {
+      setListStatusCV(listStatusCV.data);
+      setListInternship(listIntership.data);
+      setListStudent(listStudent.data);
+    }
+  };
   useEffect(() => {
     if (hasFetched.current) return; // if fetched return
     hasFetched.current = true;
-    const fetchData = async () => {
-      const listStatusCV = await getAllCode("CV_STATUS");
-      const listIntership = await getAllCode("INTERNSHIP_BATCHES");
-      const listStudent = await getInfoCvStudent();
-      if (
-        listStatusCV.errCode === 0 &&
-        listIntership.errCode === 0 &&
-        listStudent.errCode === 0
-      ) {
-        setListStatusCV(listStatusCV.data);
-        setListInternship(listIntership.data);
-        setListStudent(listStudent.data);
-      }
-    };
     fetchData();
   }, []);
   //   {
@@ -131,22 +137,34 @@ const CVManagementSystem = () => {
   const statusCards = [
     {
       count: counts.SUBMITTED,
-      label: "Đã nộp",
+      label:
+        listStatusCV &&
+        listStatusCV.length > 0 &&
+        listStatusCV.find((item) => item.key === STATUS_CV.SUBMITTED).value_VI,
       color: "bg-yellow-100 text-yellow-800",
     },
     {
       count: counts.APPROVED,
-      label: "Chấp Nhận",
+      label:
+        listStatusCV &&
+        listStatusCV.length > 0 &&
+        listStatusCV.find((item) => item.key === STATUS_CV.APPROVED).value_VI,
       color: "bg-green-100 text-green-800",
     },
     {
       count: counts.REJECT,
-      label: "Từ chối",
+      label:
+        listStatusCV &&
+        listStatusCV.length > 0 &&
+        listStatusCV.find((item) => item.key === STATUS_CV.REJECT).value_VI,
       color: "bg-red-100 text-red-800",
     },
     {
       count: counts.IN_REVIEW,
-      label: "Đang xem xét",
+      label:
+        listStatusCV &&
+        listStatusCV.length > 0 &&
+        listStatusCV.find((item) => item.key === STATUS_CV.IN_REVIEW).value_VI,
       color: "bg-blue-100 text-blue-800",
     },
   ];
@@ -164,6 +182,15 @@ const CVManagementSystem = () => {
       .split("")
       .reduce((sum, char) => sum + char.charCodeAt(0), 0);
     return colors[charSum % colors.length];
+  };
+
+  const handleUpdateStatus = async (student, status) => {
+    console.log("Check student: ", student, status);
+    const res = await updateStatusCV({ id: student.id, statusCv: status });
+    if (res && res.errCode === 0) {
+      toast.success("Cập nhập trạng thái CV thành công ");
+      fetchData();
+    }
   };
 
   return (
@@ -285,7 +312,7 @@ const CVManagementSystem = () => {
             <div className="space-y-6">
               {listStudent &&
                 listStudent.length > 0 &&
-                listStudent.map((student) => (
+                listStudent.map((student, index) => (
                   <div
                     key={student.id}
                     className="bg-white rounded-lg p-6"
@@ -358,14 +385,30 @@ const CVManagementSystem = () => {
                               </span>
                             </div>
                           </div>
-                          <div className="flex flex-wrap gap-6 my-8">
-                            <button className="bg-green-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-green-700 transition-colors">
-                              Chấp nhận
-                            </button>
-                            <button className="bg-red-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-red-700 transition-colors">
-                              Từ chối
-                            </button>
-                          </div>
+                          {(student.statusCv === STATUS_CV.SUBMITTED ||
+                            student.status === STATUS_CV.IN_REVIEW) && (
+                            <div className="flex flex-wrap gap-6 my-8">
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(
+                                    student,
+                                    STATUS_CV.APPROVED
+                                  )
+                                }
+                                className="bg-green-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-green-700 transition-colors"
+                              >
+                                Chấp nhận
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleUpdateStatus(student, STATUS_CV.REJECT)
+                                }
+                                className="bg-red-600 text-white text-sm font-medium px-3 py-1 rounded hover:bg-red-700 transition-colors"
+                              >
+                                Từ chối
+                              </button>
+                            </div>
+                          )}
                         </div>
                       </div>
                       <div className="w-full md:w-60 bg-gray-50 rounded-xl p-4 flex flex-col justify-between">

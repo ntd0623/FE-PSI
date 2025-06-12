@@ -9,8 +9,12 @@ const getAllCode = (type) => {
 const createCV = (data) => {
     return axios.post(`/api/create-cv`, data)
 }
+const updateStatusCV = (data) => {
+    return axios.put(`/api/update-cv-by-userId`, data)
+}
 export {
     getInfoCvStudent,
     getAllCode,
-    createCV
+    createCV,
+    updateStatusCV
 }
