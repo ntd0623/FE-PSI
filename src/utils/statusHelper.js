@@ -13,3 +13,18 @@ export const getStatusColor = (status) => {
             return "bg-gray-100 text-gray-600";
     }
 };
+
+export const getAvatarColor = (name) => {
+    const colors = [
+        "bg-blue-500",
+        "bg-green-500",
+        "bg-purple-500",
+        "bg-pink-500",
+        "bg-indigo-500",
+        "bg-yellow-500",
+    ];
+    const charSum = name
+        .split("")
+        .reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return colors[charSum % colors.length];
+}

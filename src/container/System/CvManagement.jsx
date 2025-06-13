@@ -10,23 +10,50 @@ import {
   Settings,
   LogOut,
 } from "lucide-react";
-import { getStatusColor } from "../../utils/statusHelper";
+import { getStatusColor, getAvatarColor } from "../../utils/statusHelper";
 import { STATUS_CV } from "../../utils/constant";
 import {
   getAllCode,
   getInfoCvStudent,
   updateStatusCV,
 } from "../../services/studentService";
+import CVDetail from "./CVDetail";
 import toast from "react-hot-toast";
-
+import html2pdf from "html2pdf.js";
 const CVManagementSystem = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedCV, setSelectedCV] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [listStatusCV, setListStatusCV] = useState("");
   const [listIntership, setListInternship] = useState("");
   const [listStudent, setListStudent] = useState("");
   const hasFetched = useRef(false);
+
+  const printRef = useRef();
+
+  const handlePrint = () => {
+    if (!selectedCV || !printRef.current) {
+      toast.error("Không có dữ liệu CV để in");
+      return;
+    }
+
+    const element = printRef.current;
+
+    const opt = {
+      margin: 0.3,
+      filename: `${selectedCV.fullName || "CV"}.pdf`,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: {
+        scale: 2,
+        useCORS: true,
+      },
+      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
+    };
+
+    html2pdf().set(opt).from(element).save();
+  };
 
   const fetchData = async () => {
     const listStatusCV = await getAllCode("CV_STATUS");
@@ -169,21 +196,6 @@ const CVManagementSystem = () => {
     },
   ];
 
-  const getAvatarColor = (name) => {
-    const colors = [
-      "bg-blue-500",
-      "bg-green-500",
-      "bg-purple-500",
-      "bg-pink-500",
-      "bg-indigo-500",
-      "bg-yellow-500",
-    ];
-    const charSum = name
-      .split("")
-      .reduce((sum, char) => sum + char.charCodeAt(0), 0);
-    return colors[charSum % colors.length];
-  };
-
   const handleUpdateStatus = async (student, status) => {
     console.log("Check student: ", student, status);
     const res = await updateStatusCV({ id: student.id, statusCv: status });
@@ -191,6 +203,20 @@ const CVManagementSystem = () => {
       toast.success("Cập nhập trạng thái CV thành công ");
       fetchData();
     }
+  };
+
+  const handleViewCV = (student, status) => {
+    console.log("Check student: ", student);
+
+    setSelectedCV(student);
+
+    handleUpdateStatus(student, status);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCV(null);
+    setIsModalOpen(false);
   };
 
   return (
@@ -308,7 +334,6 @@ const CVManagementSystem = () => {
             </div>
 
             {/* Student Cards */}
-
             <div className="space-y-6">
               {listStudent &&
                 listStudent.length > 0 &&
@@ -325,9 +350,13 @@ const CVManagementSystem = () => {
                             student.fullName
                           )} flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}
                         >
-                          {student.avatar
-                            ? student.avatar
-                            : student.fullName.charAt(0).toUpperCase()}
+                          {student?.fullName
+                            ? student?.fullName
+                                .split(" ")
+                                .map((word) => word[0])
+                                .join("")
+                                .toUpperCase()
+                            : "N/A"}
                         </div>
                         <div className="flex-1 min-w-0">
                           <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -421,15 +450,32 @@ const CVManagementSystem = () => {
                           </span>
                         </div>
                         <div className="flex flex-col space-y-1">
-                          <button className="bg-purple-600 text-white px-3 py-1 rounded text-xs font-medium hover:bg-purple-700">
-                            Tải xuống
-                          </button>
-                          <button className="bg-blue-600 text-white rounded px-3 py-1 hover:bg-blue-700 text-xs font-medium transition-colors duration-200">
+                          <button
+                            onClick={() =>
+                              handleViewCV(student, STATUS_CV.IN_REVIEW)
+                            }
+                            className="bg-blue-600 text-white rounded px-3 py-1 hover:bg-blue-700 text-xs font-medium transition-colors duration-200"
+                          >
                             Xem đầy đủ
                           </button>
                         </div>
                       </div>
                     </div>
+                    {isModalOpen && selectedCV && (
+                      <div className="fixed inset-0 bg-transparent z-9999 flex items-center justify-center px-4 mx-auto">
+                        <div className="bg-white max-h-[90vh] overflow-y-auto w-full lg:w-3/4 p-6 rounded-xl shadow-lg relative">
+                          <button
+                            onClick={handleCloseModal}
+                            className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-4xl"
+                          >
+                            &times;
+                          </button>
+
+                          {/* CV DETAIL */}
+                          <CVDetail cvData={selectedCV} />
+                        </div>
+                      </div>
+                    )}
                   </div>
                 ))}
             </div>
