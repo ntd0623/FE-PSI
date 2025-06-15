@@ -90,6 +90,7 @@ const FormCV = () => {
   const [imageFile, setImageFile] = useState(null);
   const [isOpenPreview, setIsOpenPreview] = useState(false);
   const fileInputRef = useRef(null);
+  const [formErrors, setFormErrors] = useState({});
 
   //fetch api
 
@@ -140,6 +141,11 @@ const FormCV = () => {
       ...prev,
       [field]: value,
     }));
+    setFormErrors((prevErrors) => {
+      const updatedErrors = { ...prevErrors };
+      delete updatedErrors[field];
+      return updatedErrors;
+    });
   };
   //setState Project
   const handleProjectChange = (index, field, value) => {
@@ -241,11 +247,110 @@ const FormCV = () => {
       addSkill(category);
     }
   };
+
+  //validate
+  const validateForm = () => {
+    const errors = {};
+
+    // Full Name
+    if (!formData.fullName.trim()) {
+      errors.fullName = "Họ và tên không được để trống !";
+    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.fullName)) {
+      errors.fullName = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
+    }
+
+    // Email
+    if (!formData.email.trim()) {
+      errors.email = "Email không được để trống !";
+    } else if (
+      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
+    ) {
+      errors.email = "Email không hợp lệ. Ví dụ đúng: ten@example.com !";
+    }
+
+    // phone
+    if (!formData.phone.trim()) {
+      errors.phone = "Số điện thoại không được để trống !";
+    } else if (!/^[0-9]{9,11}$/.test(formData.phone)) {
+      errors.phone = "Số điện thoại phải gồm 9 đến 11 chữ số !";
+    }
+    // Address
+    if (!formData.address.trim()) {
+      errors.address = "Địa chỉ không được để trống !";
+    }
+    // birthDay
+    if (!birthDay) {
+      errors.birthDay = "Ngày sinh không được bỏ trống !";
+    } else if (birthDay) {
+      const selectedDate = new Date(birthDay);
+      const today = new Date();
+      if (selectedDate > today) {
+        errors.birthDay = "Ngày sinh không được lớn hơn ngày hiện tại !";
+      }
+    }
+
+    // major
+    if (!formData.major.trim()) {
+      errors.major = "Chuyên ngành không được để trống !";
+    }
+
+    // school
+    if (!formData.university.trim()) {
+      errors.university = "Trường không được để trống !";
+    }
+
+    if (!formData.gender) {
+      errors.gender = "Giới tính không được để trống";
+    }
+
+    // degree
+    if (!formData.degree) {
+      errors.degree = "Vui lòng chọn bằng cấp !";
+    }
+
+    // GPA
+    if (!formData.gpa) {
+      errors.gpa =
+        "Điểm số không được bỏ trống. Có thể lấy tổng điểm gần nhất!";
+    } else if (formData.gpa && isNaN(Number(formData.gpa))) {
+      errors.gpa = "GPA phải là số !";
+    }
+
+    // graduation Year
+    if (!formData.graduationYear) {
+      errors.graduationYear =
+        "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
+    } else if (
+      formData.graduationYear &&
+      !/^[0-9]{4}$/.test(formData.graduationYear)
+    ) {
+      errors.graduationYear = "Năm tốt nghiệp phải là 4 chữ số !";
+    }
+
+    //Career objective
+    if (!formData.careerGoal) {
+      errors.careerGoal = "Mục tiêu không được bỏ trống !";
+    }
+
+    if (!formData.references) {
+      errors.references = "Người hướng dẫn không được bỏ trống !";
+    }
+
+    return errors;
+  };
+
   // handle Submit
   const handleSubmit = async () => {
     console.log("Check state: ", formData, avatar);
+    const errors = validateForm();
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error("Bạn không thể gửi form input đang lỗi !");
+      return;
+    }
     const cv = await createCV({
-      userID: 1,
+      userID: 7,
       fullName: formData.fullName,
       email: formData.email,
       phoneNumber: formData.phone,
@@ -388,8 +493,17 @@ const FormCV = () => {
                 value={formData.fullName}
                 onChange={(e) => handleInputChange("fullName", e.target.value)}
                 placeholder="Nhập họ và tên"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
+                  formErrors.fullName
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                }`}
               />
+              {formErrors.fullName && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.fullName}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -400,8 +514,15 @@ const FormCV = () => {
                 value={formData.email}
                 onChange={(e) => handleInputChange("email", e.target.value)}
                 placeholder="Nhập email"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                  formErrors.email
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                }`}
               />
+              {formErrors.email && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
+              )}
             </div>
           </div>
 
@@ -415,8 +536,17 @@ const FormCV = () => {
                 value={formData.phone}
                 onChange={(e) => handleInputChange("phone", e.target.value)}
                 placeholder="Nhập số điện thoại"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.phone
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.phone && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -425,9 +555,21 @@ const FormCV = () => {
               <input
                 type="date"
                 value={birthDay}
+                max={new Date().toISOString().split("T")[0]}
                 onChange={(e) => setBirthDay(e.target.value)}
-                className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.birthDay
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.birthDay && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.birthDay}
+                </p>
+              )}
             </div>
           </div>
 
@@ -439,7 +581,14 @@ const FormCV = () => {
               <select
                 value={formData.gender}
                 onChange={(e) => handleInputChange("gender", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                    ${
+                      formErrors.gender
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
+                    }
+
+                  `}
               >
                 <option value="" disabled>
                   Chọn giới tính
@@ -454,6 +603,9 @@ const FormCV = () => {
                     );
                   })}
               </select>
+              {formErrors.gender && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.gender}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -463,8 +615,19 @@ const FormCV = () => {
                 type="text"
                 value={formData.address}
                 onChange={(e) => handleInputChange("address", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                   ${
+                     formErrors.address
+                       ? "border-red-500 focus:ring-red-500"
+                       : "border-gray-300 focus:ring-blue-500"
+                   }
+                  `}
               />
+              {formErrors.address && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.address}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -481,7 +644,7 @@ const FormCV = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Trường đại học *
+                Trường *
               </label>
               <input
                 type="text"
@@ -489,9 +652,20 @@ const FormCV = () => {
                 onChange={(e) =>
                   handleInputChange("university", e.target.value)
                 }
-                placeholder="Tên trường đại học"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Tên trường"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50
+                  ${
+                    formErrors.university
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.university && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.university}
+                </p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -502,8 +676,17 @@ const FormCV = () => {
                 value={formData.major}
                 onChange={(e) => handleInputChange("major", e.target.value)}
                 placeholder="Chuyên ngành học"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.major
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.major && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
+              )}
             </div>
           </div>
 
@@ -515,7 +698,13 @@ const FormCV = () => {
               <select
                 value={formData.degree}
                 onChange={(e) => handleInputChange("degree", e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.degree
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               >
                 <option value="" disabled>
                   Chọn bằng cấp
@@ -530,6 +719,9 @@ const FormCV = () => {
                     );
                   })}
               </select>
+              {formErrors.degree && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.degree}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -540,8 +732,17 @@ const FormCV = () => {
                 value={formData.gpa}
                 onChange={(e) => handleInputChange("gpa", e.target.value)}
                 placeholder="VD: 3.5/4.0"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.gpa
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.gpa && (
+                <p className="text-red-500 text-sm mt-1">{formErrors.gpa}</p>
+              )}
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
@@ -554,8 +755,19 @@ const FormCV = () => {
                   handleInputChange("graduationYear", e.target.value)
                 }
                 placeholder="2024"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.graduationYear
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.graduationYear && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.graduationYear}
+                </p>
+              )}
             </div>
           </div>
         </div>
@@ -958,8 +1170,19 @@ const FormCV = () => {
                   handleInputChange("careerGoal", e.target.value)
                 }
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                  ${
+                    formErrors.careerGoal
+                      ? "border-red-500 focus:ring-red-500"
+                      : "border-gray-300 focus:ring-blue-500"
+                  }
+                  `}
               />
+              {formErrors.careerGoal && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.careerGoal}
+                </p>
+              )}
             </div>
 
             <div>
@@ -986,8 +1209,19 @@ const FormCV = () => {
                   handleInputChange("references", e.target.value)
                 }
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
+                ${
+                  formErrors.references
+                    ? "border-red-500 focus:ring-red-500"
+                    : "border-gray-300 focus:ring-blue-500"
+                }
+                `}
               />
+              {formErrors.references && (
+                <p className="text-red-500 text-sm mt-1">
+                  {formErrors.references}
+                </p>
+              )}
             </div>
           </div>
         </div>
