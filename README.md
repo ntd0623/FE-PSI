@@ -45,7 +45,7 @@ Dự án React sử dụng Vite làm build tool, SCSS và Tailwind CSS để ph�
    ```
    VITE_BACKEND_URL=http://localhost:8080
    VITE_APP_NAME=ReactPsiApp
-   VITE_PORT=8080
+   VITE_PORT=3000
    ```
 
 4. **Chạy ứng dụng**
