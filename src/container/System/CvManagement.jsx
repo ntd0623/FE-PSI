@@ -200,16 +200,27 @@ const CVManagementSystem = () => {
     console.log("Check student: ", student, status);
     const res = await updateStatusCV({ id: student.id, statusCv: status });
     if (res && res.errCode === 0) {
-      toast.success("Cập nhập trạng thái CV thành công ");
+      if (status === "CV2") {
+        toast.success(
+          `CV của ${student.fullName} đã chuyển sang trạng thái đang xem xét`
+        );
+      }
+      if (status === "CV3") {
+        toast.success(
+          `CV của ${student.fullName} đã chuyển sang trạng thái đạt yêu cầu`
+        );
+      }
+      if (status === "CV4") {
+        toast.success(
+          `CV của ${student.fullName} đã chuyển sang trạng thái bị từ chối`
+        );
+      }
       fetchData();
     }
   };
 
   const handleViewCV = (student, status) => {
-    console.log("Check student: ", student);
-
     setSelectedCV(student);
-
     handleUpdateStatus(student, status);
     setIsModalOpen(true);
   };
@@ -371,7 +382,7 @@ const CVManagementSystem = () => {
                                 TRƯỜNG
                               </span>
                               <p className="text-gray-900">
-                                {student.university}
+                                {student.schoolName}
                               </p>
                             </div>
                             <div>
@@ -415,7 +426,7 @@ const CVManagementSystem = () => {
                             </div>
                           </div>
                           {(student.statusCv === STATUS_CV.SUBMITTED ||
-                            student.status === STATUS_CV.IN_REVIEW) && (
+                            student.statusCv === STATUS_CV.IN_REVIEW) && (
                             <div className="flex flex-wrap gap-6 my-8">
                               <button
                                 onClick={() =>

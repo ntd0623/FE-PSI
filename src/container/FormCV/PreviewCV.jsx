@@ -11,6 +11,28 @@ export default function CVPreview() {
   const navigate = useNavigate();
   const location = useLocation();
   const [cvData, setCvData] = useState(null);
+  const [formErrors, setFormErrors] = useState({});
+
+  const validProjects =
+    cvData?.formData?.projects?.filter((project) =>
+      [
+        project.name,
+        project.technologies,
+        project.link,
+        project.description,
+      ].some((field) => field?.trim())
+    ) || [];
+  const validExperience =
+    cvData?.formData?.experience?.filter((exp) =>
+      [
+        exp.nameCompany,
+        exp.position,
+        exp.startDate,
+        exp.endDate,
+        exp.description,
+      ].some((field) => field?.trim())
+    ) || [];
+
   useEffect(() => {
     let data = null;
 
@@ -27,7 +49,83 @@ export default function CVPreview() {
     console.log("Dữ liệu CV:", data); // ✅ đúng, vì log đúng lúc gán
   }, []);
 
+  const validateForm = () => {
+    const errors = {};
+
+    // Full Name
+    if (!cvData.formData.fullName.trim()) {
+      errors.fullName = "Họ và tên không được để trống !";
+    }
+
+    // Email
+    if (!cvData.formData.email.trim()) {
+      errors.email = "Email không được để trống !";
+    }
+
+    // phone
+    if (!cvData.formData.phone.trim()) {
+      errors.phone = "Số điện thoại không được để trống !";
+    }
+    // Address
+    if (!cvData.formData.address.trim()) {
+      errors.address = "Địa chỉ không được để trống !";
+    }
+    // birthDay
+    if (!cvData.birthDay) {
+      errors.birthDay = "Ngày sinh không được bỏ trống !";
+    }
+
+    // major
+    if (!cvData.formData.major.trim()) {
+      errors.major = "Chuyên ngành không được để trống !";
+    }
+
+    // school
+    if (!cvData.formData.university.trim()) {
+      errors.university = "Trường không được để trống !";
+    }
+
+    if (!cvData.formData.gender) {
+      errors.gender = "Giới tính không được để trống";
+    }
+
+    // degree
+    if (!cvData.formData.degree) {
+      errors.degree = "Vui lòng chọn bằng cấp !";
+    }
+
+    // GPA
+    if (!cvData.formData.gpa) {
+      errors.gpa =
+        "Điểm số không được bỏ trống. Có thể lấy tổng điểm gần nhất!";
+    }
+
+    // graduation Year
+    if (!cvData.formData.graduationYear) {
+      errors.graduationYear =
+        "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
+    }
+
+    //Career objective
+    if (!cvData.formData.careerGoal) {
+      errors.careerGoal = "Mục tiêu không được bỏ trống !";
+    }
+
+    if (!cvData.formData.references) {
+      errors.references = "Người hướng dẫn không được bỏ trống !";
+    }
+
+    return errors;
+  };
+
   const handleSubmit = async () => {
+    const errors = validateForm();
+    setFormErrors(errors);
+
+    if (Object.keys(errors).length > 0) {
+      toast.error("Bạn không thể gửi form input đang lỗi !");
+      return;
+    }
     const cv = await createCV({
       userID: 1,
       fullName: cvData.formData.fullName,
@@ -64,7 +162,7 @@ export default function CVPreview() {
         <div className="flex justify-start">
           <button
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
-            onClick={() => navigate(-1)}
+            onClick={() => navigate(path.FORM_CV)}
           >
             <FaArrowLeft className="text-gray-700" />
             <span className="text-sm font-medium">Quay lại</span>
@@ -89,137 +187,163 @@ export default function CVPreview() {
 
       {/* CV Content & Sidebar */}
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Main CV Area */}
-        <div className="bg-white p-6 rounded-xl shadow w-full lg:w-3/4 print:w-full print-center">
-          {/* Header Info */}
-          <div className="flex flex-col lg:flex-row print:flex-row items-center lg:items-center print:items-center gap-6 mb-6 text-center lg:text-left print:text-left">
-            <div className="flex-shrink-0">
-              {cvData?.avatar ? (
-                <img
-                  src={cvData.avatar}
-                  alt="Avatar"
-                  className="w-28 h-28 rounded-full object-cover"
-                />
-              ) : (
-                <div className="w-28 h-28 rounded-full bg-purple-700 text-white flex items-center justify-center text-3xl font-bold">
-                  {cvData?.formData?.fullName
-                    ? cvData.formData.fullName
-                        .split(" ")
-                        .map((word) => word[0])
-                        .join("")
-                        .toUpperCase()
-                    : "NVA"}
-                </div>
-              )}
-            </div>
+      <div className="print-area w-full lg:pr-[400px] print:w-full print:pr-0 print:max-w-full print:shadow-none print:rounded-none print:p-0">
+        {/* Header Info */}
+        <div className="header-section flex flex-col lg:flex-row print:flex-row items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left">
+          <div className="avatar-section flex-shrink-0">
+            {cvData?.avatar ? (
+              <img
+                src={cvData.avatar}
+                alt="Avatar"
+                className="w-28 h-28 print:w-24 print:h-24 rounded-full object-cover"
+              />
+            ) : (
+              <div
+                className={`w-28 h-28 print:w-24 print:h-24 rounded-full bg-purple-700 text-white flex items-center justify-center text-3xl print:text-2xl font-bold`}
+              >
+                {cvData?.formData?.fullName
+                  ? cvData.formData.fullName
+                      .split(" ")
+                      .map((word) => word[0])
+                      .join("")
+                      .toUpperCase()
+                  : "N/A"}
+              </div>
+            )}
+          </div>
 
-            <div className="flex-1 space-y-2">
-              <h1 className="text-3xl font-semibold">
-                {cvData?.formData?.fullName || "Họ tên"}
-              </h1>
-              <div className="grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-2 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <FiMail className="text-gray-500" />
-                  <span>{cvData?.formData?.email || "Email"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FiPhone className="text-gray-500" />
-                  <span>{cvData?.formData?.phone || "Số điện thoại"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FiMapPin className="text-gray-500" />
-                  <span>{cvData?.formData?.address || "Địa chỉ"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <FiCalendar className="text-gray-500" />
-                  <span>{cvData?.birthDay || "Ngày sinh"}</span>
-                </div>
+          <div className="info-section flex-1 space-y-3 print:space-y-2">
+            <h1 className="text-3xl print:text-2xl font-semibold text-gray-800">
+              {cvData?.formData?.fullName || "Chưa nhập họ tên"}
+            </h1>
+            <div className="contact-grid grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-2 print:gap-1 text-sm text-gray-600">
+              <div className="flex items-center gap-2">
+                <FiMail className="text-gray-500 flex-shrink-0" />
+                <span className="break-all">
+                  {cvData?.formData?.email || "chưa nhập email"}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiPhone className="text-gray-500 flex-shrink-0" />
+                <span>
+                  {cvData?.formData?.phone || "chưa nhập số điện thoại "}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiMapPin className="text-gray-500 flex-shrink-0" />
+                <span>{cvData?.formData?.address || "Chưa nhập địa chỉ"}</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <FiCalendar className="text-gray-500 flex-shrink-0" />
+                <span>{cvData?.birthDay || "chưa nhập năm sinh"}</span>
               </div>
             </div>
           </div>
+        </div>
 
-          {/* Sections */}
-          <Section title="MỤC TIÊU NGHỀ NGHIỆP">
-            {cvData?.formData?.careerGoal || "Chưa nhập mục tiêu"}
-          </Section>
+        {/* Sections */}
+        <Section title="MỤC TIÊU NGHỀ NGHIỆP">
+          {cvData?.formData?.careerGoal || "Chưa nhập mục tiêu"}
+        </Section>
 
-          <Section title="HỌC VẤN">
-            <SubSection
-              title={`${cvData?.formData?.university}` || "Tên trường"}
-              subtitle={`Tốt nghiệp: ${
-                cvData?.formData?.graduationYear || "Năm"
-              }`}
-            >
-              Chuyên ngành: {cvData?.formData?.major || "Chuyên ngành"}
-              <br />
-              Bằng cấp: {cvData?.degreeValue?.value_VI || "Bằng cấp"}
-              <br />
-              GPA: {cvData?.formData?.gpa || "GPA"}
-            </SubSection>
-          </Section>
+        <Section title="HỌC VẤN">
+          <SubSection
+            title={`Trường: ${
+              cvData?.formData?.university || "Chưa nhập tên trường"
+            } `}
+            subtitle={`Tốt nghiệp: ${
+              cvData?.formData?.graduationYear || "Chưa nhập năm tốt nghiệp"
+            }`}
+          >
+            <div className="space-y-1">
+              <div>
+                Chuyên ngành:{" "}
+                {cvData?.formData?.major || "Chưa nhập chuyên ngành"}
+              </div>
+              <div>
+                Bằng cấp:{" "}
+                {cvData?.degreeValue?.value_VI || "Chưa nhập bằng cấp"}
+              </div>
+              <div>GPA: {cvData?.formData?.gpa || "Chưa nhâp GPA"}</div>
+            </div>
+          </SubSection>
+        </Section>
 
-          <Section title="KINH NGHIỆM LÀM VIỆC">
-            {cvData?.formData?.experience?.map((item, index) => {
+        <Section title="KINH NGHIỆM LÀM VIỆC">
+          {validExperience.length > 0 ? (
+            validExperience.map((item, index) => {
               const timeRange =
                 item.startDate && item.endDate
                   ? `${item.startDate} - ${item.endDate}`
-                  : "Thời gian";
+                  : "Chưa nhập thời gian";
 
               return (
                 <SubSection
                   key={index}
-                  title={item.position || "Vị trí"}
+                  title={item.position || "Chưa nhập vị trí"}
                   subtitle={timeRange}
                 >
-                  Tên Công ty: {item.nameCompany || "Tên công ty"}
-                  <br />
-                  Mô tả công việc: {item.description || "Mô tả công việc"}
+                  <div className="space-y-1">
+                    <div>
+                      <strong>Tên Công ty:</strong>{" "}
+                      {item.nameCompany || "Chưa nhập tên công ty"}
+                    </div>
+                    <div>
+                      <strong>Mô tả công việc:</strong>{" "}
+                      {item.description || "Chưa nhập mô tả công việc"}
+                    </div>
+                  </div>
                 </SubSection>
               );
-            })}
-          </Section>
+            })
+          ) : (
+            <p className="italic text-gray-500">Chưa có kinh nghiệm làm việc</p>
+          )}
+        </Section>
 
-          <Section title="KỸ NĂNG">
-            <div className="flex flex-wrap gap-3">
-              <SkillColumn
-                title="Kỹ năng kỹ thuật"
-                skills={cvData?.formData?.skills?.programming || []}
-                color="bg-purple-700"
-              />
-              <SkillColumn
-                title="Kỹ năng mềm"
-                skills={cvData?.formData?.skills?.softSkills || []}
-                color="bg-green-600"
-              />
-              <SkillColumn
-                title="Ngôn ngữ"
-                skills={cvData?.formData?.skills?.languages || []}
-                color="bg-yellow-500"
-              />
-            </div>
-          </Section>
+        <Section title="KỸ NĂNG">
+          <div className="skills-container space-y-4 print:space-y-3">
+            <SkillColumn
+              title="Kỹ năng kỹ thuật"
+              skills={cvData?.formData?.skills?.programming || []}
+              color="bg-purple-700"
+            />
+            <SkillColumn
+              title="Kỹ năng mềm"
+              skills={cvData?.formData?.skills?.softSkills || []}
+              color="bg-green-600"
+            />
+            <SkillColumn
+              title="Ngôn ngữ"
+              skills={cvData?.formData?.skills?.languages || []}
+              color="bg-yellow-500"
+            />
+          </div>
+        </Section>
 
-          <Section title="DỰ ÁN">
-            {cvData?.formData?.projects?.map((project, index) => (
+        <Section title="DỰ ÁN">
+          {validProjects.length > 0 ? (
+            validProjects.map((project, index) => (
               <Project
                 key={index}
-                title={project.name || "Tên dự án"}
-                techs={project.technologies || ""}
+                title={project.name || "Chưa nhập tên dự án"}
+                techs={project.technologies || "Chưa nhập công nghệ sử dụng"}
                 link={project.link || "#"}
-                description={project.description || ""}
+                description={project.description || "Chưa có mô tả"}
               />
-            ))}
-          </Section>
+            ))
+          ) : (
+            <p className="italic text-gray-500">Chưa có dự án</p>
+          )}
+        </Section>
 
-          <Section title="THÀNH TÍCH & GIẢI THƯỞNG">
-            <div>{cvData?.formData?.achievements || "Chưa nhập"}</div>
-          </Section>
+        <Section title="THÀNH TÍCH & GIẢI THƯỞNG">
+          {cvData?.formData?.achievements || "Chưa có thành tích"}
+        </Section>
 
-          <Section title="NGƯỜI THAM KHẢO">
-            {cvData?.formData?.references || "Chưa có"}
-          </Section>
-        </div>
+        <Section title="NGƯỜI THAM KHẢO">
+          {cvData?.formData?.references || "Chưa có người tham khảo"}
+        </Section>
       </div>
 
       {/* Sidebar */}

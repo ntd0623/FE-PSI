@@ -1,60 +1,59 @@
 @media print {
-    body {
-        background: white !important;
+    .force-one-col {
+        display              : grid !important;
+        grid-template-columns: 1fr !important;
     }
 
-    .print\:hidden {
-        display: none !important;
-    }
-
-    .print\:w-full {
+    .force-one-col>* {
         width: 100% !important;
     }
 
-    .print\:block {
-        display: block !important;
-    }
-
-    .shadow,
-    .shadow-xl {
-        box-shadow: none !important;
-    }
-
-    .bg-gray-50 {
-        background: white !important;
+    body {
+        visibility: hidden;
+        margin    : 0;
+        padding   : 0;
     }
 
     .min-h-screen {
         min-height: auto !important;
     }
 
-    // 👇 Thêm phần này để căn giữa nội dung khi in
     .print-center {
-        margin-left      : auto !important;
-        margin-right     : auto !important;
-        width            : 210mm !important; // Khổ A4 ngang: ~210mm
+        margin-left      : 0 !important;
+        margin-right     : 0 !important;
+        width            : 100% !important;
+        max-width        : 100% !important;
         page-break-inside: avoid !important;
     }
 
-    .skill-badge {
-        display      : inline-block !important;
-        font-size    : 12px !important;
-        color        : white !important;
-        padding      : 2px 8px !important;
-        border-radius: 9999px !important;
-        margin       : 2px 4px 2px 0 !important;
+    .print-area {
+        visibility      : visible;
+        display         : block !important;
+        position        : static !important;
+        width           : 100% !important;
+        max-width       : 100% !important;
+        padding         : 0 !important;
+        margin          : 0 !important;
+        background-color: white !important;
+        box-shadow      : none !important;
+        border-radius   : 0 !important;
+        overflow        : visible !important;
     }
 
-    .bg-purple-700 {
-        background-color: #6b21a8 !important;
+    .print-area * {
+        visibility: visible;
     }
 
-    .bg-green-600 {
-        background-color: #16a34a !important;
+    @page {
+        size  : A4 portrait;
+        margin: 0;
     }
 
-    .bg-yellow-500 {
-        background-color: #eab308 !important;
-        color           : black !important; // Màu chữ đen cho dễ đọc trên nền vàng
+    html,
+    body {
+        height   : auto !important;
+        overflow : visible !important;
+        width    : 100% !important;
+        max-width: 100% !important;
     }
 }

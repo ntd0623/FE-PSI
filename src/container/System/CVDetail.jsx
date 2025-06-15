@@ -70,14 +70,24 @@ const CVDetail = ({ cvData }) => {
         </Section>
 
         <Section title="HỌC VẤN">
-          <SubSection
-            title={cvData?.schoolName || "Tên trường"}
-            subtitle={`Tốt nghiệp: ${cvData?.graduationYear || "Năm"}`}
-          >
-            <div className="space-y-1">
-              <div>Chuyên ngành: {cvData?.major || "Chuyên ngành"}</div>
-              <div>Bằng cấp: {cvData?.degreeValue?.value_VI || "Bằng cấp"}</div>
-              <div>GPA: {cvData?.gpa || "GPA"}</div>
+          <SubSection>
+            <p className="text-xs print:text-xs text-gray-600 italic text-right">
+              {`Năm tốt nghiệp: ${
+                cvData?.graduationYear || "Chưa có năm tốt nghiệp"
+              }`}
+            </p>
+            <div className="grid grid-cols-[120px_1fr] gap-y-1 text-sm print:text-xs text-gray-700">
+              <div className="font-semibold">Tên trường:</div>
+              <div>{cvData?.schoolName || "Chưa nhập tên trường"}</div>
+
+              <div className="font-semibold">Chuyên ngành:</div>
+              <div>{cvData?.major || "Chưa nhập chuyên ngành"}</div>
+
+              <div className="font-semibold">Bằng cấp:</div>
+              <div>{cvData?.dataDegree?.value_VI || "Chưa nhập bằng cấp"}</div>
+
+              <div className="font-semibold">GPA:</div>
+              <div>{cvData?.gpa || "Chưa nhập GPA"}</div>
             </div>
           </SubSection>
         </Section>
@@ -86,24 +96,28 @@ const CVDetail = ({ cvData }) => {
           {cvData?.experiences?.length > 0
             ? cvData.experiences.map((item, index) => {
                 const timeRange =
-                  item.startDate && item.endDate
-                    ? `${item.startDate} - ${item.endDate}`
+                  item.start_date && item.end_date
+                    ? `Thời gian: ${item.start_date} - ${item.end_date}`
                     : "Thời gian";
 
                 return (
-                  <SubSection
-                    key={index}
-                    title={item.position || "Vị trí"}
-                    subtitle={timeRange}
-                  >
-                    <div className="space-y-1">
+                  <SubSection key={index}>
+                    <p className="text-xs print:text-xs text-gray-600 italic text-right">
+                      {item.start_date && item.end_date
+                        ? `${timeRange}`
+                        : "Thời gian"}
+                    </p>
+
+                    <div className="grid grid-cols-[120px_1fr] gap-y-1 text-sm print:text-xs text-gray-700">
+                      <div className="font-semibold">Tên công ty:</div>
+                      <div>{item.nameCompany || "Chưa nhập tên công ty"}</div>
+
+                      <div className="font-semibold">Vị trí:</div>
+                      <div>{item.position || "Chưa nhập vị trí"}</div>
+
+                      <div className="font-semibold">Mô tả công việc:</div>
                       <div>
-                        <strong>Tên Công ty:</strong>{" "}
-                        {item.nameCompany || "Tên công ty"}
-                      </div>
-                      <div>
-                        <strong>Mô tả công việc:</strong>{" "}
-                        {item.description || "Mô tả công việc"}
+                        {item.description || "Chưa nhập mô tả công việc"}
                       </div>
                     </div>
                   </SubSection>
@@ -175,7 +189,7 @@ export default CVDetail;
 function Section({ title, children }) {
   return (
     <div className="section mb-6 print:mb-4 print:break-inside-avoid">
-      <h3 className="text-lg print:text-base font-bold uppercase border-b-2 border-purple-700 mb-3 print:mb-2 text-gray-800">
+      <h3 className="text-lg print:text-base font-bold uppercase border-b-2 border-purple-700 mb-2 print:mb-2 text-gray-800">
         {title}
       </h3>
       <div className="text-sm text-gray-700 leading-relaxed print:leading-normal">
@@ -187,8 +201,8 @@ function Section({ title, children }) {
 
 function SubSection({ title, subtitle, children }) {
   return (
-    <div className="subsection mb-3 print:mb-2 print:break-inside-avoid">
-      <div className="flex flex-col print:flex-col gap-1 mb-2">
+    <div className="subsection mb-2 print:mb-2 print:break-inside-avoid">
+      <div className="flex flex-col print:flex-col">
         <p className="font-semibold text-gray-800 text-sm print:text-sm">
           {title}
         </p>
