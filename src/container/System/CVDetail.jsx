@@ -251,7 +251,7 @@ function Project({ title, techs, link, description }) {
           {link !== "#" ? "Xem dự án" : ""}
         </a>
       </div>
-      <p className="text-xs print:text-xs text-purple-700 italic mb-1">
+      <p className="text-xs print:text-xs text-blue-800 italic mb-1">
         Công nghệ: {techs}
       </p>
       <p className="text-sm print:text-xs text-gray-700 leading-relaxed">
