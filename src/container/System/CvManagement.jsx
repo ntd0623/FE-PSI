@@ -221,7 +221,9 @@ const CVManagementSystem = () => {
 
   const handleViewCV = (student, status) => {
     setSelectedCV(student);
-    handleUpdateStatus(student, status);
+    if (student.statusCv !== status) {
+      handleUpdateStatus(student, status);
+    }
     setIsModalOpen(true);
   };
 

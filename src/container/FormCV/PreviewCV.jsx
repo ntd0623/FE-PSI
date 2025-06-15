@@ -6,6 +6,7 @@ import { FaArrowLeft } from "react-icons/fa";
 import { createCV } from "../../services/studentService";
 import { path } from "../../utils/constant";
 import toast from "react-hot-toast";
+import moment from "moment";
 import "./PreviewCV.scss";
 export default function CVPreview() {
   const navigate = useNavigate();
@@ -274,7 +275,9 @@ export default function CVPreview() {
             validExperience.map((item, index) => {
               const timeRange =
                 item.startDate && item.endDate
-                  ? `${item.startDate} - ${item.endDate}`
+                  ? `${moment(item.startDate).format("DD/MM/YYYY")} - ${moment(
+                      item.endDate
+                    ).format("DD/MM/YYYY")}`
                   : "Chưa nhập thời gian";
 
               return (
