@@ -12,21 +12,27 @@ const CVDetail = ({ cvData }) => {
 
   return (
     <React.Fragment>
-      <div className="print-area w-full print:max-w-full print:shadow-none print:rounded-none print:p-0">
+      <div
+        className="print-area w-full max-w-4xl mx-auto bg-white 
+  print:w-[210mm] print:max-w-[210mm] 
+  print:shadow-none print:rounded-none 
+  print:p-0 print:m-0 print:mx-auto 
+  print:break-inside-avoid print:block"
+      >
         {/* Header Info */}
-        <div className="header-section flex flex-col lg:flex-row print:flex-row items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left">
+        <div className="header-section flex flex-col lg:flex-row print:flex-row  items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left print:break-inside-avoid">
           <div className="avatar-section flex-shrink-0">
             {cvData?.avatar ? (
               <img
                 src={cvData.avatar}
                 alt="Avatar"
-                className="w-28 h-28 print:w-24 print:h-24 rounded-full object-cover"
+                className="w-28 h-28 print:w-16 print:h-16 rounded-full object-cover"
               />
             ) : (
               <div
-                className={`w-28 h-28 print:w-24 print:h-24 rounded-full ${getAvatarColor(
+                className={`w-28 h-28 print:w-16 print:h-16 rounded-full ${getAvatarColor(
                   cvData.fullName
-                )} text-white flex items-center justify-center text-3xl print:text-2xl font-bold`}
+                )} text-white flex items-center justify-center text-2xl print:text-lg font-bold`}
               >
                 {cvData?.fullName
                   ? cvData?.fullName
@@ -110,7 +116,7 @@ const CVDetail = ({ cvData }) => {
 
                     <div className="grid grid-cols-[120px_1fr] gap-y-1 text-sm print:text-xs text-gray-700">
                       <div className="font-semibold">Tên công ty:</div>
-                      <div>{item.nameCompany || "Chưa nhập tên công ty"}</div>
+                      <div>{item.company || "Chưa nhập tên công ty"}</div>
 
                       <div className="font-semibold">Vị trí:</div>
                       <div>{item.position || "Chưa nhập vị trí"}</div>
@@ -188,8 +194,8 @@ export default CVDetail;
 
 function Section({ title, children }) {
   return (
-    <div className="section mb-6 print:mb-4 print:break-inside-avoid">
-      <h3 className="text-lg print:text-base font-bold uppercase border-b-2 border-purple-700 mb-2 print:mb-2 text-gray-800">
+    <div className="section mb-6 print:mb-4 print:break-inside-avoid print:block">
+      <h3 className="text-lg print:text-base font-bold uppercase border-b-2 border-purple-700 mb-2 print:mb-2 text-gray-800 ">
         {title}
       </h3>
       <div className="text-sm text-gray-700 leading-relaxed print:leading-normal">
