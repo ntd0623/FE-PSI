@@ -91,7 +91,6 @@ const FormCV = () => {
   const [isOpenPreview, setIsOpenPreview] = useState(false);
   const fileInputRef = useRef(null);
   const [formErrors, setFormErrors] = useState({});
-
   //fetch api
 
   useEffect(() => {
@@ -312,8 +311,13 @@ const FormCV = () => {
     if (!formData.gpa) {
       errors.gpa =
         "Điểm số không được bỏ trống. Có thể lấy tổng điểm gần nhất!";
-    } else if (formData.gpa && isNaN(Number(formData.gpa))) {
-      errors.gpa = "GPA phải là số !";
+    } else if (isNaN(Number(formData.gpa))) {
+      errors.gpa = "GPA phải là số!";
+    } else {
+      const gpa = parseFloat(formData.gpa);
+      if (gpa < 0 || gpa > 4.0) {
+        errors.gpa = "GPA phải nằm trong khoảng từ 0 đến 4.0!";
+      }
     }
 
     // graduation Year
@@ -346,9 +350,12 @@ const FormCV = () => {
     setFormErrors(errors);
 
     if (Object.keys(errors).length > 0) {
-      toast.error("Bạn không thể gửi form input đang lỗi !");
       return;
     }
+    const confirmed = window.confirm(
+      "Bạn có chắc muốn gửi CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
+    );
+    if (!confirmed) return;
     const cv = await createCV({
       userID: 7,
       fullName: formData.fullName,
@@ -375,6 +382,10 @@ const FormCV = () => {
       setFormData(defaultFormData);
       setAvatar(null);
       setImageFile(null);
+      setBirthDay(null);
+      localStorage.removeItem("cvData");
+    } else {
+      toast.error("Tạo CV thất bại. Vui lòng thử lại.");
     }
   };
   // get color skill
@@ -729,6 +740,8 @@ const FormCV = () => {
               </label>
               <input
                 type="text"
+                min="0"
+                max="4"
                 value={formData.gpa}
                 onChange={(e) => handleInputChange("gpa", e.target.value)}
                 placeholder="VD: 3.5/4.0"
@@ -855,6 +868,7 @@ const FormCV = () => {
                     </label>
                     <input
                       type="date"
+                      max={exp.endDate || undefined}
                       value={exp.startDate}
                       onChange={(e) =>
                         handleExperienceChange(
@@ -873,6 +887,7 @@ const FormCV = () => {
                     <input
                       type="date"
                       value={exp.endDate}
+                      min={exp.startDate || undefined}
                       onChange={(e) =>
                         handleExperienceChange(index, "endDate", e.target.value)
                       }

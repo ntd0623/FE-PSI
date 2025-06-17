@@ -19,6 +19,7 @@ import {
 } from "../../services/studentService";
 import CVDetail from "./CVDetail";
 import toast from "react-hot-toast";
+import moment from "moment";
 import html2pdf from "html2pdf.js";
 const CVManagementSystem = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
@@ -221,7 +222,7 @@ const CVManagementSystem = () => {
 
   const handleViewCV = (student, status) => {
     setSelectedCV(student);
-    if (student.statusCv !== status) {
+    if (student.statusCv === STATUS_CV.SUBMITTED) {
       handleUpdateStatus(student, status);
     }
     setIsModalOpen(true);
@@ -406,7 +407,9 @@ const CVManagementSystem = () => {
                                 THỜI GIAN NỘP
                               </span>
                               <p className="text-gray-900">
-                                {student.submission_date}
+                                {moment(student.submission_date).format(
+                                  "DD/MM/YYYY"
+                                )}
                               </p>
                             </div>
                           </div>
