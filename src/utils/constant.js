@@ -5,7 +5,8 @@ export const path = {
     VIEW: "/view/:id",
     CV_MANAGEMENT: "/cv-management",
     FORM_CV: "/form-cv",
-    PREVIEW_CV:"/preview-cv"
+    PREVIEW_CV: "/preview-cv",
+    LOGIN: "/login"
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",
