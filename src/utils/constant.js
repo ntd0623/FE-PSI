@@ -6,7 +6,8 @@ export const path = {
     CV_MANAGEMENT: "/cv-management",
     FORM_CV: "/form-cv",
     PREVIEW_CV: "/preview-cv",
-    LOGIN: "/login"
+    LOGIN: "/login",
+    FACEBOOK_CALLBACK: "/facebook-callback"
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",

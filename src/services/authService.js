@@ -7,6 +7,10 @@ const authService = {
     login: (email, password) => {
         return axios.post("/api/login", { email: email, password: password });
 
+    },
+    facebookAuth: (access_token) => {
+        return axios.post("/api/auth/facebook", { access_token });
+
     }
 };
 
