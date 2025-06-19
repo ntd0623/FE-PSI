@@ -6,6 +6,8 @@ import PreviewCV from "./FormCV/PreviewCV";
 import { path } from "../utils/constant";
 import "../styles/tailwind.css";
 import toast, { Toaster } from "react-hot-toast";
+import Login from "./Auth/Login";
+import FacebookCallback from "./components/Facebook/FacebookCallback";
 export default function App() {
   return (
     <>
@@ -14,6 +16,8 @@ export default function App() {
           <Route path={path.CV_MANAGEMENT} element={<CVManagementSystem />} />{" "}
           <Route path={path.FORM_CV} element={<FormCV />} />{" "}
           <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
+          <Route path={path.LOGIN} element={<Login />} />{" "}
+          <Route path={path.FACEBOOK_CALLBACK} element={<FacebookCallback />} />{" "}
         </Routes>
       </div>
       <Toaster position="top-right" />
