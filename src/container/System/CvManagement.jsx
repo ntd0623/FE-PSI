@@ -10,6 +10,7 @@ import CVDetail from "./CVDetail";
 import toast from "react-hot-toast";
 import moment from "moment";
 import html2pdf from "html2pdf.js";
+import PaginationTailwind from "../components/Pagination/PaginationTailwind";
 const CVManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -20,6 +21,9 @@ const CVManagement = () => {
   const [listStudent, setListStudent] = useState("");
   const hasFetched = useRef(false);
 
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 3; // số lượng bản ghi mỗi trang
   const printRef = useRef();
 
   const handlePrint = () => {
@@ -63,63 +67,22 @@ const CVManagement = () => {
     hasFetched.current = true;
     fetchData();
   }, []);
-  //   {
-  //     id: 1,
-  //     fullName: "Nguyễn Văn An",
-  //     email: "vanguyen@student.aou.vn",
-  //     university: "Đại học Bách Khoa",
-  //     major: "Công nghệ thông tin",
-  //     gpa: "3.2",
-  //     avatar: "N",
-  //     Cv: {
-  //       statusCv: "S2",
-  //       submission_date: "2024-01-15",
-  //       dataStatus: { value_VI: "Chờ duyệt" },
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     fullName: "Trần Thị Bình",
-  //     email: "binhtran@student.edu.vn",
-  //     university: "Đại học Quốc gia",
-  //     major: "Khoa học máy tính",
-  //     gpa: "3.5",
-  //     avatar: "T",
-  //     Cv: {
-  //       statusCv: "S3",
-  //       submission_date: "2024-01-14",
-  //       dataStatus: { value_VI: "Từ chối" },
-  //     },
-  //   },
-  //   {
-  //     id: 3,
-  //     fullName: "Phạm Thu Dung",
-  //     email: "dungpham@student.edu.vn",
-  //     university: "Đại học Kinh tế",
-  //     major: "Hệ thống thông tin",
-  //     gpa: "3.6",
-  //     avatar: "P",
-  //     Cv: {
-  //       statusCv: "S4",
-  //       submission_date: "2024-01-13",
-  //       dataStatus: { value_VI: "Chờ đợt sau" },
-  //     },
-  //   },
-  // ];
 
+  const fetchFilteredStudents = async (status, batch, page) => {
+    const res = await getInfoCvStudent(status, batch, page);
+    if (res && res.errCode === 0) {
+      setListStudent(res.data);
+      setTotalPages(Math.ceil(res?.total / limit));
+      console.log("Check total page: ", totalPages);
+    }
+  };
   useEffect(() => {
-    const fetchFilteredStudents = async () => {
-      const batch = selectedFilter;
-      const status = selectedStatus;
-      console.log("Check batch: ", batch);
-      console.log("Check status: ", status);
-      const res = await getInfoCvStudent(status, batch);
-      if (res && res.errCode === 0) {
-        setListStudent(res.data);
-      }
-    };
-    fetchFilteredStudents();
-  }, [selectedFilter, selectedStatus]);
+    const batch = selectedFilter;
+    const status = selectedStatus;
+    console.log("Check batch: ", batch);
+    console.log("Check status: ", status);
+    fetchFilteredStudents(status, batch, page);
+  }, [selectedFilter, selectedStatus, page]);
 
   const counts = {
     SUBMITTED:
@@ -194,7 +157,7 @@ const CVManagement = () => {
           `CV của ${student.fullName} đã chuyển sang trạng thái bị từ chối`
         );
       }
-      fetchData();
+      fetchFilteredStudents(selectedStatus, selectedFilter, page);
     }
   };
 
@@ -209,6 +172,10 @@ const CVManagement = () => {
   const handleCloseModal = () => {
     setSelectedCV(null);
     setIsModalOpen(false);
+  };
+
+  const handlePageChange = (page) => {
+    setPage(page);
   };
 
   return (
@@ -400,6 +367,13 @@ const CVManagement = () => {
           ))}
       </div>
       {/* Pagination - Bổ sung sau */}
+      <div className="mt-8">
+        <PaginationTailwind
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 };

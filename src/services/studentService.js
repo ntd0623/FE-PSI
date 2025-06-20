@@ -1,8 +1,10 @@
 
 import axios from "../axios";
-const getInfoCvStudent = (statusCv = "", batchID = "") => {
-    return axios.get(`/api/get-cv?statusCv=${statusCv}&batchID=${batchID}`);
-}
+const getInfoCvStudent = (statusCv = "", batchID = "", page = 1, limit = 3) => {
+    return axios.get(
+        `/api/get-cv?statusCv=${statusCv}&batchID=${batchID}&page=${page}&limit=${limit}`
+    );
+};
 const getAllCode = (type) => {
     return axios.get(`/api/get-allCode?type=${type}`)
 }

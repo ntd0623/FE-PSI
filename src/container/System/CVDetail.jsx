@@ -1,6 +1,7 @@
 import { FiMail, FiPhone, FiMapPin, FiCalendar } from "react-icons/fi";
 import { getAvatarColor } from "../../utils/statusHelper";
 import React, { useRef } from "react";
+import moment from "moment";
 import "./CVDetail.scss";
 
 const CVDetail = ({ cvData }) => {
@@ -14,10 +15,10 @@ const CVDetail = ({ cvData }) => {
     <React.Fragment>
       <div
         className="print-area w-full max-w-4xl mx-auto bg-white 
-  print:w-[210mm] print:max-w-[210mm] 
-  print:shadow-none print:rounded-none 
-  print:p-0 print:m-0 print:mx-auto 
-  print:break-inside-avoid print:block"
+                    print:w-[210mm] print:max-w-[210mm] 
+                    print:shadow-none print:rounded-none 
+                    print:p-0 print:m-0 print:mx-auto 
+                    print:break-inside-avoid print:block"
       >
         {/* Header Info */}
         <div className="header-section flex flex-col lg:flex-row print:flex-row  items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left print:break-inside-avoid">
@@ -64,7 +65,9 @@ const CVDetail = ({ cvData }) => {
               </div>
               <div className="flex items-center gap-2">
                 <FiCalendar className="text-gray-500 flex-shrink-0" />
-                <span>{cvData?.birthDay || "Ngày sinh"}</span>
+                <span>
+                  {moment(cvData?.birthDay).format("DD/MM/YYYY") || "Ngày sinh"}
+                </span>
               </div>
             </div>
           </div>
