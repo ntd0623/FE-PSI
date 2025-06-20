@@ -11,6 +11,10 @@ const authService = {
     facebookAuth: (access_token) => {
         return axios.post("/api/auth/facebook", { access_token });
 
+    },
+    register: (data) => {
+        return axios.post("/api/register", data);
+
     }
 };
 

@@ -12,6 +12,7 @@ const createCV = (data) => {
 const updateStatusCV = (data) => {
     return axios.put(`/api/update-cv-by-userId`, data)
 }
+
 export {
     getInfoCvStudent,
     getAllCode,
