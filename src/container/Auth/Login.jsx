@@ -264,9 +264,14 @@ const Login = () => {
 
         <p className="text-center text-sm text-gray-600 mb-6">
           Bạn chưa có tài khoản?{" "}
-          <a href="#" className="text-blue-600 hover:underline font-medium">
+          <span
+            onClick={() => {
+              navigate(path.REGISTER);
+            }}
+            className="text-blue-600 hover:underline font-medium cursor-pointer"
+          >
             Đăng ký ngay
-          </a>
+          </span>
         </p>
 
         {/* Divider */}
