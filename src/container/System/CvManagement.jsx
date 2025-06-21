@@ -10,6 +10,9 @@ import CVDetail from "./CVDetail";
 import toast from "react-hot-toast";
 import moment from "moment";
 import html2pdf from "html2pdf.js";
+import PaginationTailwind from "../components/Pagination/PaginationTailwind";
+import Loading from "../components/Loading/Loading"; // ✅ thêm dòng này
+
 const CVManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
@@ -20,6 +23,11 @@ const CVManagement = () => {
   const [listStudent, setListStudent] = useState("");
   const hasFetched = useRef(false);
 
+  const [loading, setLoading] = useState(false); // ✅ thêm dòng này
+
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 3;
   const printRef = useRef();
 
   const handlePrint = () => {
@@ -45,81 +53,53 @@ const CVManagement = () => {
   };
 
   const fetchData = async () => {
-    const listStatusCV = await getAllCode("CV_STATUS");
-    const listIntership = await getAllCode("INTERNSHIP_BATCHES");
-    const listStudent = await getInfoCvStudent();
-    if (
-      listStatusCV.errCode === 0 &&
-      listIntership.errCode === 0 &&
-      listStudent.errCode === 0
-    ) {
-      setListStatusCV(listStatusCV.data);
-      setListInternship(listIntership.data);
-      setListStudent(listStudent.data);
+    setLoading(true); // ✅
+    try {
+      const listStatusCV = await getAllCode("CV_STATUS");
+      const listIntership = await getAllCode("INTERNSHIP_BATCHES");
+      const listStudent = await getInfoCvStudent();
+      if (
+        listStatusCV.errCode === 0 &&
+        listIntership.errCode === 0 &&
+        listStudent.errCode === 0
+      ) {
+        setListStatusCV(listStatusCV.data);
+        setListInternship(listIntership.data);
+        setListStudent(listStudent.data);
+      }
+    } catch (error) {
+      toast.error("Lỗi khi tải dữ liệu");
+    } finally {
+      setLoading(false); // ✅
     }
   };
+
   useEffect(() => {
-    if (hasFetched.current) return; // if fetched return
+    if (hasFetched.current) return;
     hasFetched.current = true;
     fetchData();
   }, []);
-  //   {
-  //     id: 1,
-  //     fullName: "Nguyễn Văn An",
-  //     email: "vanguyen@student.aou.vn",
-  //     university: "Đại học Bách Khoa",
-  //     major: "Công nghệ thông tin",
-  //     gpa: "3.2",
-  //     avatar: "N",
-  //     Cv: {
-  //       statusCv: "S2",
-  //       submission_date: "2024-01-15",
-  //       dataStatus: { value_VI: "Chờ duyệt" },
-  //     },
-  //   },
-  //   {
-  //     id: 2,
-  //     fullName: "Trần Thị Bình",
-  //     email: "binhtran@student.edu.vn",
-  //     university: "Đại học Quốc gia",
-  //     major: "Khoa học máy tính",
-  //     gpa: "3.5",
-  //     avatar: "T",
-  //     Cv: {
-  //       statusCv: "S3",
-  //       submission_date: "2024-01-14",
-  //       dataStatus: { value_VI: "Từ chối" },
-  //     },
-  //   },
-  //   {
-  //     id: 3,
-  //     fullName: "Phạm Thu Dung",
-  //     email: "dungpham@student.edu.vn",
-  //     university: "Đại học Kinh tế",
-  //     major: "Hệ thống thông tin",
-  //     gpa: "3.6",
-  //     avatar: "P",
-  //     Cv: {
-  //       statusCv: "S4",
-  //       submission_date: "2024-01-13",
-  //       dataStatus: { value_VI: "Chờ đợt sau" },
-  //     },
-  //   },
-  // ];
 
-  useEffect(() => {
-    const fetchFilteredStudents = async () => {
-      const batch = selectedFilter;
-      const status = selectedStatus;
-      console.log("Check batch: ", batch);
-      console.log("Check status: ", status);
-      const res = await getInfoCvStudent(status, batch);
+  const fetchFilteredStudents = async (status, batch, page) => {
+    setLoading(true); // ✅
+    try {
+      const res = await getInfoCvStudent(status, batch, page);
       if (res && res.errCode === 0) {
         setListStudent(res.data);
+        setTotalPages(Math.ceil(res?.total / limit));
       }
-    };
-    fetchFilteredStudents();
-  }, [selectedFilter, selectedStatus]);
+    } catch (err) {
+      toast.error("Lỗi khi lọc CV");
+    } finally {
+      setLoading(false); // ✅
+    }
+  };
+
+  useEffect(() => {
+    const batch = selectedFilter;
+    const status = selectedStatus;
+    fetchFilteredStudents(status, batch, page);
+  }, [selectedFilter, selectedStatus, page]);
 
   const counts = {
     SUBMITTED:
@@ -146,7 +126,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.SUBMITTED).value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.SUBMITTED)?.value_VI,
       color: "bg-yellow-100 text-yellow-800",
     },
     {
@@ -154,7 +134,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.APPROVED).value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.APPROVED)?.value_VI,
       color: "bg-green-100 text-green-800",
     },
     {
@@ -162,7 +142,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.REJECT).value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.REJECT)?.value_VI,
       color: "bg-red-100 text-red-800",
     },
     {
@@ -170,31 +150,37 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.IN_REVIEW).value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.IN_REVIEW)?.value_VI,
       color: "bg-blue-100 text-blue-800",
     },
   ];
 
   const handleUpdateStatus = async (student, status) => {
-    console.log("Check student: ", student, status);
-    const res = await updateStatusCV({ id: student.id, statusCv: status });
-    if (res && res.errCode === 0) {
-      if (status === "CV2") {
-        toast.success(
-          `CV của ${student.fullName} đã chuyển sang trạng thái đang xem xét`
-        );
+    setLoading(true); // ✅ Bắt đầu loading
+    try {
+      const res = await updateStatusCV({ id: student.id, statusCv: status });
+      if (res && res.errCode === 0) {
+        if (status === "CV2") {
+          toast.success(
+            `CV của ${student.fullName} đã chuyển sang trạng thái đang xem xét`
+          );
+        }
+        if (status === "CV3") {
+          toast.success(
+            `CV của ${student.fullName} đã chuyển sang trạng thái đạt yêu cầu`
+          );
+        }
+        if (status === "CV4") {
+          toast.success(
+            `CV của ${student.fullName} đã chuyển sang trạng thái bị từ chối`
+          );
+        }
+        await fetchFilteredStudents(selectedStatus, selectedFilter, page);
       }
-      if (status === "CV3") {
-        toast.success(
-          `CV của ${student.fullName} đã chuyển sang trạng thái đạt yêu cầu`
-        );
-      }
-      if (status === "CV4") {
-        toast.success(
-          `CV của ${student.fullName} đã chuyển sang trạng thái bị từ chối`
-        );
-      }
-      fetchData();
+    } catch (err) {
+      toast.error("Cập nhật trạng thái thất bại");
+    } finally {
+      setLoading(false); // ✅ Kết thúc loading
     }
   };
 
@@ -211,6 +197,11 @@ const CVManagement = () => {
     setIsModalOpen(false);
   };
 
+  const handlePageChange = (page) => {
+    setPage(page);
+  };
+
+  if (loading) return <Loading />;
   return (
     <div
       className="bg-white rounded-lg p-5"
@@ -278,18 +269,28 @@ const CVManagement = () => {
             >
               <div className="flex flex-col md:flex-row md:justify-between gap-6">
                 <div className="flex-1 flex items-start space-x-4">
-                  <div
-                    className={`w-12 h-12 rounded-full ${getAvatarColor(
-                      student.fullName
-                    )} flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}
-                  >
-                    {student?.fullName
-                      ? student?.fullName
-                          .split(" ")
-                          .map((word) => word[0])
-                          .join("")
-                          .toUpperCase()
-                      : "N/A"}
+                  <div className="w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-lg flex-shrink-0 overflow-hidden">
+                    {student?.image ? (
+                      <img
+                        src={`${student.image}`}
+                        alt="avatar"
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <div
+                        className={`${getAvatarColor(
+                          student.fullName
+                        )} w-full h-full flex items-center justify-center`}
+                      >
+                        {student?.fullName
+                          ? student.fullName
+                              .split(" ")
+                              .map((word) => word[0])
+                              .join("")
+                              .toUpperCase()
+                          : "N/A"}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
@@ -400,6 +401,13 @@ const CVManagement = () => {
           ))}
       </div>
       {/* Pagination - Bổ sung sau */}
+      <div className="mt-8">
+        <PaginationTailwind
+          currentPage={page}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
+      </div>
     </div>
   );
 };
