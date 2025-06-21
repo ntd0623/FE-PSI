@@ -3,10 +3,9 @@ import { getAvatarColor } from "../../utils/statusHelper";
 import React, { useRef } from "react";
 import moment from "moment";
 import "./CVDetail.scss";
-
 const CVDetail = ({ cvData }) => {
   const skillGroups = groupSkillsByType(cvData?.skills || []);
-
+  console.log("Check cv data: ", cvData);
   const handlePrint = () => {
     window.print();
   };
@@ -23,9 +22,9 @@ const CVDetail = ({ cvData }) => {
         {/* Header Info */}
         <div className="header-section flex flex-col lg:flex-row print:flex-row  items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left print:break-inside-avoid">
           <div className="avatar-section flex-shrink-0">
-            {cvData?.avatar ? (
+            {cvData?.image ? (
               <img
-                src={cvData.avatar}
+                src={cvData.image}
                 alt="Avatar"
                 className="w-28 h-28 print:w-16 print:h-16 rounded-full object-cover"
               />
