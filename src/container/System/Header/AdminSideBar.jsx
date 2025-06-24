@@ -8,7 +8,7 @@ import toast from "react-hot-toast";
 const AdminSideBar = ({ isSidebarOpen, setIsSidebarOpen, menuItems = [] }) => {
   const dispatch = useDispatch();
   const navigate = useNavigate;
-  const hanldeLogout = () => {
+  const handleLogout = () => {
     dispatch(processLogout());
     toast.success("Đăng xuất thành công");
     navigate(path.LOGIN);
@@ -49,7 +49,7 @@ const AdminSideBar = ({ isSidebarOpen, setIsSidebarOpen, menuItems = [] }) => {
       <div className="absolute bottom-4 left-4 right-4">
         <button className="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors">
           <LogOut className="w-5 h-5 mr-3" />
-          <span className="text-sm cursor-pointer" onClick={hanldeLogout}>
+          <span className="text-sm cursor-pointer" onClick={handleLogout}>
             Đăng xuất
           </span>
         </button>

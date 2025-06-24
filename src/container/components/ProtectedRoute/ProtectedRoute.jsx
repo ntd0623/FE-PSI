@@ -2,9 +2,9 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { path } from "../../../utils/constant";
+import Header from "../../Home/HomeHeader/HomeHeader";
 const ProtectedRoute = ({ allowedRoles }) => {
-  const user = useSelector((state) => state.user.userInfo);
-
+  const user = useSelector((state) => state?.user?.userInfo);
   if (!user) {
     return <Navigate to={path.LOGIN} replace />;
   }

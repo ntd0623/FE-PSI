@@ -51,7 +51,7 @@ const Login = () => {
       if (user.roleID === USER_ROLE.ADMIN) {
         navigate(path.CV_MANAGEMENT);
       } else {
-        navigate(path.FORM_CV);
+        navigate(path.HOME);
       }
     }
   }, [isLoggedIn, user, navigate]);

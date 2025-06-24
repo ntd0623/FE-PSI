@@ -7,7 +7,7 @@ import { getAllCode, createCV } from "../../services/studentService";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import toast from "react-hot-toast";
-const FormCV = () => {
+const MyCV = () => {
   const defaultFormData = {
     fullName: "",
     email: "",
@@ -446,7 +446,7 @@ const FormCV = () => {
     }
   }, []);
   return (
-    <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8 pt-32">
+    <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 border-b border-gray-200 pb-3">
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">
@@ -1266,4 +1266,4 @@ const FormCV = () => {
   );
 };
 
-export default FormCV;
+export default MyCV;

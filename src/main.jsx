@@ -8,6 +8,7 @@ import { PersistGate } from "redux-persist/integration/react";
 import reduxStore, { persistor } from "./redux";
 import App from "./container/App";
 import "./styles/tailwind.css";
+import "./styles/index.scss";
 
 const clientID = import.meta.env.VITE_GG_CLIENT_ID;
 
