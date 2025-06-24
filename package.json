@@ -38,6 +38,8 @@
     "redux-logger": "^3.0.6",
     "redux-persist": "^6.0.0",
     "redux-state-sync": "^3.1.4",
+    "simplebar": "^6.3.1",
+    "simplebar-react": "^3.3.1",
     "yet-another-react-lightbox": "^3.23.2"
   },
   "devDependencies": {

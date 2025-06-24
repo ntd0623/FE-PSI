@@ -1,15 +1,18 @@
 // Khai báo đường dẫn
 export const path = {
     HOME: "/",
+    STUDENT: "/student",
     ADMIN: "/admin",
-    VIEW: "/view/:id",
     CV_MANAGEMENT: "/admin/cv-management",
-    FORM_CV: "/form-cv",
-    PREVIEW_CV: "/preview-cv",
+    FORM_CV: "/student/form-cv",
+    PREVIEW_CV: "/student/preview-cv",
     LOGIN: "/login",
     FACEBOOK_CALLBACK: "/facebook-callback",
     REGISTER: "/register",
-    UNAUTHORIZED: "/unauthorized"
+    UNAUTHORIZED: "/unauthorized",
+    PROFILE: "/student/profile",
+    ABOUT: "/about",
+    MY_CV: "/student/my-cv"
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",
