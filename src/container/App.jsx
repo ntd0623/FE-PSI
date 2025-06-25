@@ -18,6 +18,7 @@ import HomePage from "./Home/HomePage";
 import Profile from "./Home/Profile/Profile";
 import MyCV from "./FormCV/MyCV";
 import StudentLayout from "./Home/HomeHeader/StudentLayout";
+import UpdateCV from "./FormCV/UpdateCV";
 export default function App() {
   return (
     <>
@@ -53,6 +54,7 @@ export default function App() {
               <Route path={path.FORM_CV} element={<FormCV />} />{" "}
               <Route path={path.MY_CV} element={<MyCV />} />{" "}
               <Route path={path.PROFILE} element={<Profile />} />{" "}
+              <Route path={path.VIEW_CV} element={<UpdateCV />} />{" "}
             </Route>
             <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
           </Route>

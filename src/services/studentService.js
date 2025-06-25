@@ -15,9 +15,19 @@ const updateStatusCV = (data) => {
     return axios.put(`/api/update-cv-by-userId`, data)
 }
 
+const getCVByStudentID = (data) => {
+    return axios.get(`/api/get-cv-by-id?id=${data.id}&statusCv=${data.statusCv ? data.statusCv : ""}&page=${data.page ? data.page : 1},&litmit=${data.limit ? data.limit : 3}`)
+}
+
+const getCV = (data) => {
+    return axios.get(`/api/get-cv-by-studentID-and-idCv?studentID=${data.studentID}&cvID=${data.cvID}`)
+}
+
 export {
     getInfoCvStudent,
     getAllCode,
     createCV,
-    updateStatusCV
+    updateStatusCV,
+    getCVByStudentID,
+    getCV
 }

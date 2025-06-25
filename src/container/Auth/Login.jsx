@@ -92,6 +92,7 @@ const Login = () => {
       const res = await authService.login(email, password);
 
       if (res && res.errCode === 0) {
+        localStorage.setItem("token", res.token);
         dispatch(userLoginSuccess(res.data));
         toast.success("Đăng nhập thành công!");
 
