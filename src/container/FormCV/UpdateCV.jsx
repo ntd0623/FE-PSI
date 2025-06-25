@@ -1,14 +1,14 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
 import { getBase64 } from "../../utils/CommonUtils";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { navigateToCVPreview } from "../../utils/navigateWithState";
-import { getAllCode, createCV } from "../../services/studentService";
+import { getAllCode, createCV, getCV } from "../../services/studentService";
 import { useSelector } from "react-redux";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
 import toast from "react-hot-toast";
-const FormCV = () => {
+const UpdateCV = () => {
   const defaultFormData = {
     fullName: "",
     email: "",
@@ -34,10 +34,13 @@ const FormCV = () => {
   };
   // User
   const user = useSelector((state) => state?.user?.userInfo);
+  const { id } = useParams();
+
   // list gender load api
   const [listGender, setListGender] = useState("");
   // list degree load api
   const [listDegree, setListDegree] = useState("");
+  const [cvData, setCvData] = useState("");
   // Flag fetch
   const hasFetched = useRef(false);
   // Form data
@@ -104,8 +107,18 @@ const FormCV = () => {
       try {
         const listGender = await getAllCode("GENDER");
         const listDegree = await getAllCode("DEGREE");
-        setListGender(listGender.data);
-        setListDegree(listDegree.data);
+        const studentID = user.id;
+        console.log("Check student ID: ", studentID);
+        const dataCV = await getCV({ studentID: studentID, cvID: id });
+        if (
+          listDegree.errCode === 0 &&
+          listGender.errCode === 0 &&
+          dataCV.errCode === 0
+        ) {
+          setListGender(listGender.data);
+          setListDegree(listDegree.data);
+          setCvData(dataCV.data);
+        }
       } catch (error) {
         console.error("Lỗi khi fetch data:", error);
       }
@@ -113,6 +126,77 @@ const FormCV = () => {
 
     fetchData();
   }, []);
+
+  // set Form
+  useEffect(() => {
+    if (cvData) {
+      setFormData({
+        fullName: cvData.fullName || "",
+        email: cvData.email || "",
+        phone: cvData.phoneNumber || "",
+        gender: cvData.genderID || "",
+        address: cvData.address || "",
+        university: cvData.schoolName || "",
+        major: cvData.major || "",
+        degree: cvData.degreeID || "",
+        gpa: cvData.gpa || "",
+        graduationYear: cvData.graduationYear || "",
+        projects: cvData.projects?.map((p) => ({
+          name: p.name || "",
+          technologies: p.technologies || "",
+          description: p.description || "",
+          link: p.github_url || p.demo_url || "",
+        })) || [
+          {
+            name: "",
+            technologies: "",
+            description: "",
+            link: "",
+          },
+        ],
+        experience: cvData.experiences?.map((e) => ({
+          nameCompany: e.company || "",
+          position: e.position || "",
+          startDate: e.start_date || "",
+          endDate: e.end_date || "",
+          description: e.description || "",
+          link: "",
+        })) || [
+          {
+            nameCompany: "",
+            position: "",
+            startDate: "",
+            endDate: "",
+            description: "",
+            link: "",
+          },
+        ],
+        skills: {
+          programming:
+            cvData.skills
+              ?.filter((s) => s.type === "programming")
+              .map((s) => s.name) || [],
+          softSkills:
+            cvData.skills
+              ?.filter((s) => s.type === "softSkills")
+              .map((s) => s.name) || [],
+          languages:
+            cvData.skills
+              ?.filter((s) => s.type === "languages")
+              .map((s) => s.name) || [],
+        },
+        careerGoal: cvData.career_objective || "",
+        achievements: cvData.archivement || "",
+        references: cvData.references || "",
+      });
+      setBirthDay(cvData.birthDay);
+      setAvatar(cvData.image);
+    }
+  }, [cvData]);
+
+  useEffect(() => {
+    console.log("✅ Đã cập nhật formData: ", formData);
+  }, [formData]);
 
   // handle change Avatar
   const handleOnChangeImage = async (event) => {
@@ -452,8 +536,8 @@ const FormCV = () => {
     <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8 pt-32">
       <div className="max-w-4xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 border-b border-gray-200 pb-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">
-            Tạo CV Thực Tập Sinh
+          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0 text-center">
+            Sửa CV
           </h1>
           <button className="text-blue-600 hover:text-blue-800 text-sm self-start sm:self-auto">
             Thực tập sinh
@@ -1269,4 +1353,4 @@ const FormCV = () => {
   );
 };
 
-export default FormCV;
+export default UpdateCV;

@@ -1,1267 +1,345 @@
-import React, { useState, useRef, useEffect } from "react";
-import { User, Plus, X } from "lucide-react";
-import { getBase64 } from "../../utils/CommonUtils";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import { navigateToCVPreview } from "../../utils/navigateWithState";
-import { getAllCode, createCV } from "../../services/studentService";
-import Lightbox from "yet-another-react-lightbox";
-import "yet-another-react-lightbox/styles.css";
-import toast from "react-hot-toast";
-const MyCV = () => {
-  const defaultFormData = {
-    fullName: "",
-    email: "",
-    phone: "",
-    birthDay: "",
-    gender: "",
-    degree: "",
-    address: "",
-    university: "",
-    major: "",
-    gpa: "",
-    graduationYear: "",
-    careerGoal: "",
-    achievements: "",
-    references: "",
-    skills: {
-      programming: [],
-      softSkills: [],
-      languages: [],
-    },
-    experience: [],
-    projects: [],
-  };
-  // list gender load api
-  const [listGender, setListGender] = useState("");
-  // list degree load api
-  const [listDegree, setListDegree] = useState("");
-  // Flag fetch
-  const hasFetched = useRef(false);
-  // Form data
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    phone: "",
-    gender: "",
-    address: "",
-    university: "",
-    major: "",
-    degree: "",
-    gpa: "",
-    graduationYear: "",
-    projects: [
-      {
-        name: "",
-        technologies: "",
-        description: "",
-        link: "",
-      },
-    ],
-    experience: [
-      {
-        nameCompany: "",
-        position: "",
-        startDate: "",
-        endDate: "",
-        description: "",
-        link: "",
-      },
-    ],
-    skills: {
-      programming: [],
-      softSkills: [],
-      languages: [],
-    },
-    careerGoal: "",
-    achievements: "",
-    references: "",
-  });
-  //BirthDay data
-  const [birthDay, setBirthDay] = useState("");
-  //Skill data
-  const [skillInputs, setSkillInputs] = useState({
-    programming: "",
-    softSkills: "",
-    languages: "",
-  });
-  // Avatar
-  const [avatar, setAvatar] = useState("");
-  // Preview Avatar
-  const [imageFile, setImageFile] = useState(null);
-  const [isOpenPreview, setIsOpenPreview] = useState(false);
-  const fileInputRef = useRef(null);
-  const [formErrors, setFormErrors] = useState({});
-  //fetch api
+import {
+  FaFileAlt,
+  FaEye,
+  FaTimes,
+  FaTrash,
+  FaPlus,
+  FaFilter,
+  FaCalendarAlt,
+} from "react-icons/fa";
+import { getCVByStudentID } from "../../services/studentService";
+import CVCard from "../components/Section/CVCard";
+import CVDetail from "../../container/System/CVDetail";
+import { path, STATUS_CV, STATUS_CV_LABELS } from "../../utils/constant";
+import Loading from "../components/Loading/Loading";
+import "./MyCV.scss";
+const initialCVs = [
+  {
+    id: 1,
+    title: "CV ứng tuyển Frontend Developer",
+    submittedAt: "2025-06-23",
+    status: "Chờ duyệt",
+    description: "Mục tiêu: Làm frontend tại công ty startup sử dụng ReactJS.",
+    company: "TechStart JSC",
+  },
+  {
+    id: 2,
+    title: "CV Backend Internship",
+    submittedAt: "2025-06-15",
+    status: "Đã duyệt",
+    description: "Ứng tuyển vị trí thực tập Node.js, backend REST API.",
+    company: "Innovation Lab",
+  },
+  {
+    id: 3,
+    title: "CV Full-stack Developer",
+    submittedAt: "2025-06-10",
+    status: "Từ chối",
+    description:
+      "Vị trí phát triển ứng dụng web full-stack với React và Node.js.",
+    company: "Digital Solutions",
+  },
+];
 
-  useEffect(() => {
-    if (hasFetched.current) return; // if fetched return
-    hasFetched.current = true;
-    // Call API once times when mount component
-    const fetchData = async () => {
-      try {
-        const listGender = await getAllCode("GENDER");
-        const listDegree = await getAllCode("DEGREE");
-        setListGender(listGender.data);
-        setListDegree(listDegree.data);
-      } catch (error) {
-        console.error("Lỗi khi fetch data:", error);
-      }
-    };
-
-    fetchData();
-  }, []);
-
-  // handle change Avatar
-  const handleOnChangeImage = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      const objectUrl = URL.createObjectURL(file);
-      const base64 = await getBase64(file);
-
-      setAvatar(base64);
-      setImageFile(objectUrl);
-    }
-  };
-  // Open Dialog
-  const handleButtonClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click(); // Mở hộp thoại chọn ảnh
-    }
-  };
-  // Process Preview Avartar
-  const openPreview = () => {
-    if (imageFile) {
-      setIsOpenPreview(true);
-    }
-  };
-  // setState Input
-  const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-    setFormErrors((prevErrors) => {
-      const updatedErrors = { ...prevErrors };
-      delete updatedErrors[field];
-      return updatedErrors;
-    });
-  };
-  //setState Project
-  const handleProjectChange = (index, field, value) => {
-    const newProjects = [...formData.projects];
-    newProjects[index][field] = value;
-    setFormData((prev) => ({
-      ...prev,
-      projects: newProjects,
-    }));
-  };
-  //setExperience
-  const handleExperienceChange = (index, field, value) => {
-    const newExperience = [...formData.experience];
-    newExperience[index][field] = value;
-    setFormData((prev) => ({
-      ...prev,
-      experience: newExperience,
-    }));
-  };
-  // processs add info experience
-  const addExperience = () => {
-    setFormData((prev) => ({
-      ...prev,
-      experience: [
-        ...prev.experience,
-        {
-          nameCompany: "",
-          position: "",
-          startDate: "",
-          endDate: "",
-          description: "",
-          link: "",
-        },
-      ],
-    }));
-  };
-  //Delete Experience
-  const removeExperience = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      experience: prev.experience.filter((_, i) => i !== index),
-    }));
-  };
-  // process add info project
-  const addProject = () => {
-    setFormData((prev) => ({
-      ...prev,
-      projects: [
-        ...prev.projects,
-        { name: "", technologies: "", description: "", link: "" },
-      ],
-    }));
-  };
-  // remove project
-  const removeProject = (index) => {
-    setFormData((prev) => ({
-      ...prev,
-      projects: prev.projects.filter((_, i) => i !== index),
-    }));
-  };
-  // add Info Skill
-  const addSkill = (category) => {
-    const skill = skillInputs[category].trim();
-    if (skill) {
-      setFormData((prev) => ({
-        ...prev,
-        skills: {
-          ...prev.skills,
-          [category]: [...prev.skills[category], skill],
-        },
-      }));
-      setSkillInputs((prev) => ({
-        ...prev,
-        [category]: "",
-      }));
-    }
-  };
-  // remove skill
-  const removeSkill = (category, index) => {
-    setFormData((prev) => ({
-      ...prev,
-      skills: {
-        ...prev.skills,
-        [category]: prev.skills[category].filter((_, i) => i !== index),
-      },
-    }));
-  };
-  // setState Input
-  const handleSkillInputChange = (category, value) => {
-    setSkillInputs((prev) => ({
-      ...prev,
-      [category]: value,
-    }));
-  };
-  // Enter add new Skill
-  const handleSkillKeyPress = (e, category) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      addSkill(category);
-    }
-  };
-
-  //validate
-  const validateForm = () => {
-    const errors = {};
-
-    // Full Name
-    if (!formData.fullName.trim()) {
-      errors.fullName = "Họ và tên không được để trống !";
-    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.fullName)) {
-      errors.fullName = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
-    }
-
-    // Email
-    if (!formData.email.trim()) {
-      errors.email = "Email không được để trống !";
-    } else if (
-      !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(formData.email)
-    ) {
-      errors.email = "Email không hợp lệ. Ví dụ đúng: ten@example.com !";
-    }
-
-    // phone
-    if (!formData.phone.trim()) {
-      errors.phone = "Số điện thoại không được để trống !";
-    } else if (!/^[0-9]{9,11}$/.test(formData.phone)) {
-      errors.phone = "Số điện thoại phải gồm 9 đến 11 chữ số !";
-    }
-    // Address
-    if (!formData.address.trim()) {
-      errors.address = "Địa chỉ không được để trống !";
-    }
-    // birthDay
-    if (!birthDay) {
-      errors.birthDay = "Ngày sinh không được bỏ trống !";
-    } else if (birthDay) {
-      const selectedDate = new Date(birthDay);
-      const today = new Date();
-      if (selectedDate > today) {
-        errors.birthDay = "Ngày sinh không được lớn hơn ngày hiện tại !";
-      }
-    }
-
-    // major
-    if (!formData.major.trim()) {
-      errors.major = "Chuyên ngành không được để trống !";
-    }
-
-    // school
-    if (!formData.university.trim()) {
-      errors.university = "Trường không được để trống !";
-    }
-
-    if (!formData.gender) {
-      errors.gender = "Giới tính không được để trống";
-    }
-
-    // degree
-    if (!formData.degree) {
-      errors.degree = "Vui lòng chọn bằng cấp !";
-    }
-
-    // GPA
-    if (!formData.gpa) {
-      errors.gpa =
-        "Điểm số không được bỏ trống. Có thể lấy tổng điểm gần nhất!";
-    } else if (isNaN(Number(formData.gpa))) {
-      errors.gpa = "GPA phải là số!";
-    } else {
-      const gpa = parseFloat(formData.gpa);
-      if (gpa < 0 || gpa > 4.0) {
-        errors.gpa = "GPA phải nằm trong khoảng từ 0 đến 4.0!";
-      }
-    }
-
-    // graduation Year
-    if (!formData.graduationYear) {
-      errors.graduationYear =
-        "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
-    } else if (
-      formData.graduationYear &&
-      !/^[0-9]{4}$/.test(formData.graduationYear)
-    ) {
-      errors.graduationYear = "Năm tốt nghiệp phải là 4 chữ số !";
-    }
-
-    //Career objective
-    if (!formData.careerGoal) {
-      errors.careerGoal = "Mục tiêu không được bỏ trống !";
-    }
-
-    if (!formData.references) {
-      errors.references = "Người hướng dẫn không được bỏ trống !";
-    }
-
-    return errors;
-  };
-
-  // handle Submit
-  const handleSubmit = async () => {
-    console.log("Check state: ", formData, avatar);
-    const errors = validateForm();
-    setFormErrors(errors);
-
-    if (Object.keys(errors).length > 0) {
-      return;
-    }
-    const confirmed = window.confirm(
-      "Bạn có chắc muốn gửi CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
-    );
-    if (!confirmed) return;
-    const cv = await createCV({
-      userID: 7,
-      fullName: formData.fullName,
-      email: formData.email,
-      phoneNumber: formData.phone,
-      birthDay: birthDay,
-      genderID: formData.gender,
-      degreeID: formData.degree,
-      address: formData.address,
-      school_name: formData.university,
-      major: formData.major,
-      gpa: formData.gpa,
-      graduationYear: formData.graduationYear,
-      career_objective: formData.careerGoal,
-      archivements: formData.achievements,
-      references: formData.references,
-      skills: formData.skills,
-      experience: formData.experience,
-      projects: formData.projects,
-      image: avatar,
-    });
-    if (cv && cv.errCode === 0) {
-      toast.success("Tạo CV thành công !");
-      setFormData(defaultFormData);
-      setAvatar(null);
-      setImageFile(null);
-      setBirthDay(null);
-      localStorage.removeItem("cvData");
-    } else {
-      toast.error("Tạo CV thất bại. Vui lòng thử lại.");
-    }
-  };
-  // get color skill
-  const getSkillBadgeColor = (category) => {
-    switch (category) {
-      case "programming":
-        return "bg-blue-100 text-blue-800";
-      case "softSkills":
-        return "bg-green-100 text-green-800";
-      case "languages":
-        return "bg-yellow-100 text-yellow-800";
-      default:
-        return "bg-gray-100 text-gray-800";
-    }
-  };
-  // get color button skill
-  const getButtonColor = (category) => {
-    switch (category) {
-      case "programming":
-        return "bg-blue-600 hover:bg-blue-700";
-      case "softSkills":
-        return "bg-green-600 hover:bg-green-700";
-      case "languages":
-        return "bg-yellow-600 hover:bg-yellow-700";
-      default:
-        return "bg-gray-600 hover:bg-gray-700";
-    }
-  };
-
-  // Navigate Preview CV
-  const navigate = useNavigate();
-  const handlePreview = () => {
-    const degreeValue = listDegree.find(
-      (item) => item?.key === formData.degree
-    );
-    const cvData = {
-      formData,
-      avatar,
-      birthDay,
-      degreeValue,
-    };
-    localStorage.setItem("cvData", JSON.stringify(cvData));
-    navigateToCVPreview(navigate, cvData);
-  };
-  useEffect(() => {
-    const stored = localStorage.getItem("cvData");
-
-    if (stored && stored !== "undefined") {
-      try {
-        const parsed = JSON.parse(stored);
-
-        setFormData(parsed.formData || {});
-        setAvatar(parsed.avatar || "");
-        setBirthDay(parsed.birthDay || "");
-      } catch (error) {
-        console.error("Lỗi khi parse JSON từ localStorage:", error);
-      }
-    }
-  }, []);
-  return (
-    <div className="min-h-screen bg-gray-50 py-4 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-4xl mx-auto bg-white p-4 sm:p-6 lg:p-8 rounded-lg shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 sm:mb-8 border-b border-gray-200 pb-3">
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-2 sm:mb-0">
-            Tạo CV Thực Tập Sinh
-          </h1>
-          <button className="text-blue-600 hover:text-blue-800 text-sm self-start sm:self-auto">
-            Thực tập sinh
-          </button>
+const DeleteConfirmModal = ({ cv, onConfirm, onCancel }) => (
+  <div className="fixed inset-0 bg-black/50 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-fadeIn">
+    <div className="bg-white max-w-md w-full rounded-2xl shadow-2xl transform animate-slideUp">
+      <div className="p-6">
+        <div className="flex items-center justify-center w-16 h-16 mx-auto bg-red-100 rounded-full mb-4">
+          <FaTrash className="text-red-600 text-xl" />
         </div>
 
-        {/* Profile */}
-        <div className="mb-8">
-          <div className="flex flex-col items-center mb-6">
-            {/* Vòng tròn Avatar preview */}
-            <div
-              className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4 overflow-hidden cursor-pointer"
-              onClick={openPreview}
-            >
-              {imageFile ? (
-                <img
-                  src={imageFile}
-                  alt="Avatar preview"
-                  className="object-cover w-full h-full"
-                />
-              ) : (
-                <User size={32} className="text-gray-400" />
-              )}
-            </div>
+        <h3 className="text-lg font-bold text-gray-800 text-center mb-2">
+          Xác nhận xóa CV
+        </h3>
 
-            {/* Nút tải ảnh */}
-            <button
-              onClick={handleButtonClick}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700"
-            >
-              Tải ảnh lên
-            </button>
+        <p className="text-gray-600 text-center mb-6">
+          Bạn có chắc chắn muốn xóa CV "
+          <span className="font-semibold text-gray-800">{cv.title}</span>"? Hành
+          động này không thể hoàn tác.
+        </p>
 
-            {/* File input bị ẩn */}
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              className="hidden"
-              onChange={handleOnChangeImage}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Họ và tên *
-              </label>
-              <input
-                type="text"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
-                placeholder="Nhập họ và tên"
-                className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-                  formErrors.fullName
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-blue-500"
-                }`}
-              />
-              {formErrors.fullName && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.fullName}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Email *
-              </label>
-              <input
-                type="email"
-                value={formData.email}
-                onChange={(e) => handleInputChange("email", e.target.value)}
-                placeholder="Nhập email"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  formErrors.email
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-blue-500"
-                }`}
-              />
-              {formErrors.email && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.email}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Số điện thoại *
-              </label>
-              <input
-                type="tel"
-                value={formData.phone}
-                onChange={(e) => handleInputChange("phone", e.target.value)}
-                placeholder="Nhập số điện thoại"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.phone
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.phone && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.phone}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Ngày sinh
-              </label>
-              <input
-                type="date"
-                value={birthDay}
-                max={new Date().toISOString().split("T")[0]}
-                onChange={(e) => setBirthDay(e.target.value)}
-                className={`w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.birthDay
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.birthDay && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.birthDay}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Giới tính
-              </label>
-              <select
-                value={formData.gender}
-                onChange={(e) => handleInputChange("gender", e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                    ${
-                      formErrors.gender
-                        ? "border-red-500 focus:ring-red-500"
-                        : "border-gray-300 focus:ring-blue-500"
-                    }
-
-                  `}
-              >
-                <option value="" disabled>
-                  Chọn giới tính
-                </option>
-                {listGender &&
-                  listGender.length > 0 &&
-                  listGender.map((item, index) => {
-                    return (
-                      <option key={index} value={item.key}>
-                        {item.value_VI}
-                      </option>
-                    );
-                  })}
-              </select>
-              {formErrors.gender && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.gender}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Địa chỉ
-              </label>
-              <input
-                type="text"
-                value={formData.address}
-                onChange={(e) => handleInputChange("address", e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                   ${
-                     formErrors.address
-                       ? "border-red-500 focus:ring-red-500"
-                       : "border-gray-300 focus:ring-blue-500"
-                   }
-                  `}
-              />
-              {formErrors.address && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.address}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Education */}
-        <div className="mb-8">
-          <div className="flex items-center mb-6">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
-              2
-            </div>
-            <h2 className="text-lg font-semibold">Học vấn</h2>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Trường *
-              </label>
-              <input
-                type="text"
-                value={formData.university}
-                onChange={(e) =>
-                  handleInputChange("university", e.target.value)
-                }
-                placeholder="Tên trường"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-50
-                  ${
-                    formErrors.university
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.university && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.university}
-                </p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Chuyên ngành *
-              </label>
-              <input
-                type="text"
-                value={formData.major}
-                onChange={(e) => handleInputChange("major", e.target.value)}
-                placeholder="Chuyên ngành học"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.major
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.major && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.major}</p>
-              )}
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Bằng cấp
-              </label>
-              <select
-                value={formData.degree}
-                onChange={(e) => handleInputChange("degree", e.target.value)}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.degree
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              >
-                <option value="" disabled>
-                  Chọn bằng cấp
-                </option>
-                {listDegree &&
-                  listDegree.length > 0 &&
-                  listDegree.map((item, index) => {
-                    return (
-                      <option key={index} value={item.key}>
-                        {item.value_VI}
-                      </option>
-                    );
-                  })}
-              </select>
-              {formErrors.degree && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.degree}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                GPA
-              </label>
-              <input
-                type="text"
-                min="0"
-                max="4"
-                value={formData.gpa}
-                onChange={(e) => handleInputChange("gpa", e.target.value)}
-                placeholder="VD: 3.5/4.0"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.gpa
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.gpa && (
-                <p className="text-red-500 text-sm mt-1">{formErrors.gpa}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Năm tốt nghiệp (dự kiến)
-              </label>
-              <input
-                type="text"
-                value={formData.graduationYear}
-                onChange={(e) =>
-                  handleInputChange("graduationYear", e.target.value)
-                }
-                placeholder="2024"
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.graduationYear
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.graduationYear && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.graduationYear}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Experience */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
-                3
-              </div>
-              <h2 className="text-lg font-semibold">Kinh nghiệm làm việc</h2>
-            </div>
-            <button
-              onClick={addExperience}
-              className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 flex items-center"
-            >
-              <Plus size={16} className="mr-2" />
-              Thêm kinh nghiệm
-            </button>
-          </div>
-
-          {formData.experience &&
-            formData.experience.length > 0 &&
-            formData.experience.map((exp, index) => (
-              <div
-                key={index}
-                className="border border-gray-200 rounded-lg p-4 mb-4"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-medium">Kinh nghiệm {index + 1}</h3>
-                  {formData.experience.length > 1 && (
-                    <button
-                      onClick={() => removeExperience(index)}
-                      className="text-red-600 hover:text-red-800"
-                    >
-                      Xóa
-                    </button>
-                  )}
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Công ty/Tổ chức
-                    </label>
-                    <input
-                      type="text"
-                      value={exp.nameCompany}
-                      onChange={(e) =>
-                        handleExperienceChange(
-                          index,
-                          "nameCompany",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Tên công ty"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Vị trí
-                    </label>
-                    <input
-                      type="text"
-                      value={exp.position}
-                      onChange={(e) =>
-                        handleExperienceChange(
-                          index,
-                          "position",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Vị trí công việc"
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Ngày Bắt Đầu
-                    </label>
-                    <input
-                      type="date"
-                      max={exp.endDate || undefined}
-                      value={exp.startDate}
-                      onChange={(e) =>
-                        handleExperienceChange(
-                          index,
-                          "startDate",
-                          e.target.value
-                        )
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-3">
-                      Ngày Kết Thúc
-                    </label>
-                    <input
-                      type="date"
-                      value={exp.endDate}
-                      min={exp.startDate || undefined}
-                      onChange={(e) =>
-                        handleExperienceChange(index, "endDate", e.target.value)
-                      }
-                      className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Mô tả công việc
-                  </label>
-                  <textarea
-                    value={exp.description}
-                    onChange={(e) =>
-                      handleExperienceChange(
-                        index,
-                        "description",
-                        e.target.value
-                      )
-                    }
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-            ))}
-        </div>
-
-        {/* Skills - Updated Section */}
-        <div className="mb-8">
-          <div className="flex items-center mb-6">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
-              4
-            </div>
-            <h2 className="text-lg font-semibold">Kỹ năng</h2>
-          </div>
-
-          <div className="space-y-6">
-            {/* Programming Skills */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Kỹ năng kỹ thuật
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.programming &&
-                  formData.skills.programming.length > 0 &&
-                  formData.skills.programming.map((skill, index) => (
-                    <span
-                      key={index}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
-                        "programming"
-                      )}`}
-                    >
-                      {skill}
-                      <button
-                        onClick={() => removeSkill("programming", index)}
-                        className="ml-2 text-current hover:text-red-600"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.programming}
-                  onChange={(e) =>
-                    handleSkillInputChange("programming", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "programming")}
-                  placeholder="VD: JavaScript, Python"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={() => addSkill("programming")}
-                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
-                    "programming"
-                  )}`}
-                >
-                  Thêm
-                </button>
-              </div>
-            </div>
-
-            {/* Soft Skills */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Kỹ năng mềm
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.softSkills &&
-                  formData.skills.softSkills.length > 0 &&
-                  formData.skills.softSkills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
-                        "softSkills"
-                      )}`}
-                    >
-                      {skill}
-                      <button
-                        onClick={() => removeSkill("softSkills", index)}
-                        className="ml-2 text-current hover:text-red-600"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.softSkills}
-                  onChange={(e) =>
-                    handleSkillInputChange("softSkills", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "softSkills")}
-                  placeholder="VD: Teamwork, Communication"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={() => addSkill("softSkills")}
-                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
-                    "softSkills"
-                  )}`}
-                >
-                  Thêm
-                </button>
-              </div>
-            </div>
-
-            {/* Languages */}
-            <div>
-              <h3 className="text-sm font-medium text-gray-700 mb-3">
-                Ngôn ngữ
-              </h3>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.languages.map((skill, index) => (
-                  <span
-                    key={index}
-                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
-                      "languages"
-                    )}`}
-                  >
-                    {skill}
-                    <button
-                      onClick={() => removeSkill("languages", index)}
-                      className="ml-2 text-current hover:text-red-600"
-                    >
-                      <X size={12} />
-                    </button>
-                  </span>
-                ))}
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.languages}
-                  onChange={(e) =>
-                    handleSkillInputChange("languages", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "languages")}
-                  placeholder="VD: Tiếng Anh (TOEIC 800)"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <button
-                  onClick={() => addSkill("languages")}
-                  className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
-                    "languages"
-                  )}`}
-                >
-                  Thêm
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Projects */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center">
-              <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
-                5
-              </div>
-              <h2 className="text-lg font-semibold">Dự Án</h2>
-            </div>
-            <button
-              onClick={addProject}
-              className="bg-blue-600 text-white px-4 py-2 shadow-sm rounded-md hover:bg-blue-700 flex items-center"
-            >
-              <Plus size={16} className="mr-2" />
-              Thêm dự án
-            </button>
-          </div>
-
-          {formData.projects.map((project, index) => (
-            <div
-              key={index}
-              className="border border-gray-200 rounded-lg p-4 mb-4"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="font-medium">Dự án {index + 1}</h3>
-                {formData.projects.length > 1 && (
-                  <button
-                    onClick={() => removeProject(index)}
-                    className="text-red-600 hover:text-red-800"
-                  >
-                    Xóa
-                  </button>
-                )}
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Tên dự án
-                  </label>
-                  <input
-                    type="text"
-                    value={project.name}
-                    onChange={(e) =>
-                      handleProjectChange(index, "name", e.target.value)
-                    }
-                    placeholder="Tên dự án"
-                    className="w-full px-3 py-2 border shadow-sm border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Công nghệ sử dụng
-                  </label>
-                  <input
-                    type="text"
-                    value={project.technologies}
-                    onChange={(e) =>
-                      handleProjectChange(index, "technologies", e.target.value)
-                    }
-                    placeholder="VD: React, Node.js, MongoDB"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Link dự án
-                </label>
-                <input
-                  type="url"
-                  value={project.link}
-                  onChange={(e) =>
-                    handleProjectChange(index, "link", e.target.value)
-                  }
-                  placeholder="https://github.com/..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-3">
-                  Mô tả dự án
-                </label>
-                <textarea
-                  value={project.description}
-                  onChange={(e) =>
-                    handleProjectChange(index, "description", e.target.value)
-                  }
-                  rows={3}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-        {/* Add Information */}
-        <div className="mb-8">
-          <div className="flex items-center mb-6">
-            <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
-              6
-            </div>
-            <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
-          </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Mục tiêu nghề nghiệp
-              </label>
-              <textarea
-                value={formData.careerGoal}
-                onChange={(e) =>
-                  handleInputChange("careerGoal", e.target.value)
-                }
-                rows={3}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                  ${
-                    formErrors.careerGoal
-                      ? "border-red-500 focus:ring-red-500"
-                      : "border-gray-300 focus:ring-blue-500"
-                  }
-                  `}
-              />
-              {formErrors.careerGoal && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.careerGoal}
-                </p>
-              )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Thành tích & Giải thưởng
-              </label>
-              <textarea
-                value={formData.achievements}
-                onChange={(e) =>
-                  handleInputChange("achievements", e.target.value)
-                }
-                rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Người tham khảo
-              </label>
-              <textarea
-                value={formData.references}
-                onChange={(e) =>
-                  handleInputChange("references", e.target.value)
-                }
-                rows={3}
-                className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
-                ${
-                  formErrors.references
-                    ? "border-red-500 focus:ring-red-500"
-                    : "border-gray-300 focus:ring-blue-500"
-                }
-                `}
-              />
-              {formErrors.references && (
-                <p className="text-red-500 text-sm mt-1">
-                  {formErrors.references}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-        {/* Buttons */}
-        <div className="flex justify-between">
+        <div className="flex gap-3">
           <button
-            onClick={handlePreview}
-            className="border border-blue-600 text-blue-600 px-6 py-2 rounded-md hover:bg-blue-50"
+            onClick={onCancel}
+            className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-3 px-4 rounded-lg transition-colors"
           >
-            Xem trước CV
+            Hủy bỏ
           </button>
           <button
-            className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
-            onClick={() => handleSubmit()}
+            onClick={onConfirm}
+            className="flex-1 bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-4 rounded-lg transition-colors"
           >
-            Gửi CV cho Admin
+            Xóa CV
           </button>
         </div>
       </div>
-      {/* Lightbox for image preview */}
-      <Lightbox
-        open={isOpenPreview}
-        close={() => setIsOpenPreview(false)}
-        slides={[{ src: imageFile }]}
-      />
+    </div>
+  </div>
+);
+
+const MyCV = () => {
+  const [cvs, setCVs] = useState(initialCVs);
+  const [selectedCV, setSelectedCV] = useState(null);
+  const [deleteCV, setDeleteCV] = useState(null);
+  const [filter, setFilter] = useState("");
+  const [page, setPage] = useState(1);
+  const user = useSelector((state) => state?.user?.userInfo);
+  const [listCV, setListCV] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [total, setTotal] = useState(null);
+  const navigate = useNavigate();
+  useEffect(() => {
+    const statusCv = filter;
+    const id = user.id;
+    fetchData(id, statusCv, page);
+  }, [filter, page]);
+
+  const getStatusCount = (status) => {
+    return listCV.filter((cv) => cv?.statusCv === status).length;
+  };
+
+  const filteredCVs =
+    filter === "Tất cả"
+      ? listCV
+      : listCV.filter((cv) => cv?.dataStatus?.value_VI === filter);
+
+  const statusCv = [
+    { key: "", label: "Tất cả CV", count: total },
+    {
+      key: STATUS_CV.IN_REVIEW,
+      label: STATUS_CV_LABELS.CV2,
+      count: getStatusCount(STATUS_CV.IN_REVIEW),
+    },
+    {
+      key: STATUS_CV.REJECT,
+      label: STATUS_CV_LABELS.CV4,
+      count: getStatusCount(STATUS_CV.REJECT),
+    },
+    {
+      key: STATUS_CV.APPROVED,
+      label: STATUS_CV_LABELS.CV3,
+      count: getStatusCount(STATUS_CV.APPROVED),
+    },
+    {
+      key: STATUS_CV.SUBMITTED,
+      label: STATUS_CV_LABELS.CV1,
+      count: getStatusCount(STATUS_CV.SUBMITTED),
+    },
+  ];
+
+  const fetchData = async (id, statusCv, page) => {
+    setIsLoading(true);
+    try {
+      let res = await getCVByStudentID({ id, statusCv, page });
+      if (res && res.errCode === 0) {
+        setListCV(res.data);
+        setTotal(res.total);
+      }
+    } catch (e) {
+      console.log("Error: ", e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteCV = (id) => {
+    const cvToDelete = cvs.find((cv) => cv.id === id);
+    setDeleteCV(cvToDelete);
+  };
+
+  const handleViewCV = (cv) => {
+    setSelectedCV(cv);
+    setIsModalOpen(true);
+  };
+
+  const confirmDelete = () => {
+    setCVs(cvs.filter((cv) => cv.id !== deleteCV.id));
+    setDeleteCV(null);
+  };
+
+  const handleCloseModal = () => {
+    setSelectedCV(null);
+    setIsModalOpen(false);
+  };
+
+  if (isLoading) return <Loading />;
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
+      <div className="pt-32 pb-8 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Enhanced Sidebar */}
+            <aside className="lg:col-span-1 space-y-6">
+              <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <FaFilter className="text-blue-600" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">Bộ lọc</h3>
+                </div>
+
+                <div className="space-y-2">
+                  {statusCv &&
+                    statusCv.length > 0 &&
+                    statusCv.map((item) => (
+                      <button
+                        key={item.key}
+                        onClick={() => setFilter(item.key)}
+                        className={`w-full flex items-center justify-between text-left p-3 rounded-xl transition-all duration-200 ${
+                          filter === item.key
+                            ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg transform scale-105"
+                            : "text-gray-700 hover:bg-gray-50"
+                        }`}
+                      >
+                        <span className="font-medium">{item.label}</span>
+                        <span
+                          className={`text-xs px-2 py-1 rounded-full ${
+                            filter === item.key ? "bg-white/20" : "bg-gray-200"
+                          }`}
+                        >
+                          {item.count}
+                        </span>
+                      </button>
+                    ))}
+                </div>
+              </div>
+
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 p-6 rounded-2xl shadow-lg text-white">
+                <h4 className="font-bold text-lg mb-2">Thống kê</h4>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-100">Tổng CV:</span>
+                    <span className="font-bold text-xl">{listCV.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-100">
+                      {STATUS_CV_LABELS.CV1}
+                    </span>
+                    <span className="font-bold text-xl text-green-200">
+                      {getStatusCount(STATUS_CV.SUBMITTED)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-100">
+                      {STATUS_CV_LABELS.CV3}
+                    </span>
+                    <span className="font-bold text-xl text-green-200">
+                      {getStatusCount(STATUS_CV.APPROVED)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-100">
+                      {STATUS_CV_LABELS.CV2}
+                    </span>
+                    <span className="font-bold text-xl text-green-200">
+                      {getStatusCount(STATUS_CV.IN_REVIEW)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-100">
+                      {STATUS_CV_LABELS.CV4}
+                    </span>
+                    <span className="font-bold text-xl text-yellow-200">
+                      {getStatusCount(STATUS_CV.REJECT)}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            {/* Enhanced Main Content */}
+            <main className="lg:col-span-3 space-y-6">
+              <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-800 mb-2">
+                    CV của bạn
+                  </h1>
+                  <p className="text-gray-600">
+                    Quản lý và theo dõi trạng thái các CV đã nộp
+                  </p>
+                </div>
+                <button
+                  onClick={() => navigate(path.FORM_CV)}
+                  className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white px-6 py-3 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                >
+                  <FaPlus className="text-sm" />
+                  Nộp CV mới
+                </button>
+              </div>
+
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-xl p-6">
+                <div className="flex items-start gap-4">
+                  <div className="text-3xl">💡</div>
+                  <div>
+                    <h3 className="font-bold text-blue-800 mb-1">Lời khuyên</h3>
+                    <p className="text-blue-700">
+                      Bạn nên cập nhật CV ít nhất 1 lần trước ngày{" "}
+                      <strong>30/06</strong> để tăng cơ hội được duyệt.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                {listCV && listCV.length > 0 ? (
+                  listCV.map((cv) => (
+                    <CVCard
+                      key={cv.id}
+                      data={cv}
+                      onView={() => handleViewCV(cv)}
+                      onDelete={handleDeleteCV}
+                    />
+                  ))
+                ) : (
+                  <div className="text-center py-16">
+                    <div className="text-6xl mb-4">📄</div>
+                    <h3 className="text-xl font-semibold text-gray-700 mb-2">
+                      Không có CV nào
+                    </h3>
+                    <p className="text-gray-500 mb-6">
+                      Không có CV nào phù hợp với bộ lọc hiện tại.
+                    </p>
+                    <button
+                      onClick={() => setFilter("")}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                      Xem tất cả CV
+                    </button>
+                  </div>
+                )}
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+
+      {isModalOpen && selectedCV && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] z-9999 flex items-center justify-center px-4 mx-auto">
+          <div className="bg-white max-h-[90vh] overflow-y-auto w-full lg:w-3/4 p-6 rounded-xl shadow-lg relative">
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500 text-4xl"
+            >
+              &times;
+            </button>
+            {/* CV DETAIL */}
+            <CVDetail cvData={selectedCV} />
+          </div>
+        </div>
+      )}
+
+      {deleteCV && (
+        <DeleteConfirmModal
+          cv={deleteCV}
+          onConfirm={confirmDelete}
+          onCancel={() => setDeleteCV(null)}
+        />
+      )}
     </div>
   );
 };

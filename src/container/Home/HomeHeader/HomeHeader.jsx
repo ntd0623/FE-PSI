@@ -4,9 +4,9 @@ import { useSelector, useDispatch } from "react-redux";
 import { path } from "../../../utils/constant";
 import { getAvatarColor } from "../../../utils/statusHelper";
 import { processLogout } from "../../../store/actions";
-import logo from "../../../assets/img/pltprone.png";
+import logo from "../../../assets/img/pltLogo.png";
+import logo2 from "../../../assets/img/pltprone.png";
 import toast from "react-hot-toast";
-import { HiOutlineDocumentAdd } from "react-icons/hi";
 const Header = () => {
   const [showMenu, setShowMenu] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -53,11 +53,15 @@ const Header = () => {
     >
       <Link
         to={path.HOME}
-        className="flex items-center ml-4 sm:ml-8 md:ml-16 lg:ml-32"
+        className={`flex items-center  sm:ml-8 md:ml-16 lg:ml-32 ${
+          isScrolled ? "ml-10" : ""
+        }`}
       >
         <img
-          src={logo}
-          className="w-24 h-auto object-contain transition-transform hover:scale-105"
+          src={isScrolled ? logo2 : logo}
+          className={`h-18 object-contain transition-transform hover:scale-105 ${
+            isScrolled ? "w-20" : "w-64"
+          }`}
           alt="logo"
         />
       </Link>

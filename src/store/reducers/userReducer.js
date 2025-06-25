@@ -20,6 +20,7 @@ const appReducer = (state = initialState, action) => {
         userInfo: null,
       };
     case actionTypes.PROCESS_LOGOUT:
+      localStorage.clear();
       return {
         ...state,
         isLoggedIn: false,

@@ -12,7 +12,8 @@ export const path = {
     UNAUTHORIZED: "/unauthorized",
     PROFILE: "/student/profile",
     ABOUT: "/about",
-    MY_CV: "/student/my-cv"
+    MY_CV: "/student/my-cv",
+    VIEW_CV: "/student/form-cv/:id",
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",
@@ -36,3 +37,10 @@ export const STATUS_CV = {
     APPROVED: "CV3",
     REJECT: "CV4"
 }
+
+export const STATUS_CV_LABELS = {
+    CV1: "Đã nộp",
+    CV2: "Đang xem xét",
+    CV3: "Đã duyệt",
+    CV4: "Từ chối",
+};
