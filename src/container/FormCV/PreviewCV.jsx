@@ -3,8 +3,8 @@ import { FiMail, FiPhone, FiMapPin, FiCalendar } from "react-icons/fi";
 import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
-import { createCV } from "../../services/studentService";
-import { path } from "../../utils/constant";
+import { upsertCV } from "../../services/studentService";
+import { CRUD_ACTIONS, path } from "../../utils/constant";
 import toast from "react-hot-toast";
 import moment from "moment";
 import "./PreviewCV.scss";
@@ -13,6 +13,16 @@ export default function CVPreview() {
   const location = useLocation();
   const [cvData, setCvData] = useState(null);
   const [formErrors, setFormErrors] = useState({});
+
+  const handleNavigate = (cvData) => {
+    if (cvData.action === CRUD_ACTIONS.ADD) {
+      navigate(path.FORM_CV);
+    }
+
+    if (cvData.action === CRUD_ACTIONS.EDIT) {
+      navigate(path.VIEW_CV.replace(":id", cvData.cvID));
+    }
+  };
 
   const validProjects =
     cvData?.formData?.projects?.filter((project) =>
@@ -127,7 +137,7 @@ export default function CVPreview() {
       toast.error("Bạn không thể gửi form input đang lỗi !");
       return;
     }
-    const cv = await createCV({
+    const cv = await upsertCV({
       userID: 1,
       fullName: cvData.formData.fullName,
       email: cvData.formData.email,
@@ -147,6 +157,7 @@ export default function CVPreview() {
       experience: cvData.formData.experience,
       projects: cvData.formData.projects,
       image: cvData.avatar,
+      action: CRUD_ACTIONS.ADD,
     });
     if (cv && cv.errCode === 0) {
       toast.success("Tạo CV thành công !");
@@ -163,7 +174,7 @@ export default function CVPreview() {
         <div className="flex justify-start">
           <button
             className="flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-100 transition"
-            onClick={() => navigate(path.FORM_CV)}
+            onClick={() => handleNavigate(cvData)}
           >
             <FaArrowLeft className="text-gray-700" />
             <span className="text-sm font-medium">Quay lại</span>
@@ -269,10 +280,10 @@ export default function CVPreview() {
             </div>
           </SubSection>
         </Section>
-
-        <Section title="KINH NGHIỆM LÀM VIỆC">
-          {validExperience.length > 0 ? (
-            validExperience.map((item, index) => {
+        {/* Experience */}
+        {validExperience.length > 0 && (
+          <Section title="KINH NGHIỆM LÀM VIỆC">
+            {validExperience.map((item, index) => {
               const timeRange =
                 item.startDate && item.endDate
                   ? `${moment(item.startDate).format("DD/MM/YYYY")} - ${moment(
@@ -298,35 +309,39 @@ export default function CVPreview() {
                   </div>
                 </SubSection>
               );
-            })
-          ) : (
-            <p className="italic text-gray-500">Chưa có kinh nghiệm làm việc</p>
-          )}
-        </Section>
+            })}
+          </Section>
+        )}
 
-        <Section title="KỸ NĂNG">
-          <div className="skills-container space-y-4 print:space-y-3">
-            <SkillColumn
-              title="Kỹ năng kỹ thuật"
-              skills={cvData?.formData?.skills?.programming || []}
-              color="bg-purple-700"
-            />
-            <SkillColumn
-              title="Kỹ năng mềm"
-              skills={cvData?.formData?.skills?.softSkills || []}
-              color="bg-green-600"
-            />
-            <SkillColumn
-              title="Ngôn ngữ"
-              skills={cvData?.formData?.skills?.languages || []}
-              color="bg-yellow-500"
-            />
-          </div>
-        </Section>
+        {/* Skill */}
+        {(cvData?.formData?.skills?.programming?.length > 0 ||
+          cvData?.formData?.skills?.softSkills?.length > 0 ||
+          cvData?.formData?.skills?.languages?.length > 0) && (
+          <Section title="KỸ NĂNG">
+            <div className="skills-container space-y-4 print:space-y-3">
+              <SkillColumn
+                title="Kỹ năng kỹ thuật"
+                skills={cvData?.formData?.skills?.programming || []}
+                color="bg-purple-700"
+              />
+              <SkillColumn
+                title="Kỹ năng mềm"
+                skills={cvData?.formData?.skills?.softSkills || []}
+                color="bg-green-600"
+              />
+              <SkillColumn
+                title="Ngôn ngữ"
+                skills={cvData?.formData?.skills?.languages || []}
+                color="bg-yellow-500"
+              />
+            </div>
+          </Section>
+        )}
 
-        <Section title="DỰ ÁN">
-          {validProjects.length > 0 ? (
-            validProjects.map((project, index) => (
+        {/* Project */}
+        {validProjects.length > 0 && (
+          <Section title="DỰ ÁN">
+            {validProjects.map((project, index) => (
               <Project
                 key={index}
                 title={project.name || "Chưa nhập tên dự án"}
@@ -334,19 +349,20 @@ export default function CVPreview() {
                 link={project.link || "#"}
                 description={project.description || "Chưa có mô tả"}
               />
-            ))
-          ) : (
-            <p className="italic text-gray-500">Chưa có dự án</p>
-          )}
-        </Section>
+            ))}
+          </Section>
+        )}
+        {cvData?.formData?.achievements?.trim() && (
+          <Section title="THÀNH TÍCH & GIẢI THƯỞNG">
+            {cvData.formData.achievements}
+          </Section>
+        )}
 
-        <Section title="THÀNH TÍCH & GIẢI THƯỞNG">
-          {cvData?.formData?.achievements || "Chưa có thành tích"}
-        </Section>
-
-        <Section title="NGƯỜI THAM KHẢO">
-          {cvData?.formData?.references || "Chưa có người tham khảo"}
-        </Section>
+        {cvData?.formData?.references?.trim() && (
+          <Section title="NGƯỜI THAM KHẢO">
+            {cvData.formData.references}
+          </Section>
+        )}
       </div>
 
       {/* Sidebar */}

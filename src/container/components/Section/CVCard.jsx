@@ -10,16 +10,13 @@ const CVCard = ({ data, onView, onDelete }) => {
   const status = statusStyle(data?.statusCv);
   return (
     <div className="group cursor-pointer bg-white p-6 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-blue-200 transform hover:-translate-y-1">
-      <div className="flex justify-between items-start mb-4">
+      <div onClick={onView} className="flex justify-between items-start mb-4">
         <div className="flex items-start gap-4 flex-1">
           <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl text-white shadow-lg">
             <FaFileAlt className="text-lg" />
           </div>
           <div className="flex-1">
-            <h3
-              onClick={onView}
-              className="text-lg font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors"
-            >
+            <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
               {`CV của ${data?.fullName} - ${data?.career_objective}` ||
                 "CV chưa có tiêu đề"}
             </h3>
@@ -64,7 +61,7 @@ const CVCard = ({ data, onView, onDelete }) => {
         </div>
 
         <button
-          onClick={() => onDelete(data.id)}
+          onClick={() => onDelete(data)}
           className="flex items-center gap-2 text-red-500 hover:text-red-700 hover:bg-red-50 px-4 py-2 rounded-lg transition-all duration-200 font-medium text-sm group"
         >
           <FaTrash className="text-xl group-hover:animate-pulse" />
