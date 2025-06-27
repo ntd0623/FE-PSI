@@ -1,15 +1,15 @@
 import { FiMail, FiPhone, FiMapPin, FiCalendar } from "react-icons/fi";
 import { getAvatarColor } from "../../utils/statusHelper";
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import moment from "moment";
 import "./CVDetail.scss";
+import { getBase64 } from "../../utils/CommonUtils";
 const CVDetail = ({ cvData }) => {
   const skillGroups = groupSkillsByType(cvData?.skills || []);
   console.log("Check cv data: ", cvData);
   const handlePrint = () => {
     window.print();
   };
-
   return (
     <React.Fragment>
       <div
@@ -22,7 +22,7 @@ const CVDetail = ({ cvData }) => {
         {/* Header Info */}
         <div className="header-section flex flex-col lg:flex-row print:flex-row  items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left print:break-inside-avoid">
           <div className="avatar-section flex-shrink-0">
-            {cvData?.image ? (
+            {cvData.image ? (
               <img
                 src={cvData.image}
                 alt="Avatar"

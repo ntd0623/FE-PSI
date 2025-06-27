@@ -8,8 +8,8 @@ const getInfoCvStudent = (statusCv = "", batchID = "", page = 1, limit = 3) => {
 const getAllCode = (type) => {
     return axios.get(`/api/get-allCode?type=${type}`)
 }
-const createCV = (data) => {
-    return axios.post(`/api/create-cv`, data)
+const upsertCV = (data) => {
+    return axios.post(`/api/upsert-cv`, data)
 }
 const updateStatusCV = (data) => {
     return axios.put(`/api/update-cv-by-userId`, data)
@@ -23,11 +23,16 @@ const getCV = (data) => {
     return axios.get(`/api/get-cv-by-studentID-and-idCv?studentID=${data.studentID}&cvID=${data.cvID}`)
 }
 
+const deleteCVStudent = (id) => {
+    return axios.delete(`/api/delete-cv?id=${id}`)
+}
+
 export {
     getInfoCvStudent,
     getAllCode,
-    createCV,
+    upsertCV,
     updateStatusCV,
     getCVByStudentID,
-    getCV
+    getCV,
+    deleteCVStudent
 }

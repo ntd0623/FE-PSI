@@ -2,8 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
 import { getBase64 } from "../../utils/CommonUtils";
 import { useNavigate } from "react-router-dom";
+import { CRUD_ACTIONS } from "../../utils/constant";
 import { navigateToCVPreview } from "../../utils/navigateWithState";
-import { getAllCode, createCV } from "../../services/studentService";
+import { getAllCode, upsertCV } from "../../services/studentService";
 import { useSelector } from "react-redux";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -359,7 +360,7 @@ const FormCV = () => {
       "Bạn có chắc muốn gửi CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
     );
     if (!confirmed) return;
-    const cv = await createCV({
+    const cv = await upsertCV({
       userID: user.id,
       fullName: formData.fullName,
       email: formData.email,
@@ -379,6 +380,7 @@ const FormCV = () => {
       experience: formData.experience,
       projects: formData.projects,
       image: avatar,
+      action: CRUD_ACTIONS.ADD,
     });
     if (cv && cv.errCode === 0) {
       toast.success("Tạo CV thành công !");
@@ -429,6 +431,7 @@ const FormCV = () => {
       avatar,
       birthDay,
       degreeValue,
+      action: CRUD_ACTIONS.ADD,
     };
     localStorage.setItem("cvData", JSON.stringify(cvData));
     navigateToCVPreview(navigate, cvData);

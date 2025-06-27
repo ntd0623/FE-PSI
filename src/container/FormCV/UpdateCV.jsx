@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
 import { getBase64 } from "../../utils/CommonUtils";
+import { CRUD_ACTIONS } from "../../utils/constant";
 import { useNavigate, useParams } from "react-router-dom";
 import { navigateToCVPreview } from "../../utils/navigateWithState";
-import { getAllCode, createCV, getCV } from "../../services/studentService";
+import { getAllCode, upsertCV, getCV } from "../../services/studentService";
 import { useSelector } from "react-redux";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -129,74 +130,138 @@ const UpdateCV = () => {
 
   // set Form
   useEffect(() => {
-    if (cvData) {
-      setFormData({
-        fullName: cvData.fullName || "",
-        email: cvData.email || "",
-        phone: cvData.phoneNumber || "",
-        gender: cvData.genderID || "",
-        address: cvData.address || "",
-        university: cvData.schoolName || "",
-        major: cvData.major || "",
-        degree: cvData.degreeID || "",
-        gpa: cvData.gpa || "",
-        graduationYear: cvData.graduationYear || "",
-        projects: cvData.projects?.map((p) => ({
-          name: p.name || "",
-          technologies: p.technologies || "",
-          description: p.description || "",
-          link: p.github_url || p.demo_url || "",
-        })) || [
-          {
-            name: "",
-            technologies: "",
-            description: "",
-            link: "",
+    const localData = localStorage.getItem("cvData");
+    let data = null;
+
+    if (localData) {
+      try {
+        data = JSON.parse(localData);
+      } catch (e) {
+        console.error("Lỗi parse localStorage:", e);
+      }
+    }
+
+    const source = data || cvData;
+
+    if (source) {
+      if (source === data) {
+        setFormData({
+          fullName: source?.formData?.fullName || "",
+          email: source?.formData?.email || "",
+          phone: source?.formData?.phone || "",
+          gender: source?.formData?.gender || "",
+          address: source?.formData?.address || "",
+          university: source?.formData?.university || "",
+          major: source?.formData?.major || "",
+          degree: source?.formData?.degree || "",
+          gpa: source?.formData?.gpa || "",
+          graduationYear: source?.formData?.graduationYear || "",
+          projects: source?.formData?.projects?.map((p) => ({
+            name: p.name || "",
+            technologies: p.technologies || "",
+            description: p.description || "",
+            link: p.github_url || p.demo_url || p.link || "",
+          })) || [
+            {
+              name: "",
+              technologies: "",
+              description: "",
+              link: "",
+            },
+          ],
+          experience: source?.formData?.experience?.map((e) => ({
+            nameCompany: e.nameCompany || "",
+            position: e.position || "",
+            startDate: e.startDate || "",
+            endDate: e.endDate || "",
+            description: e.description || "",
+            link: e.link || "",
+          })) || [
+            {
+              nameCompany: "",
+              position: "",
+              startDate: "",
+              endDate: "",
+              description: "",
+              link: "",
+            },
+          ],
+          skills: {
+            programming: source?.formData?.skills?.programming,
+            softSkills: source?.formData?.skills?.softSkills,
+            languages: source?.formData?.skills?.languages,
           },
-        ],
-        experience: cvData.experiences?.map((e) => ({
-          nameCompany: e.company || "",
-          position: e.position || "",
-          startDate: e.start_date || "",
-          endDate: e.end_date || "",
-          description: e.description || "",
-          link: "",
-        })) || [
-          {
-            nameCompany: "",
-            position: "",
-            startDate: "",
-            endDate: "",
-            description: "",
-            link: "",
+          careerGoal: source?.formData?.careerGoal || "",
+          achievements: source?.formData?.achievements || "",
+          references: source?.formData?.references || "",
+        });
+        setBirthDay(source.birthDay || "");
+        setAvatar(source.avatar || "");
+      } else {
+        setFormData({
+          fullName: source.fullName || "",
+          email: source.email || "",
+          phone: source.phoneNumber || "",
+          gender: source.genderID || "",
+          address: source.address || "",
+          university: source.schoolName || "",
+          major: source.major || "",
+          degree: source.degreeID || "",
+          gpa: source.gpa || "",
+          graduationYear: source.graduationYear || "",
+          projects: source.projects?.map((p) => ({
+            name: p.name || "",
+            technologies: p.technologies || "",
+            description: p.description || "",
+            link: p.github_url || p.demo_url || p.link || "",
+          })) || [
+            {
+              name: "",
+              technologies: "",
+              description: "",
+              link: "",
+            },
+          ],
+          experience: source.experiences?.map((e) => ({
+            nameCompany: e.company || e.nameCompany || "",
+            position: e.position || "",
+            startDate: e.start_date || e.startDate || "",
+            endDate: e.end_date || e.endDate || "",
+            description: e.description || "",
+            link: e.link || "",
+          })) || [
+            {
+              nameCompany: "",
+              position: "",
+              startDate: "",
+              endDate: "",
+              description: "",
+              link: "",
+            },
+          ],
+          skills: {
+            programming:
+              source.skills
+                ?.filter((s) => s.type === "programming")
+                .map((s) => s.name) || [],
+            softSkills:
+              source.skills
+                ?.filter((s) => s.type === "softSkills")
+                .map((s) => s.name) || [],
+            languages:
+              source.skills
+                ?.filter((s) => s.type === "languages")
+                .map((s) => s.name) || [],
           },
-        ],
-        skills: {
-          programming:
-            cvData.skills
-              ?.filter((s) => s.type === "programming")
-              .map((s) => s.name) || [],
-          softSkills:
-            cvData.skills
-              ?.filter((s) => s.type === "softSkills")
-              .map((s) => s.name) || [],
-          languages:
-            cvData.skills
-              ?.filter((s) => s.type === "languages")
-              .map((s) => s.name) || [],
-        },
-        careerGoal: cvData.career_objective || "",
-        achievements: cvData.archivement || "",
-        references: cvData.references || "",
-      });
-      setBirthDay(cvData.birthDay);
-      setAvatar(cvData.image);
+          careerGoal: source.career_objective || "",
+          achievements: source.archivement || "",
+          references: source.references || "",
+        });
+        setBirthDay(source.birthDay || "");
+        setAvatar(source.image || "");
+      }
     }
   }, [cvData]);
-
-  useEffect(() => {
-    console.log("✅ Đã cập nhật formData: ", formData);
-  }, [formData]);
 
   // handle change Avatar
   const handleOnChangeImage = async (event) => {
@@ -440,10 +505,11 @@ const UpdateCV = () => {
       return;
     }
     const confirmed = window.confirm(
-      "Bạn có chắc muốn gửi CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
+      "Bạn có chắc muốn cập nhập lại CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
     );
     if (!confirmed) return;
-    const cv = await createCV({
+    const cv = await upsertCV({
+      cvID: id,
       userID: user.id,
       fullName: formData.fullName,
       email: formData.email,
@@ -463,9 +529,10 @@ const UpdateCV = () => {
       experience: formData.experience,
       projects: formData.projects,
       image: avatar,
+      action: CRUD_ACTIONS.EDIT,
     });
     if (cv && cv.errCode === 0) {
-      toast.success("Tạo CV thành công !");
+      toast.success("Sửa CV thành công !");
       setFormData(defaultFormData);
       setAvatar(null);
       setImageFile(null);
@@ -513,6 +580,8 @@ const UpdateCV = () => {
       avatar,
       birthDay,
       degreeValue,
+      cvID: id,
+      action: CRUD_ACTIONS.EDIT,
     };
     localStorage.setItem("cvData", JSON.stringify(cvData));
     navigateToCVPreview(navigate, cvData);
@@ -1339,7 +1408,7 @@ const UpdateCV = () => {
             className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700"
             onClick={() => handleSubmit()}
           >
-            Gửi CV cho Admin
+            Cập Nhập CV
           </button>
         </div>
       </div>
