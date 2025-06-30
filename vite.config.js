@@ -8,6 +8,9 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     base: './',
+    build: {
+      outDir: 'dist',
+    },
     css: {
       postcss: './postcss.config.js',
       preprocessorOptions: {
