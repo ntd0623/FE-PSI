@@ -122,26 +122,34 @@ const HomePage = () => {
       <HomeHeader />
 
       {/* Hero Section */}
-      <section className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white px-0 py-40 rounded-none mb-8 flex flex-col md:flex-row items-center justify-between gap-6 overflow-hidden">
-        <div
-          className="w-full md:w-3/5 px-8 md:px-20 mt-16 md:mt-24"
-          ref={heroTitleRef}
-        >
-          <h1 className="text-4xl font-bold mb-4 leading-snug">
-            Nền Tảng Kết Nối <br />
-            <span className="text-5xl">Thực Tập Sinh & Doanh Nghiệp</span>
-          </h1>
-          <p className="mb-6 text-lg">
-            PLT Solutions giúp sinh viên IT tìm được cơ hội thực tập phù hợp và
-            hỗ trợ doanh nghiệp tuyển đúng người, đúng kỹ năng.
-          </p>
-        </div>
-        <div
-          className="w-full md:w-2/5 px-6 md:px-10 flex justify-center"
-          ref={heroImageRef}
-        >
-          <div className="w-96 h-96 rounded-xl cursor-pointer overflow-hidden">
-            <img src={resume} alt="" className="w-full h-full object-cover" />
+      <section className="w-full bg-gradient-to-r from-blue-600 to-cyan-600 text-white py-24 mb-8 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-12">
+          {/* LEFT */}
+          <div className="w-full md:w-3/5 mt-12 md:mt-20" ref={heroTitleRef}>
+            <h1 className="text-3xl md:text-4xl font-bold mb-4 leading-snug">
+              Nền Tảng Kết Nối <br />
+              <span className="text-4xl md:text-5xl">
+                Thực Tập Sinh &amp; Doanh Nghiệp
+              </span>
+            </h1>
+            <p className="mb-6 text-base md:text-lg">
+              PLT Solutions giúp sinh viên IT tìm được cơ hội thực tập phù hợp
+              và hỗ trợ doanh nghiệp tuyển đúng người, đúng kỹ năng.
+            </p>
+          </div>
+
+          {/* RIGHT */}
+          <div className="w-full md:w-2/5 flex justify-center">
+            <div
+              className="w-72 md:w-96 h-72 md:h-96 rounded-xl overflow-hidden"
+              ref={heroImageRef}
+            >
+              <img
+                src={resume}
+                alt="Ảnh minh họa"
+                className="w-full h-full object-cover"
+              />
+            </div>
           </div>
         </div>
       </section>

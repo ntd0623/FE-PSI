@@ -15,7 +15,10 @@ const AdminLayout = ({ menuItems }) => {
       />
       <div className="flex-1 overflow-y-auto bg-gray-50">
         <AdminHeader setIsSidebarOpen={setIsSidebarOpen} />
-        <div className="p-6" style={{ background: "#EEEEEE" }}>
+        <div
+          className="p-6 w-full min-h-screen"
+          style={{ background: "#EEEEEE" }}
+        >
           <Outlet />
         </div>
       </div>

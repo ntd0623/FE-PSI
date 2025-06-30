@@ -14,6 +14,9 @@ export const path = {
     ABOUT: "/about",
     MY_CV: "/student/my-cv",
     VIEW_CV: "/student/form-cv/:id",
+    QUIZ: "/admin/quiz",
+    QUIZ_SETS_CREATE: "/admin/quiz/quiz-create/:id",
+    QUIZ_CREATE: "/admin/quiz/quiz-create",
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",
