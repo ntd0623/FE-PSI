@@ -76,10 +76,13 @@ const Register = () => {
     setErrors(validationErrors);
 
     const captchaToken = recaptchaRef.current.getValue();
+
     if (!captchaToken) {
       setCaptchaError("Vui lòng xác minh CAPTCHA.");
       return;
     }
+
+    setCaptchaError("");
 
     if (Object.keys(validationErrors).length > 0) return;
 
@@ -92,22 +95,24 @@ const Register = () => {
       });
 
       if (res && res.errCode === 3) {
-        setErrors((prev) => ({ ...prev, captchaError: res.message }));
+        setCaptchaError(res.message);
+        recaptchaRef.current.reset(); 
         return;
       }
       if (res && res.errCode === 4) {
         setErrors((prev) => ({ ...prev, email: res.message }));
+        recaptchaRef.current.reset();
         return;
       }
       if ((res && res.errCode === 5) || (res.errCode && res.errCode === 1)) {
         setErrors((prev) => ({ ...prev, server: res.message }));
+        recaptchaRef.current.reset();
         return;
       }
       if (res && res.errCode === 0) {
         toast.success("Đăng ký thành công. Hãy đăng nhập!");
         navigate(path.LOGIN);
       }
-      navigate(path.LOGIN);
     } catch (error) {
       console.error("Register error:", error);
       toast.error("Lỗi máy chủ. Vui lòng thử lại sau.");

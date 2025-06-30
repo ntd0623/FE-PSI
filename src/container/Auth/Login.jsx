@@ -141,7 +141,7 @@ const Login = () => {
 
   const handleFacebookLogin = () => {
     const facebookAppId = import.meta.env.VITE_APP_FB_ID;
-    const redirectUri = `http://localhost:3000/${path.FACEBOOK_CALLBACK}`;
+    const redirectUri = `https://psi.plt.pro.vn${path.FACEBOOK_CALLBACK}`;
 
     const fbLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${facebookAppId}&redirect_uri=${redirectUri}&response_type=token&scope=email,public_profile`;
 

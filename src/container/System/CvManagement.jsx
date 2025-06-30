@@ -11,7 +11,7 @@ import toast from "react-hot-toast";
 import moment from "moment";
 import html2pdf from "html2pdf.js";
 import PaginationTailwind from "../components/Pagination/PaginationTailwind";
-import Loading from "../components/Loading/Loading"; // ✅ thêm dòng này
+import Loading from "../components/Loading/Loading";
 
 const CVManagement = () => {
   const [selectedFilter, setSelectedFilter] = useState("");
@@ -23,34 +23,11 @@ const CVManagement = () => {
   const [listStudent, setListStudent] = useState("");
   const hasFetched = useRef(false);
 
-  const [loading, setLoading] = useState(false); // ✅ thêm dòng này
+  const [loading, setLoading] = useState(false);
 
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const limit = 3;
-  const printRef = useRef();
-
-  const handlePrint = () => {
-    if (!selectedCV || !printRef.current) {
-      toast.error("Không có dữ liệu CV để in");
-      return;
-    }
-
-    const element = printRef.current;
-
-    const opt = {
-      margin: 0.3,
-      filename: `${selectedCV.fullName || "CV"}.pdf`,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: {
-        scale: 2,
-        useCORS: true,
-      },
-      jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-    };
-
-    html2pdf().set(opt).from(element).save();
-  };
 
   const fetchData = async () => {
     setLoading(true); // ✅

@@ -190,7 +190,7 @@ export default function CVPreview() {
         <div className="flex justify-end">
           <button
             onClick={() => window.print()}
-            className="px-4 py-2 rounded-md bg-purple-700 text-white hover:bg-purple-800 transition text-sm font-medium"
+            className="px-4 py-2 rounded-md bg-blue-700 text-white hover:bg-blue-800 transition text-sm font-medium"
           >
             In CV
           </button>
@@ -211,7 +211,7 @@ export default function CVPreview() {
               />
             ) : (
               <div
-                className={`w-28 h-28 print:w-24 print:h-24 rounded-full bg-purple-700 text-white flex items-center justify-center text-3xl print:text-2xl font-bold`}
+                className={`w-28 h-28 print:w-24 print:h-24 rounded-full bg-blue-700 text-white flex items-center justify-center text-3xl print:text-2xl font-bold`}
               >
                 {cvData?.formData?.fullName
                   ? cvData.formData.fullName
@@ -322,7 +322,7 @@ export default function CVPreview() {
               <SkillColumn
                 title="Kỹ năng kỹ thuật"
                 skills={cvData?.formData?.skills?.programming || []}
-                color="bg-purple-700"
+                color="bg-blue-700"
               />
               <SkillColumn
                 title="Kỹ năng mềm"
@@ -388,14 +388,14 @@ export default function CVPreview() {
           </div>
           <button
             onClick={handleSubmit}
-            className="mt-4 w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition"
+            className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition"
           >
             Gửi CV cho Admin
           </button>
 
           <button
             onClick={() => navigate(-1)}
-            className="mt-2 w-full border border-purple-600 text-purple-600 hover:bg-purple-100 font-medium py-2 px-4 rounded transition"
+            className="mt-2 w-full border border-blue-600 text-blue-600 hover:bg-blue-100 font-medium py-2 px-4 rounded transition"
           >
             Quay lại chỉnh sửa
           </button>
@@ -408,7 +408,7 @@ export default function CVPreview() {
 function Section({ title, children }) {
   return (
     <div className="mb-6">
-      <h3 className="text-md font-bold uppercase border-b-2 border-purple-700 mb-2">
+      <h3 className="text-md font-bold uppercase border-b-2 border-blue-700 mb-2">
         {title}
       </h3>
       <div className="text-sm text-gray-700 leading-relaxed">{children}</div>
@@ -455,7 +455,7 @@ function Project({ title, techs, link, description }) {
           Xem dự án
         </a>
       </div>
-      <p className="text-xs text-purple-700 italic">Công nghệ: {techs}</p>
+      <p className="text-xs text-blue-700 italic">Công nghệ: {techs}</p>
       <p className="text-sm text-gray-700">{description}</p>
     </div>
   );

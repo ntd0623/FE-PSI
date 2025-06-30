@@ -18,50 +18,53 @@ import HomePage from "./Home/HomePage";
 import Profile from "./Home/Profile/Profile";
 import MyCV from "./FormCV/MyCV";
 import StudentLayout from "./Home/HomeHeader/StudentLayout";
+import QuizManagement from "./System/Quiz/QuizManagement";
+import QuizCreate from "./System/Quiz/QuizCreate";
 import UpdateCV from "./FormCV/UpdateCV";
 export default function App() {
   return (
     <>
-      <div className="container ">
-        <Routes>
-          <Route path={path.HOME} element={<HomePage />} /> {/* ROUTE LOGIN */}
-          <Route path={path.LOGIN} element={<Login />} />{" "}
-          {/* ROUTE LOGIN WITH FACEBOOK */}
-          <Route
-            path={path.FACEBOOK_CALLBACK}
-            element={<FacebookCallback />}
-          />{" "}
-          {/* ROUTE REGISTER */}
-          <Route path={path.REGISTER} element={<Register />} />{" "}
-          {/* Protected route Admin */}
-          <Route
-            path={path.ADMIN}
-            element={<ProtectedRoute allowedRoles={[USER_ROLE.ADMIN]} />}
-          >
-            {/* HEADER AND SIDEBAR */}
-            <Route element={<CVManagementSystem />}>
-              <Route index element={<CVManagement />} />
-              <Route path={path.CV_MANAGEMENT} element={<CVManagement />} />
-            </Route>
+      <Routes>
+        <Route path={path.HOME} element={<HomePage />} /> {/* ROUTE LOGIN */}
+        <Route path={path.LOGIN} element={<Login />} />{" "}
+        {/* ROUTE LOGIN WITH FACEBOOK */}
+        <Route
+          path={path.FACEBOOK_CALLBACK}
+          element={<FacebookCallback />}
+        />{" "}
+        {/* ROUTE REGISTER */}
+        <Route path={path.REGISTER} element={<Register />} />{" "}
+        {/* Protected route Admin */}
+        <Route
+          path={path.ADMIN}
+          element={<ProtectedRoute allowedRoles={[USER_ROLE.ADMIN]} />}
+        >
+          {/* HEADER AND SIDEBAR */}
+          <Route element={<CVManagementSystem />}>
+            <Route index element={<CVManagement />} />
+            <Route path={path.CV_MANAGEMENT} element={<CVManagement />} />
+            <Route path={path.QUIZ} element={<QuizManagement />} />
+            <Route path={path.QUIZ_SETS_CREATE} element={<QuizCreate />} />
+            <Route path={path.QUIZ_CREATE} element={<QuizCreate />} />
           </Route>
-          {/* Protected Route Student */}
-          <Route
-            path={path.STUDENT}
-            element={<ProtectedRoute allowedRoles={[USER_ROLE.STUDENT]} />}
-          >
-            {/* HEADER */}
-            <Route element={<StudentLayout />}>
-              <Route path={path.FORM_CV} element={<FormCV />} />{" "}
-              <Route path={path.MY_CV} element={<MyCV />} />{" "}
-              <Route path={path.PROFILE} element={<Profile />} />{" "}
-              <Route path={path.VIEW_CV} element={<UpdateCV />} />{" "}
-            </Route>
-            <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
+        </Route>
+        {/* Protected Route Student */}
+        <Route
+          path={path.STUDENT}
+          element={<ProtectedRoute allowedRoles={[USER_ROLE.STUDENT]} />}
+        >
+          {/* HEADER */}
+          <Route element={<StudentLayout />}>
+            <Route path={path.FORM_CV} element={<FormCV />} />{" "}
+            <Route path={path.MY_CV} element={<MyCV />} />{" "}
+            <Route path={path.PROFILE} element={<Profile />} />{" "}
+            <Route path={path.VIEW_CV} element={<UpdateCV />} />{" "}
           </Route>
-          {/* Unauthorized when it not role */}
-          <Route path={path.UNAUTHORIZED} element={<Unauthorized />} />{" "}
-        </Routes>
-      </div>
+          <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
+        </Route>
+        {/* Unauthorized when it not role */}
+        <Route path={path.UNAUTHORIZED} element={<Unauthorized />} />{" "}
+      </Routes>
       <Toaster position="top-right" />
     </>
   );
