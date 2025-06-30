@@ -8,8 +8,11 @@ export default defineConfig(({ mode }) => {
   return {
     plugins: [react()],
     base: './',
+    build: {
+      outDir: 'dist',
+    },
     css: {
-      postcss: './postcss.config.js', // Thêm dòng này
+      postcss: './postcss.config.js',
       preprocessorOptions: {
         scss: {
           additionalData: `@use "@/styles/variables" as *;`,
