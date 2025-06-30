@@ -1,6 +1,7 @@
 name: Deploy React App lên Hosting
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - master
