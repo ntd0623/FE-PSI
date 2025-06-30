@@ -7,6 +7,7 @@ export default defineConfig(({ mode }) => {
 
   return {
     plugins: [react()],
+    base: './',
     css: {
       postcss: './postcss.config.js', // Thêm dòng này
       preprocessorOptions: {
