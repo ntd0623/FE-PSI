@@ -58,7 +58,7 @@ const CVManagement = () => {
   }, []);
 
   const fetchFilteredStudents = async (status, batch, page) => {
-    setLoading(true); // ✅
+    setLoading(true);
     try {
       const res = await getInfoCvStudent(status, batch, page);
       if (res && res.errCode === 0) {
@@ -68,7 +68,7 @@ const CVManagement = () => {
     } catch (err) {
       toast.error("Lỗi khi lọc CV");
     } finally {
-      setLoading(false); // ✅
+      setLoading(false);
     }
   };
 
@@ -377,7 +377,7 @@ const CVManagement = () => {
             </div>
           ))}
       </div>
-      {/* Pagination - Bổ sung sau */}
+      {/* Pagination */}
       <div className="mt-8">
         <PaginationTailwind
           currentPage={page}

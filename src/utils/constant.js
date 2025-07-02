@@ -17,6 +17,9 @@ export const path = {
     QUIZ: "/admin/quiz",
     QUIZ_SETS_CREATE: "/admin/quiz/quiz-create/:id",
     QUIZ_CREATE: "/admin/quiz/quiz-create",
+    QUIZ_UPDATE: "/admin/quiz/quiz-update/:id",
+    QUIZ_REVIEW: "/admin/quiz/:id",
+    QUIZ_EVALUATION: "/student/quiz-evaluation",
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",

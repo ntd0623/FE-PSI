@@ -9,58 +9,48 @@ import gsap from "gsap";
 import toast from "react-hot-toast";
 import { getBase64 } from "../../../utils/CommonUtils";
 import Lightbox from "yet-another-react-lightbox";
-
-const QuizCreate = () => {
-  const initialQuizSet = {
-    title: "",
-    description: "",
-    timeLimit: 60,
-    maxScore: 100,
-    image: null,
-    questions: [
-      {
-        content: "",
-        options: ["", "", "", ""],
-        correctAnswer: null,
-        explanation: "",
-      },
-    ],
-  };
+import Loading from "../../components/Loading/Loading";
+const QuizUpdate = () => {
   const navigate = useNavigate();
   const { id } = useParams();
-  const [quiz, setQuiz] = useState({});
   const [errors, setErrors] = useState({});
   const [avatar, setAvatar] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [isOpenPreview, setIsOpenPreview] = useState(false);
-  const [quizSet, setQuizSet] = useState({
-    title: "",
-    description: "",
-    timeLimit: 60,
-    maxScore: 10,
-    image: null,
-    questions: [
-      {
-        content: "",
-        options: ["", "", "", ""],
-        correctAnswer: null,
-        explanation: "",
-      },
-    ],
-  });
-
+  const [quizSet, setQuizSet] = useState({});
   const [expandedQuestions, setExpandedQuestions] = useState([true]);
   const questionRefs = useRef({});
   const hasFetched = useRef(false);
 
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     if (hasFetched.current) return;
     const fetchQuizSet = async () => {
-      if (id) {
-        const res = await quizService.getQuizSetsByID(id);
-        if (res && res.errCode === 0) {
-          setQuiz(res.data);
+      setLoading(true);
+      try {
+        if (id) {
+          const res = await quizService.getQuizSetsByID(id);
+          if (res && res.errCode === 0) {
+            const fetchedQuestions = res.data.questions.map((q) => {
+              const options = q.answers.map((a) => a.content);
+              const correctIndex = q.answers.findIndex((a) => a.isCorrect);
+              return {
+                ...q,
+                options,
+                correctAnswer: correctIndex,
+              };
+            });
+
+            setQuizSet({ ...res.data, questions: fetchedQuestions });
+            setExpandedQuestions(
+              new Array(fetchedQuestions.length).fill(false)
+            );
+          }
         }
+      } catch (e) {
+        toast.error("Không thể tải dữ liệu bộ câu hỏi.");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -204,22 +194,6 @@ const QuizCreate = () => {
     setQuizSet((prev) => ({ ...prev, questions: updated }));
   };
 
-  const addQuestion = () => {
-    setQuizSet((prev) => ({
-      ...prev,
-      questions: [
-        ...prev.questions,
-        {
-          content: "",
-          options: ["", "", "", ""],
-          correctAnswer: null,
-          explanation: "",
-        },
-      ],
-    }));
-    setExpandedQuestions((prev) => [...prev, false]);
-  };
-
   const addOption = (qIndex) => {
     const updated = [...quizSet.questions];
     updated[qIndex].options.push("");
@@ -269,17 +243,17 @@ const QuizCreate = () => {
         newErrors.maxScore = "Điểm tối đa phải là số nguyên.";
       }
     }
-    if (!Array.isArray(data.questions) || data.questions.length === 0) {
-      newErrors.questions = "Phải có ít nhất một câu hỏi.";
-    } else {
+    if (Array.isArray(data.questions)) {
       newErrors.questions = [];
 
       data.questions.forEach((q, i) => {
         const qErr = {};
 
         if (!q.content.trim()) qErr.content = "Câu hỏi không được để trống.";
-        if (!Array.isArray(q.options) || q.options.length < 2)
+
+        if (!Array.isArray(q.options) || q.options.length < 2) {
           qErr.options = "Phải có ít nhất 2 lựa chọn.";
+        }
 
         q.options?.forEach((opt, j) => {
           if (!opt.trim()) {
@@ -299,6 +273,8 @@ const QuizCreate = () => {
 
         newErrors.questions[i] = qErr;
       });
+    } else {
+      newErrors.questions = [];
     }
 
     setErrors(newErrors);
@@ -312,33 +288,47 @@ const QuizCreate = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Check submit: ", quizSet);
-    const isValid = validateQuizSet(quizSet);
-    if (!isValid) {
-      console.log("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.");
-      return;
-    }
+    const transformedQuestions = quizSet.questions.map((q, qIndex) => {
+      const answers = q.options.map((opt, idx) => ({
+        id: q.answers?.[idx]?.id,
+        content: opt,
+        isCorrect: idx === q.correctAnswer,
+      }));
+      return {
+        id: q.id,
+        content: q.content,
+        explanation: q.explanation,
+        answers,
+      };
+    });
 
+    const isValid = validateQuizSet(quizSet);
+    if (!isValid) return;
+
+    setLoading(true);
     try {
       const res = await quizService.upsertQuizSets({
         id: id,
         title: quizSet.title,
         description: quizSet.description,
         image: quizSet.image,
-        duration_minute: parseInt(quizSet.timeLimit, 10),
-        score: parseInt(quizSet.maxScore, 10),
-        questions: quizSet.questions,
-        action: CRUD_ACTIONS.ADD,
+        duration_minutes: parseInt(quizSet.duration_minutes, 10),
+        score: parseInt(quizSet.score, 10),
+        questions: transformedQuestions,
+        action: CRUD_ACTIONS.EDIT,
       });
+
       if (res && res.errCode === 0) {
-        toast.success("Tạo câu hỏi thành công ");
-        setQuizSet(initialQuizSet);
+        toast.success("Cập nhật dữ liệu thành công");
+        navigate(path.QUIZ);
       }
     } catch (e) {
       toast.error("Lỗi hệ thống: " + e.message);
+    } finally {
+      setLoading(false);
     }
   };
-
+  if (loading) return <Loading />;
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
       <div className="flex justify-between items-center mb-6">
@@ -359,137 +349,129 @@ const QuizCreate = () => {
 
       <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
         <FileQuestion className="w-8 h-8 text-blue-600" />
-        {id ? `${quiz.title}` : `Thêm bộ câu hỏi trắc nghiệm `}
+        {quizSet.title}
       </h2>
 
-      {!id && (
-        <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-6">
-          <h3 className="font-medium text-base mb-4">Thông tin bộ câu hỏi</h3>
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Tên bộ câu hỏi
-            </label>
-            <input
-              type="text"
-              name="title"
-              placeholder="Nhập tên bộ câu hỏi..."
-              className={`w-full p-2 border ${
-                errors.title ? "border-red-500" : "border-gray-200"
-              } rounded focus:outline-none`}
-              value={quizSet.title}
-              onChange={handleInputChange}
-            />
-            {errors.title && (
-              <p className="text-red-500 text-sm mt-1">{errors.title}</p>
-            )}
-          </div>
+      <div className="bg-white p-4 sm:p-6 rounded-xl shadow mb-6">
+        <h3 className="font-medium text-base mb-4">Thông tin bộ câu hỏi</h3>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Tên bộ câu hỏi
+          </label>
+          <input
+            type="text"
+            name="title"
+            placeholder="Nhập tên bộ câu hỏi..."
+            className={`w-full p-2 border ${
+              errors.title ? "border-red-500" : "border-gray-200"
+            } rounded focus:outline-none`}
+            value={quizSet.title}
+            onChange={handleInputChange}
+          />
+          {errors.title && (
+            <p className="text-red-500 text-sm mt-1">{errors.title}</p>
+          )}
+        </div>
 
-          <div className="mb-4">
-            <label className="block text-sm font-medium text-gray-700 mb-3">
-              Mô tả
-            </label>
-            <textarea
-              name="description"
-              placeholder="Mô tả chi tiết về bộ câu hỏi..."
-              className={`w-full p-2 border ${
-                errors.description ? "border-red-500" : "border-gray-200"
-              } rounded focus:border-gray-400 focus:outline-none transition-all`}
-              rows="3"
-              value={quizSet.description}
-              onChange={handleInputChange}
-            />
-            {errors.description && (
-              <p className="text-red-500 text-sm mt-1">{errors.description}</p>
-            )}
-          </div>
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Mô tả
+          </label>
+          <textarea
+            name="description"
+            placeholder="Mô tả chi tiết về bộ câu hỏi..."
+            className={`w-full p-2 border ${
+              errors.description ? "border-red-500" : "border-gray-200"
+            } rounded focus:border-gray-400 focus:outline-none transition-all`}
+            rows="3"
+            value={quizSet.description}
+            onChange={handleInputChange}
+          />
+          {errors.description && (
+            <p className="text-red-500 text-sm mt-1">{errors.description}</p>
+          )}
+        </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Thời gian làm bài (phút)
-              </label>
-              <input
-                type="number"
-                name="timeLimit"
-                className={`w-full p-2 border ${
-                  errors.timeLimit ? "border-red-500" : "border-gray-200"
-                } rounded focus:border-gray-400 focus:outline-none transition-all`}
-                value={quizSet.timeLimit}
-                onChange={handleInputChange}
-              />
-              {errors.timeLimit && (
-                <p className="text-red-500 text-sm mt-1">{errors.timeLimit}</p>
-              )}
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Điểm tối đa
-              </label>
-              <input
-                type="number"
-                name="maxScore"
-                className={`w-full p-2 border ${
-                  errors.maxScore ? "border-red-500" : "border-gray-200"
-                } rounded focus:border-gray-400 focus:outline-none transition-all`}
-                value={quizSet.maxScore}
-                onChange={handleInputChange}
-              />
-              {errors.maxScore && (
-                <p className="text-red-500 text-sm mt-1">{errors.maxScore}</p>
-              )}
-            </div>
-          </div>
-
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              Hình ảnh minh hoạ (tuỳ chọn)
+              Thời gian làm bài (phút)
             </label>
-            <div className="border-2 border-dashed border-blue-300 rounded p-4 text-center">
-              {!quizSet.image ? (
-                <label className="cursor-pointer block">
-                  <div className="flex flex-col items-center gap-2 text-blue-600">
-                    <FiUpload size={24} />
-                    <span className="text-sm">Nhấp để tải lên hình ảnh</span>
-                    <span className="text-xs text-gray-500">
-                      PNG, JPG, GIF tối đa 10MB
-                    </span>
-                  </div>
-                  <input
-                    type="file"
-                    className="hidden"
-                    onChange={handleImageChange}
-                  />
-                </label>
-              ) : (
-                <div className="relative inline-block">
-                  <img
-                    onClick={openPreview}
-                    src={quizSet.image}
-                    alt="Preview"
-                    className="max-h-40 mx-auto rounded object-cover cursor-pointer"
-                  />
-                  <button
-                    className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full cursor-pointer"
-                    onClick={removeImage}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              )}
-            </div>
+            <input
+              type="number"
+              name="timeLimit"
+              className={`w-full p-2 border ${
+                errors.timeLimit ? "border-red-500" : "border-gray-200"
+              } rounded focus:border-gray-400 focus:outline-none transition-all`}
+              value={quizSet.duration_minutes}
+              onChange={handleInputChange}
+            />
+            {errors.timeLimit && (
+              <p className="text-red-500 text-sm mt-1">{errors.timeLimit}</p>
+            )}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-3">
+              Điểm tối đa
+            </label>
+            <input
+              type="number"
+              name="maxScore"
+              className={`w-full p-2 border ${
+                errors.maxScore ? "border-red-500" : "border-gray-200"
+              } rounded focus:border-gray-400 focus:outline-none transition-all`}
+              value={quizSet.score}
+              onChange={handleInputChange}
+            />
+            {errors.maxScore && (
+              <p className="text-red-500 text-sm mt-1">{errors.maxScore}</p>
+            )}
           </div>
         </div>
-      )}
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-3">
+            Hình ảnh minh hoạ (tuỳ chọn)
+          </label>
+          <div className="border-2 border-dashed border-blue-300 rounded p-4 text-center">
+            {!quizSet.image ? (
+              <label className="cursor-pointer block">
+                <div className="flex flex-col items-center gap-2 text-blue-600">
+                  <FiUpload size={24} />
+                  <span className="text-sm">Nhấp để tải lên hình ảnh</span>
+                  <span className="text-xs text-gray-500">
+                    PNG, JPG, GIF tối đa 10MB
+                  </span>
+                </div>
+                <input
+                  type="file"
+                  className="hidden"
+                  onChange={handleImageChange}
+                />
+              </label>
+            ) : (
+              <div className="relative inline-block">
+                <img
+                  onClick={openPreview}
+                  src={quizSet.image}
+                  alt="Preview"
+                  className="max-h-40 mx-auto rounded object-cover cursor-pointer"
+                />
+                <button
+                  className="absolute top-1 right-1 bg-red-500 hover:bg-red-600 text-white p-1 rounded-full cursor-pointer"
+                  onClick={removeImage}
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <div className="bg-white p-6 rounded-xl shadow max-h-[100vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="font-medium">Danh sách câu hỏi</h3>
-          <button
-            onClick={addQuestion}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-          >
-            + Thêm câu hỏi
-          </button>
+        <div className="mb-4">
+          <h3 className="font-medium text-xl">Danh sách câu hỏi</h3>
         </div>
 
         {quizSet.questions &&
@@ -581,7 +563,7 @@ const QuizCreate = () => {
                         type="radio"
                         name={`correct-${qIndex}`}
                         checked={question.correctAnswer === oIndex}
-                        onClick={() => setCorrectAnswer(qIndex, oIndex)}
+                        onChange={() => setCorrectAnswer(qIndex, oIndex)}
                         className="accent-blue-600"
                       />
                       <input
@@ -634,6 +616,7 @@ const QuizCreate = () => {
             </div>
           ))}
       </div>
+
       <Lightbox
         open={isOpenPreview}
         close={() => setIsOpenPreview(false)}
@@ -643,4 +626,4 @@ const QuizCreate = () => {
   );
 };
 
-export default QuizCreate;
+export default QuizUpdate;
