@@ -24,14 +24,12 @@ import DeleteConfirmModal from "../components/Section/DeleteConfirmModal";
 
 const MyCV = () => {
   const modalRef = useRef();
-  const [cvs, setCVs] = useState("");
   const [selectedCV, setSelectedCV] = useState(null);
   const [selectedDeleteCV, setSelectedDeleteCV] = useState(null);
   const [filter, setFilter] = useState("");
   const [page, setPage] = useState(1);
   const user = useSelector((state) => state?.user?.userInfo);
   const [listCV, setListCV] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [total, setTotal] = useState(null);
   const navigate = useNavigate();
@@ -49,10 +47,6 @@ const MyCV = () => {
     localStorage.removeItem("cvData");
   }, []);
 
-  const filteredCVs =
-    filter === "Tất cả"
-      ? listCV
-      : listCV.filter((cv) => cv?.dataStatus?.value_VI === filter);
 
   const statusCv = [
     { key: "", label: "Tất cả CV", count: total },
@@ -83,7 +77,6 @@ const MyCV = () => {
   }, [listCV]);
 
   const fetchData = async (id, statusCv, page) => {
-    setIsLoading(true);
     try {
       let res = await getCVByStudentID({ id, statusCv, page });
       if (res && res.errCode === 0) {
@@ -92,8 +85,6 @@ const MyCV = () => {
       }
     } catch (e) {
       console.log("Error: ", e);
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -135,7 +126,6 @@ const MyCV = () => {
     };
   }, []);
 
-  if (isLoading) return <Loading />;
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
       <div className="pt-32 pb-8 px-6">

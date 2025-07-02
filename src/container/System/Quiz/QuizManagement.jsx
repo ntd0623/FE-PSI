@@ -6,16 +6,18 @@ import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { path } from "../../../utils/constant";
 import quizService from "../../../services/quizService";
-
+import DeleteConfirmModal from "../../components/Section/DeleteConfirmModal";
+import toast from "react-hot-toast";
 const QuizManagement = () => {
   const [quizSets, setQuizSets] = useState([]);
+  const [selectedQuiz, setSelectedQuiz] = useState("");
   const [search, setSearch] = useState("");
   const cardRefs = useRef([]);
   const navigate = useNavigate();
   useEffect(() => {
     const ctx = gsap.context(() => {
       gsap.fromTo(
-        cardRefs.current,
+        cardRefs.current.filter(Boolean),
         {
           opacity: 0,
           y: 50,
@@ -67,6 +69,28 @@ const QuizManagement = () => {
     item.title.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleOpenDeleteModal = (item) => {
+    setSelectedQuiz(item);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      const res = await quizService.deleteQuizSet(selectedQuiz.id);
+      if (res.errCode === 0) {
+        toast.success(`Xóa ${selectedQuiz.title} thành công`);
+        setQuizSets((prev) =>
+          prev.filter((item) => item.id !== selectedQuiz.id)
+        );
+      } else {
+        toast.error("Xóa thất bại.");
+      }
+    } catch (e) {
+      toast.error("Có lỗi xảy ra.");
+    } finally {
+      setSelectedQuiz(null);
+    }
+  };
+
   return (
     <div className="p-6 w-full min-h-screen bg-[#FFFF] rounded-lg">
       {/* Header */}
@@ -79,7 +103,7 @@ const QuizManagement = () => {
         </p>
       </div>
 
-      {/* Mini Thống kê */}
+      {/* Mini */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
         <div className="bg-violet-100 p-6 rounded-xl shadow flex flex-col items-center">
           <p className="text-xl font-bold text-violet-700">{quizSets.length}</p>
@@ -99,7 +123,7 @@ const QuizManagement = () => {
         </div>
       </div>
 
-      {/* Công cụ tìm kiếm */}
+      {/* Tool search */}
       <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
         <div className="flex items-center gap-3 px-4 py-3 bg-gray-100 border border-gray-300 rounded-xl w-fit shadow-sm">
           <div className="relative">
@@ -136,53 +160,79 @@ const QuizManagement = () => {
 
       {/* Grid Card */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredData.map((set, index) => (
-          <div
-            key={set.id}
-            ref={(el) => (cardRefs.current[index] = el)}
-            className="bg-white border cursor-pointer
+        {filteredData.length === 0 ? (
+          <div className="col-span-full text-center text-gray-500 text-lg mt-10">
+            Không có bộ đề nào để hiển thị.
+          </div>
+        ) : (
+          filteredData.map((set, index) => (
+            <div
+              key={set.id}
+              ref={(el) => (cardRefs.current[index] = el)}
+              className="bg-white border cursor-pointer
             border-gray-200 rounded-xl shadow-md 
              hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]
              hover:ring-2 hover:ring-blue-300 
              hover:scale-105 hover:-translate-y-1 
              transform transition-all duration-300 ease-in-out
              p-5 flex flex-col justify-between"
-          >
-            <div className="flex items-center gap-4 mb-3">
-              <img
-                src={set.image}
-                alt={set.title}
-                className="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
-              />
-              <div>
-                <p className="text-lg font-semibold text-gray-800">
-                  {set.title}
-                </p>
-                <p className="text-sm text-gray-500">{set.description}</p>
+            >
+              <div
+                onClick={() =>
+                  navigate(path.QUIZ_REVIEW.replace(":id", set.id))
+                }
+                className="flex items-center gap-4 mb-3"
+              >
+                <img
+                  src={set.image}
+                  alt={set.title}
+                  className="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
+                />
+                <div>
+                  <p className="text-lg font-semibold text-gray-800">
+                    {set.title}
+                  </p>
+                  <p className="text-sm text-gray-500">{set.description}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-end gap-2 mt-auto">
+                <button
+                  className="p-2 bg-green-100 hover:bg-green-200 rounded-full text-green-600 text-lg transition transform hover:scale-110"
+                  onClick={() =>
+                    navigate(`${path.QUIZ_SETS_CREATE.replace(":id", set.id)}`)
+                  }
+                  title="Thêm câu hỏi"
+                >
+                  <Plus className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() =>
+                    navigate(`${path.QUIZ_UPDATE.replace(":id", set.id)}`)
+                  }
+                  className="p-2 bg-yellow-100 hover:bg-yellow-200 rounded-full text-yellow-600 text-lg transition transform hover:scale-110"
+                >
+                  <FaEdit />
+                </button>
+
+                <button
+                  onClick={() => handleOpenDeleteModal(set)}
+                  className="p-2 bg-red-100 hover:bg-red-200 rounded-full text-red-600 text-lg transition transform hover:scale-110"
+                >
+                  <FaTrash />
+                </button>
               </div>
             </div>
-            <div className="flex items-center justify-end gap-2 mt-auto">
-              <button
-                className="p-2 bg-green-100 hover:bg-green-200 rounded-full text-green-600 text-lg transition transform hover:scale-110"
-                onClick={() =>
-                  navigate(`${path.QUIZ_SETS_CREATE.replace(":id", set.id)}`)
-                }
-                title="Thêm câu hỏi"
-              >
-                <Plus className="w-4 h-4" />
-              </button>
-
-              <button className="p-2 bg-yellow-100 hover:bg-yellow-200 rounded-full text-yellow-600 text-lg transition transform hover:scale-110">
-                <FaEdit />
-              </button>
-
-              <button className="p-2 bg-red-100 hover:bg-red-200 rounded-full text-red-600 text-lg transition transform hover:scale-110">
-                <FaTrash />
-              </button>
-            </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
+      {selectedQuiz && (
+        <DeleteConfirmModal
+          item={selectedQuiz}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setSelectedQuiz(null)}
+        />
+      )}
     </div>
   );
 };

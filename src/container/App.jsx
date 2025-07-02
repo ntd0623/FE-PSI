@@ -8,6 +8,7 @@ import PreviewCV from "./FormCV/PreviewCV";
 import { path, USER_ROLE } from "../utils/constant";
 import "../styles/tailwind.css";
 import "../styles/index.scss";
+import "../styles/nprogress.css";
 import toast, { Toaster } from "react-hot-toast";
 import Login from "./Auth/Login";
 import FacebookCallback from "./components/Facebook/FacebookCallback";
@@ -21,6 +22,9 @@ import StudentLayout from "./Home/HomeHeader/StudentLayout";
 import QuizManagement from "./System/Quiz/QuizManagement";
 import QuizCreate from "./System/Quiz/QuizCreate";
 import UpdateCV from "./FormCV/UpdateCV";
+import QuizUpdate from "./System/Quiz/QuizUpdate";
+import QuizReview from "./System/Quiz/QuizReview";
+import CandidateEvaluationQuiz from "./Home/Exam/CandidateEvaluationQuiz";
 export default function App() {
   return (
     <>
@@ -46,6 +50,8 @@ export default function App() {
             <Route path={path.QUIZ} element={<QuizManagement />} />
             <Route path={path.QUIZ_SETS_CREATE} element={<QuizCreate />} />
             <Route path={path.QUIZ_CREATE} element={<QuizCreate />} />
+            <Route path={path.QUIZ_UPDATE} element={<QuizUpdate />} />
+            <Route path={path.QUIZ_REVIEW} element={<QuizReview />} />
           </Route>
         </Route>
         {/* Protected Route Student */}
@@ -59,6 +65,10 @@ export default function App() {
             <Route path={path.MY_CV} element={<MyCV />} />{" "}
             <Route path={path.PROFILE} element={<Profile />} />{" "}
             <Route path={path.VIEW_CV} element={<UpdateCV />} />{" "}
+            <Route
+              path={path.QUIZ_EVALUATION}
+              element={<CandidateEvaluationQuiz />}
+            />{" "}
           </Route>
           <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
         </Route>
