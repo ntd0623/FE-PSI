@@ -50,7 +50,7 @@ const CVManagementSystem = () => {
           icon: () => <UserCheck className="text-amber-600" />,
           label: "Sinh viên đã làm bài",
           active: location.pathname === path.QUIZ_CREATE,
-          onClick: () => navigate(path.QUIZ_CREATE),
+          onClick: () => navigate(path.STUDENT_SUBMISSTION),
         },
       ],
     },

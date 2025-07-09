@@ -11,6 +11,7 @@ import toast from "react-hot-toast";
 const QuizManagement = () => {
   const [quizSets, setQuizSets] = useState([]);
   const [selectedQuiz, setSelectedQuiz] = useState("");
+  const [statistics, setStatistics] = useState(null);
   const [search, setSearch] = useState("");
   const cardRefs = useRef([]);
   const navigate = useNavigate();
@@ -55,6 +56,7 @@ const QuizManagement = () => {
         const res = await quizService.getQuizSets();
         if (res && res.errCode === 0) {
           setQuizSets(res.data);
+          setStatistics(res.statistics);
         }
       } catch (e) {
         console.log("Error: ", e);
@@ -110,15 +112,21 @@ const QuizManagement = () => {
           <p className="text-sm text-violet-800">Tổng bộ đề</p>
         </div>
         <div className="bg-blue-100 p-6 rounded-xl shadow flex flex-col items-center">
-          <p className="text-xl font-bold text-blue-700">120</p>
+          <p className="text-xl font-bold text-blue-700">
+            {statistics?.attempt}
+          </p>
           <p className="text-sm text-blue-800">Lượt làm</p>
         </div>
         <div className="bg-green-100 p-6 rounded-xl shadow flex flex-col items-center">
-          <p className="text-xl font-bold text-green-700">15 phút</p>
+          <p className="text-xl font-bold text-green-700">
+            {statistics?.averageTime}
+          </p>
           <p className="text-sm text-green-800">Thời gian TB</p>
         </div>
         <div className="bg-red-100 p-6 rounded-xl shadow flex flex-col items-center">
-          <p className="text-xl font-bold text-red-700">10%</p>
+          <p className="text-xl font-bold text-red-700">
+            {statistics?.unFinished}%
+          </p>
           <p className="text-sm text-red-800">Chưa hoàn thành</p>
         </div>
       </div>

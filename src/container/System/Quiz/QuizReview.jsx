@@ -3,6 +3,7 @@ import QuestionCard from "../../components/Section/QuestionCard";
 import { useParams } from "react-router-dom";
 import quizService from "../../../services/quizService";
 import PaginationTailwind from "../../components/Pagination/PaginationTailwind";
+import { USER_ROLE } from "../../../utils/constant";
 const QuizReview = () => {
   const { id } = useParams();
   const [questions, setQuestion] = useState([]);
@@ -13,7 +14,12 @@ const QuizReview = () => {
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        const res = await quizService.getQuestionByQuizID(id, page, limit);
+        const res = await quizService.getQuestionByQuizID(
+          id,
+          page,
+          limit,
+          USER_ROLE.ADMIN
+        );
         if (res && res.errCode === 0) {
           const questions = res.data.map((q) => {
             const options = q.answers.map((a) => a.content);

@@ -1,4 +1,3 @@
-// Khai báo đường dẫn
 export const path = {
     HOME: "/",
     STUDENT: "/student",
@@ -19,7 +18,9 @@ export const path = {
     QUIZ_CREATE: "/admin/quiz/quiz-create",
     QUIZ_UPDATE: "/admin/quiz/quiz-update/:id",
     QUIZ_REVIEW: "/admin/quiz/:id",
-    QUIZ_EVALUATION: "/student/quiz-evaluation",
+    QUIZ_EVALUATION: "/student/quiz-evaluation/:id",
+    QUIZ_LIST_EXAM: "/student/quiz-evaluation",
+    STUDENT_SUBMISSTION: "/admin/student-submisstion",
 }
 export const CRUD_ACTIONS = {
     ADD: "ADD",

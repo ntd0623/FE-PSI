@@ -25,6 +25,8 @@ import UpdateCV from "./FormCV/UpdateCV";
 import QuizUpdate from "./System/Quiz/QuizUpdate";
 import QuizReview from "./System/Quiz/QuizReview";
 import CandidateEvaluationQuiz from "./Home/Exam/CandidateEvaluationQuiz";
+import QuizListExam from "./Home/Exam/QuizListExam";
+import StudentSubmissions from "./System/Quiz/StudentSubmisstion";
 export default function App() {
   return (
     <>
@@ -52,6 +54,10 @@ export default function App() {
             <Route path={path.QUIZ_CREATE} element={<QuizCreate />} />
             <Route path={path.QUIZ_UPDATE} element={<QuizUpdate />} />
             <Route path={path.QUIZ_REVIEW} element={<QuizReview />} />
+            <Route
+              path={path.STUDENT_SUBMISSTION}
+              element={<StudentSubmissions />}
+            />
           </Route>
         </Route>
         {/* Protected Route Student */}
@@ -69,6 +75,7 @@ export default function App() {
               path={path.QUIZ_EVALUATION}
               element={<CandidateEvaluationQuiz />}
             />{" "}
+            <Route path={path.QUIZ_LIST_EXAM} element={<QuizListExam />} />{" "}
           </Route>
           <Route path={path.PREVIEW_CV} element={<PreviewCV />} />{" "}
         </Route>

@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Eye, EyeOff } from "lucide-react";
@@ -31,6 +31,8 @@ const Login = () => {
   const navigate = useNavigate();
   const isLoggedIn = useSelector((state) => state.user?.isLoggedIn);
   const user = useSelector((state) => state.user?.userInfo);
+  const location = useLocation();
+  const from = location.state?.from?.pathname || path.HOME;
   useEffect(() => {
     gsap.fromTo(
       formRef.current,
@@ -51,7 +53,7 @@ const Login = () => {
       if (user.roleID === USER_ROLE.ADMIN) {
         navigate(path.CV_MANAGEMENT);
       } else {
-        navigate(path.HOME);
+        navigate(from, { replace: true });
       }
     }
   }, [isLoggedIn, user, navigate]);
@@ -99,7 +101,7 @@ const Login = () => {
         if (res.data.roleID === USER_ROLE.ADMIN) {
           navigate(path.CV_MANAGEMENT);
         } else {
-          navigate(path.HOME);
+          navigate(from, { replace: true });
         }
       } else {
         dispatch(userLoginFail());
