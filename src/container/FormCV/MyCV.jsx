@@ -21,7 +21,7 @@ import Loading from "../components/Loading/Loading";
 import "./MyCV.scss";
 import toast from "react-hot-toast";
 import DeleteConfirmModal from "../components/Section/DeleteConfirmModal";
-
+import PaginationTailwind from "../components/Pagination/PaginationTailwind";
 const MyCV = () => {
   const modalRef = useRef();
   const [selectedCV, setSelectedCV] = useState(null);
@@ -32,11 +32,13 @@ const MyCV = () => {
   const [listCV, setListCV] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [total, setTotal] = useState(null);
+  const [totalPages, setTotalPages] = useState(1);
   const navigate = useNavigate();
+  const limit = 3;
   useEffect(() => {
     const statusCv = filter;
     const id = user.id;
-    fetchData(id, statusCv, page);
+    fetchData(id, statusCv, page, limit);
   }, [filter, page]);
 
   const getStatusCount = (status) => {
@@ -46,7 +48,6 @@ const MyCV = () => {
   useEffect(() => {
     localStorage.removeItem("cvData");
   }, []);
-
 
   const statusCv = [
     { key: "", label: "Tất cả CV", count: total },
@@ -78,10 +79,11 @@ const MyCV = () => {
 
   const fetchData = async (id, statusCv, page) => {
     try {
-      let res = await getCVByStudentID({ id, statusCv, page });
+      let res = await getCVByStudentID({ id, statusCv, page, limit });
       if (res && res.errCode === 0) {
         setListCV(res.data);
         setTotal(res.total);
+        setTotalPages(Math.ceil(res?.total / limit));
       }
     } catch (e) {
       console.log("Error: ", e);
@@ -93,6 +95,7 @@ const MyCV = () => {
     if (res.errCode === 0) {
       toast.success("Xóa CV thành công!");
       setListCV((prev) => prev.filter((cv) => cv.id !== selectedDeleteCV.id));
+      fetchData(user.id, filter, page, limit);
     } else {
       toast.error("Xóa CV thất bại.");
     }
@@ -125,6 +128,10 @@ const MyCV = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  const handlePageChange = (newPage) => {
+    setPage(newPage);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-indigo-50/30">
@@ -251,6 +258,8 @@ const MyCV = () => {
                       data={cv}
                       onView={() => handleViewCV(cv)}
                       onDelete={handleOpenDeleteModal}
+                      canEdit={cv.statusCv === STATUS_CV.SUBMITTED}
+                      canDelete={cv.statusCv === STATUS_CV.SUBMITTED}
                     />
                   ))
                 ) : (
@@ -270,6 +279,14 @@ const MyCV = () => {
                     </button>
                   </div>
                 )}
+              </div>
+              {/* Pagination */}
+              <div className="mt-8">
+                <PaginationTailwind
+                  currentPage={page}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
+                />
               </div>
             </main>
           </div>

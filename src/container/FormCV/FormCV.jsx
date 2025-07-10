@@ -387,7 +387,7 @@ const FormCV = () => {
       setFormData(defaultFormData);
       setAvatar(null);
       setImageFile(null);
-      setBirthDay(null);
+      setBirthDay(" ");
       localStorage.removeItem("cvData");
     } else {
       toast.error("Tạo CV thất bại. Vui lòng thử lại.");

@@ -16,7 +16,7 @@ const updateStatusCV = (data) => {
 }
 
 const getCVByStudentID = (data) => {
-    return axios.get(`/api/get-cv-by-id?id=${data.id}&statusCv=${data.statusCv ? data.statusCv : ""}&page=${data.page ? data.page : 1},&litmit=${data.limit ? data.limit : 3}`)
+    return axios.get(`/api/get-cv-by-id?id=${data.id}&statusCv=${data.statusCv ? data.statusCv : ""}&page=${data.page ? data.page : 1}&limit=${data.limit ? data.limit : 3}`)
 }
 
 const getCV = (data) => {

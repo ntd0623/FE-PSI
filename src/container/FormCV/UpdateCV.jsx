@@ -532,7 +532,7 @@ const UpdateCV = () => {
       action: CRUD_ACTIONS.EDIT,
     });
     if (cv && cv.errCode === 0) {
-      toast.success("Sửa CV thành công !");
+      toast.success("Cập nhập CV thành công !");
       setFormData(defaultFormData);
       setAvatar(null);
       setImageFile(null);

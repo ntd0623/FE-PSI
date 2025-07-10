@@ -129,6 +129,9 @@ const Login = () => {
     const result = await authService.googleAuth(token);
 
     if (result && result.data) {
+      if (result.token) {
+        localStorage.setItem("token", result.token);
+      }
       dispatch(userLoginSuccess(result.data));
       navigate(path.FORM_CV);
       toast.success("Đăng nhập thành công !");

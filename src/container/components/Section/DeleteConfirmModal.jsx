@@ -9,12 +9,12 @@ const DeleteConfirmModal = ({ item, onConfirm, onCancel }) => (
         </div>
 
         <h3 className="text-lg font-bold text-gray-800 text-center mb-2">
-          Xác nhận xóa {item.title}
+          Xác nhận xóa {item?.title || "CV"}
         </h3>
 
         <p className="text-gray-600 text-center mb-6">
           Bạn có chắc chắn muốn xóa{" "}
-          <span className="font-semibold text-gray-800">{item.title}</span>?
+          <span className="font-semibold text-gray-800">{item?.title || "CV"}</span>?
           Hành động này không thể hoàn tác.
         </p>
 

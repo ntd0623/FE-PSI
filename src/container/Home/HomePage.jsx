@@ -18,13 +18,15 @@ import {
   FaChartBar,
 } from "react-icons/fa";
 import TestimonialSection from "../components/Section/TestimonialSection";
+import { useNavigate } from "react-router-dom";
+import { path } from "../../utils/constant";
 gsap.registerPlugin(ScrollTrigger);
 
 const HomePage = () => {
   const sectionRefs = useRef([]);
   const heroTitleRef = useRef(null);
   const heroImageRef = useRef(null);
-
+const navigate = useNavigate()
   useEffect(() => {
     sectionRefs.current.forEach((el) => {
       if (!el) return;
@@ -245,7 +247,9 @@ const HomePage = () => {
           <br />
         </p>
         <div className="space-x-4">
-          <button className="bg-white text-purple-700 font-semibold px-4 py-2 rounded">
+          <button 
+          onClick={() => navigate(path.FORM_CV)} 
+          className="bg-white text-purple-700 font-semibold px-4 py-2 rounded">
             Gửi hồ sơ thực tập
           </button>
         </div>
