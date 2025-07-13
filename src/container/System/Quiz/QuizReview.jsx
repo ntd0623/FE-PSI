@@ -1,16 +1,19 @@
 import React, { useEffect, useState, useRef } from "react";
 import QuestionCard from "../../components/Section/QuestionCard";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import quizService from "../../../services/quizService";
 import PaginationTailwind from "../../components/Pagination/PaginationTailwind";
 import { USER_ROLE } from "../../../utils/constant";
+import { path } from "../../../utils/constant";
+import { ArrowLeft } from "lucide-react";
 const QuizReview = () => {
   const { id } = useParams();
   const [questions, setQuestion] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
+  const [title, setTitle] = useState({});
   const limit = 5;
-  const hasInitialFetched = useRef(false);
+  const navigate = useNavigate();
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
@@ -30,9 +33,9 @@ const QuizReview = () => {
               correctAnswer: correctIndex,
             };
           });
-
           setQuestion(questions);
           setTotalPages(Math.ceil(res?.total / limit));
+          setTitle(res?.title);
         }
       } catch (e) {
         console.error("Lỗi khi fetch quiz: ", e);
@@ -47,13 +50,24 @@ const QuizReview = () => {
   const handlePageChange = (page) => {
     setPage(page);
   };
-
-  // if (loading || !questions) return <Loading />;
+  const handleReturn = () => {
+    const confirm = window.confirm(
+      "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
+    );
+    if (confirm) {
+      navigate(path.QUIZ);
+    }
+  };
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
-      <h2 className="text-3xl font-bold text-gray-800 mb-4">
-        Bộ câu hỏi về PHP
-      </h2>
+      <button
+        onClick={handleReturn}
+        className="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-6"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        Quay lại danh sách
+      </button>
+      <h2 className="text-3xl font-bold text-gray-800 mb-4">{title.title}</h2>
       <p className="text-gray-600 mb-6">
         Kiến thức cơ bản về ngôn ngữ lập trình PHP
       </p>

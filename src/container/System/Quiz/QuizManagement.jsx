@@ -10,6 +10,7 @@ import DeleteConfirmModal from "../../components/Section/DeleteConfirmModal";
 import toast from "react-hot-toast";
 const QuizManagement = () => {
   const [quizSets, setQuizSets] = useState([]);
+  const [sortBy, setSortBy] = useState("latest");
   const [selectedQuiz, setSelectedQuiz] = useState("");
   const [statistics, setStatistics] = useState(null);
   const [search, setSearch] = useState("");
@@ -93,6 +94,21 @@ const QuizManagement = () => {
     }
   };
 
+  const handleSort = async (e) => {
+    const selectedSort = e.target.value;
+    setSortBy(selectedSort);
+
+    try {
+      const res = await quizService.getQuizSets(selectedSort);
+      if (res && res.errCode === 0) {
+        setQuizSets(res.data);
+        setStatistics(res.statistics);
+      }
+    } catch (error) {
+      console.error("Lỗi khi sort: ", error);
+    }
+  };
+
   return (
     <div className="p-6 w-full min-h-screen bg-[#FFFF] rounded-lg">
       {/* Header */}
@@ -153,7 +169,10 @@ const QuizManagement = () => {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
-          <select className="px-3 py-2 border border-gray-300 rounded-lg">
+          <select
+            onChange={handleSort}
+            className="px-3 py-2 border border-gray-300 rounded-lg"
+          >
             <option value="latest">Mới nhất</option>
             <option value="az">A → Z</option>
           </select>

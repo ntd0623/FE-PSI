@@ -27,12 +27,14 @@ import QuizReview from "./System/Quiz/QuizReview";
 import CandidateEvaluationQuiz from "./Home/Exam/CandidateEvaluationQuiz";
 import QuizListExam from "./Home/Exam/QuizListExam";
 import StudentSubmissions from "./System/Quiz/StudentSubmisstion";
+import AboutPage from "./Home/About/AboutPage";
 export default function App() {
   return (
     <>
       <Routes>
         <Route path={path.HOME} element={<HomePage />} /> {/* ROUTE LOGIN */}
         <Route path={path.LOGIN} element={<Login />} />{" "}
+        <Route path={path.ABOUT} element={<AboutPage />} />{" "}
         {/* ROUTE LOGIN WITH FACEBOOK */}
         <Route
           path={path.FACEBOOK_CALLBACK}

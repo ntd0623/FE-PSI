@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
 import { FaArrowLeft } from "react-icons/fa";
 import { upsertCV } from "../../services/studentService";
+import { useSelector } from "react-redux";
 import { CRUD_ACTIONS, path } from "../../utils/constant";
 import toast from "react-hot-toast";
 import moment from "moment";
@@ -13,7 +14,7 @@ export default function CVPreview() {
   const location = useLocation();
   const [cvData, setCvData] = useState(null);
   const [formErrors, setFormErrors] = useState({});
-
+  const user = useSelector((state) => state?.user?.userInfo);
   const handleNavigate = (cvData) => {
     if (cvData.action === CRUD_ACTIONS.ADD) {
       navigate(path.FORM_CV);
@@ -138,7 +139,7 @@ export default function CVPreview() {
       return;
     }
     const cv = await upsertCV({
-      userID: 1,
+      userID: user.id,
       fullName: cvData.formData.fullName,
       email: cvData.formData.email,
       phoneNumber: cvData.formData.phone,

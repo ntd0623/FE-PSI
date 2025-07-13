@@ -1,8 +1,8 @@
 import axios from "../axios";
 
 const quizService = {
-    getQuizSets: () => {
-        return axios.get("/api/get-quiz-set");
+    getQuizSets: (sort = "") => {
+        return axios.get(`/api/get-quiz-set?sort=${sort}`);
     },
     getQuizSetsByID: (id) => {
         return axios.get(`/api/get-quiz-set-by-id?id=${id}`)

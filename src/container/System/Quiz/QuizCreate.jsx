@@ -9,7 +9,6 @@ import gsap from "gsap";
 import toast from "react-hot-toast";
 import { getBase64 } from "../../../utils/CommonUtils";
 import Lightbox from "yet-another-react-lightbox";
-
 const QuizCreate = () => {
   const initialQuizSet = {
     title: "",
@@ -251,8 +250,11 @@ const QuizCreate = () => {
     const isCreating = !id;
     if (isCreating) {
       if (!data.title.trim()) newErrors.title = "Tên bộ câu hỏi là bắt buộc.";
-      if (!data.description.trim())
+      if (!data.description.trim()) {
         newErrors.description = "Mô tả là bắt buộc.";
+      } else if (data.description.trim().length > 1000) {
+        newErrors.description = "Mô tả không được vượt quá 800 ký tự.";
+      }
       if (data.timeLimit <= 0)
         newErrors.timeLimit = "Thời gian làm bài phải lớn hơn 0.";
       if (!data.timeLimit)
@@ -316,7 +318,7 @@ const QuizCreate = () => {
     const isValid = validateQuizSet(quizSet);
     if (!isValid) {
       console.log("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.");
-      return;
+      toast.error(`Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại !`);
     }
 
     try {
@@ -333,17 +335,25 @@ const QuizCreate = () => {
       if (res && res.errCode === 0) {
         toast.success("Tạo câu hỏi thành công ");
         setQuizSet(initialQuizSet);
+        navigate(path.QUIZ);
       }
     } catch (e) {
       toast.error("Lỗi hệ thống: " + e.message);
     }
   };
-
+  const handleReturn = () => {
+    const confirm = window.confirm(
+      "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
+    );
+    if (confirm) {
+      navigate(path.QUIZ);
+    }
+  };
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => navigate(path.QUIZ)}
+          onClick={handleReturn}
           className="flex items-center gap-2 text-gray-600 hover:text-blue-600"
         >
           <ArrowLeft className="w-5 h-5" />

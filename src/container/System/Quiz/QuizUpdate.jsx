@@ -194,6 +194,22 @@ const QuizUpdate = () => {
     setQuizSet((prev) => ({ ...prev, questions: updated }));
   };
 
+  const addQuestion = () => {
+    setQuizSet((prev) => ({
+      ...prev,
+      questions: [
+        ...prev.questions,
+        {
+          content: "",
+          options: ["", "", "", ""],
+          correctAnswer: null,
+          explanation: "",
+        },
+      ],
+    }));
+    setExpandedQuestions((prev) => [...prev, false]);
+  };
+
   const addOption = (qIndex) => {
     const updated = [...quizSet.questions];
     updated[qIndex].options.push("");
@@ -201,6 +217,10 @@ const QuizUpdate = () => {
   };
 
   const removeOption = (qIndex, oIndex) => {
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa lựa chọn này?"
+    );
+    if (!confirmDelete) return;
     const updated = [...quizSet.questions];
     updated[qIndex].options.splice(oIndex, 1);
     if (updated[qIndex].correctAnswer === oIndex) {
@@ -210,6 +230,10 @@ const QuizUpdate = () => {
   };
 
   const removeQuestion = (qIndex) => {
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa câu hỏi này?"
+    );
+    if (!confirmDelete) return;
     const updated = [...quizSet.questions];
     updated.splice(qIndex, 1);
     setQuizSet((prev) => ({ ...prev, questions: updated }));
@@ -222,45 +246,55 @@ const QuizUpdate = () => {
 
   const validateQuizSet = (data) => {
     const newErrors = {};
-    const isCreating = !id;
-    if (isCreating) {
-      if (!data.title.trim()) newErrors.title = "Tên bộ câu hỏi là bắt buộc.";
-      if (!data.description.trim())
-        newErrors.description = "Mô tả là bắt buộc.";
-      if (data.timeLimit <= 0)
-        newErrors.timeLimit = "Thời gian làm bài phải lớn hơn 0.";
-      if (!data.timeLimit)
-        newErrors.timeLimit = "Thời gian làm bài không được bỏ trống.";
-      if (!data.timeLimit || isNaN(data.timeLimit) || data.timeLimit <= 0)
-        newErrors.timeLimit = "Thời gian làm bài phải lớn hơn 0.";
-      if (!Number.isInteger(Number(data.timeLimit)))
-        newErrors.timeLimit = "Thời gian làm bài phải là số nguyên.";
 
-      const maxScore = Number(data.maxScore);
-      if (!maxScore || maxScore <= 0) {
-        newErrors.maxScore = "Điểm tối đa phải lớn hơn 0.";
-      } else if (!Number.isInteger(maxScore)) {
-        newErrors.maxScore = "Điểm tối đa phải là số nguyên.";
-      }
+    if (!data.title?.trim()) {
+      newErrors.title = "Tên bộ câu hỏi là bắt buộc.";
     }
-    if (Array.isArray(data.questions)) {
+
+    if (!data.description?.trim()) {
+      newErrors.description = "Mô tả là bắt buộc.";
+    } else if (data.description.trim().length > 1000) {
+      newErrors.description = "Mô tả không được vượt quá 1000 ký tự.";
+    }
+
+    const duration = Number(data.duration_minutes);
+    if (!duration) {
+      newErrors.duration_minutes = "Thời gian làm bài không được bỏ trống.";
+    } else if (isNaN(duration) || duration <= 0) {
+      newErrors.duration_minutes = "Thời gian làm bài phải lớn hơn 0.";
+    } else if (!Number.isInteger(duration)) {
+      newErrors.duration_minutes = "Thời gian làm bài phải là số nguyên.";
+    }
+
+    const score = Number(data.score);
+    if (!score) {
+      newErrors.score = "Điểm tối đa không được bỏ trống.";
+    } else if (score <= 0) {
+      newErrors.score = "Điểm tối đa phải lớn hơn 0.";
+    } else if (!Number.isInteger(score)) {
+      newErrors.score = "Điểm tối đa phải là số nguyên.";
+    }
+
+    if (Array.isArray(data.questions) && data.questions.length > 0) {
       newErrors.questions = [];
 
       data.questions.forEach((q, i) => {
         const qErr = {};
 
-        if (!q.content.trim()) qErr.content = "Câu hỏi không được để trống.";
+        if (!q.content?.trim()) {
+          qErr.content = "Câu hỏi không được để trống.";
+        }
 
         if (!Array.isArray(q.options) || q.options.length < 2) {
           qErr.options = "Phải có ít nhất 2 lựa chọn.";
+        } else {
+          q.options.forEach((opt, j) => {
+            if (!opt?.trim()) {
+              if (!qErr.optionErrors) qErr.optionErrors = {};
+              qErr.optionErrors[j] = "Không được để trống.";
+            }
+          });
         }
-
-        q.options?.forEach((opt, j) => {
-          if (!opt.trim()) {
-            if (!qErr.optionErrors) qErr.optionErrors = {};
-            qErr.optionErrors[j] = "Không được để trống.";
-          }
-        });
 
         if (
           q.correctAnswer === null ||
@@ -273,16 +307,20 @@ const QuizUpdate = () => {
 
         newErrors.questions[i] = qErr;
       });
-    } else {
-      newErrors.questions = [];
     }
 
     setErrors(newErrors);
-    const hasError = Object.keys(newErrors).some(
-      (key) =>
-        key !== "questions" ||
-        newErrors.questions.some((q) => Object.keys(q).length > 0)
-    );
+
+    const hasError = Object.entries(newErrors).some(([key, value]) => {
+      if (key === "questions") {
+        if (typeof value === "string") return true;
+        if (Array.isArray(value)) {
+          return value.some((qErr) => qErr && Object.keys(qErr).length > 0);
+        }
+        return false;
+      }
+      return Boolean(value);
+    });
 
     return !hasError;
   };
@@ -302,8 +340,17 @@ const QuizUpdate = () => {
       };
     });
 
-    const isValid = validateQuizSet(quizSet);
-    if (!isValid) return;
+    const dataToValidate = {
+      ...quizSet,
+      questions: quizSet.questions,
+    };
+
+    const isValid = validateQuizSet(dataToValidate);
+    if (!isValid) {
+      console.log("Check validate: ", isValid);
+      toast.error("Lỗi dữ liệu không hợp lệ. Vui lòng kiểm tra lại !");
+      return;
+    }
 
     setLoading(true);
     try {
@@ -328,12 +375,20 @@ const QuizUpdate = () => {
       setLoading(false);
     }
   };
+  const handleReturn = () => {
+    const confirm = window.confirm(
+      "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
+    );
+    if (confirm) {
+      navigate(path.QUIZ);
+    }
+  };
   if (loading) return <Loading />;
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
       <div className="flex justify-between items-center mb-6">
         <button
-          onClick={() => navigate(path.QUIZ)}
+          onClick={handleReturn}
           className="flex items-center gap-2 text-gray-600 hover:text-blue-600"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -399,15 +454,17 @@ const QuizUpdate = () => {
             </label>
             <input
               type="number"
-              name="timeLimit"
+              name="duration_minutes"
               className={`w-full p-2 border ${
                 errors.timeLimit ? "border-red-500" : "border-gray-200"
               } rounded focus:border-gray-400 focus:outline-none transition-all`}
               value={quizSet.duration_minutes}
               onChange={handleInputChange}
             />
-            {errors.timeLimit && (
-              <p className="text-red-500 text-sm mt-1">{errors.timeLimit}</p>
+            {errors.duration_minutes && (
+              <p className="text-red-500 text-sm mt-1">
+                {errors.duration_minutes}
+              </p>
             )}
           </div>
           <div>
@@ -416,15 +473,15 @@ const QuizUpdate = () => {
             </label>
             <input
               type="number"
-              name="maxScore"
+              name="score"
               className={`w-full p-2 border ${
-                errors.maxScore ? "border-red-500" : "border-gray-200"
+                errors.score ? "border-red-500" : "border-gray-200"
               } rounded focus:border-gray-400 focus:outline-none transition-all`}
               value={quizSet.score}
               onChange={handleInputChange}
             />
-            {errors.maxScore && (
-              <p className="text-red-500 text-sm mt-1">{errors.maxScore}</p>
+            {errors.score && (
+              <p className="text-red-500 text-sm mt-1">{errors.score}</p>
             )}
           </div>
         </div>
@@ -472,6 +529,16 @@ const QuizUpdate = () => {
       <div className="bg-white p-6 rounded-xl shadow max-h-[100vh] overflow-y-auto">
         <div className="mb-4">
           <h3 className="font-medium text-xl">Danh sách câu hỏi</h3>
+        </div>
+
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="font-medium">Danh sách câu hỏi</h3>
+          <button
+            onClick={addQuestion}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
+          >
+            + Thêm câu hỏi
+          </button>
         </div>
 
         {quizSet.questions &&
