@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
+import { MdInfoOutline } from "react-icons/md";
 import { getBase64 } from "../../utils/CommonUtils";
 import { useNavigate } from "react-router-dom";
 import { CRUD_ACTIONS } from "../../utils/constant";
@@ -59,6 +60,8 @@ const FormCV = () => {
         technologies: "",
         description: "",
         link: "",
+        start_date: "",
+        end_date: "",
       },
     ],
     experience: [
@@ -95,6 +98,10 @@ const FormCV = () => {
   const [isOpenPreview, setIsOpenPreview] = useState(false);
   const fileInputRef = useRef(null);
   const [formErrors, setFormErrors] = useState({});
+  const [focusedInput, setFocusedInput] = useState("");
+
+  const handleFocus = (field) => setFocusedInput(field);
+  const handleBlur = () => setFocusedInput("");
   //fetch api
 
   useEffect(() => {
@@ -923,7 +930,7 @@ const FormCV = () => {
             ))}
         </div>
 
-        {/* Skills - Updated Section */}
+        {/* Skills  */}
         <div className="mb-8">
           <div className="flex items-center mb-6">
             <div className="flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full mr-3">
@@ -933,42 +940,50 @@ const FormCV = () => {
           </div>
 
           <div className="space-y-6">
-            {/* Programming Skills */}
+            {/* Kỹ năng kỹ thuật */}
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 Kỹ năng kỹ thuật
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.programming &&
-                  formData.skills.programming.length > 0 &&
-                  formData.skills.programming.map((skill, index) => (
-                    <span
-                      key={index}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
-                        "programming"
-                      )}`}
+                {formData.skills.programming?.map((skill, index) => (
+                  <span
+                    key={index}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
+                      "programming"
+                    )}`}
+                  >
+                    {skill}
+                    <button
+                      onClick={() => removeSkill("programming", index)}
+                      className="ml-2 text-current hover:text-red-600"
                     >
-                      {skill}
-                      <button
-                        onClick={() => removeSkill("programming", index)}
-                        className="ml-2 text-current hover:text-red-600"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
               </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.programming}
-                  onChange={(e) =>
-                    handleSkillInputChange("programming", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "programming")}
-                  placeholder="VD: JavaScript, Python"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <div className="flex gap-2 items-start">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    onFocus={() => handleFocus("programming")}
+                    onBlur={handleBlur}
+                    value={skillInputs.programming}
+                    onChange={(e) =>
+                      handleSkillInputChange("programming", e.target.value)
+                    }
+                    onKeyPress={(e) => handleSkillKeyPress(e, "programming")}
+                    placeholder="VD: JavaScript, Python"
+                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {focusedInput === "programming" && (
+                    <div className="absolute flex items-center gap-1 left-0 mt-1 text-xs text-gray-600 bg-white border border-gray-300 rounded px-2 py-1 shadow z-10">
+                      <MdInfoOutline className="text-gray-500" size={16} />
+                      Nhập từng kỹ năng rồi nhấn Enter
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => addSkill("programming")}
                   className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
@@ -980,42 +995,50 @@ const FormCV = () => {
               </div>
             </div>
 
-            {/* Soft Skills */}
+            {/* Kỹ năng mềm */}
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 Kỹ năng mềm
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.softSkills &&
-                  formData.skills.softSkills.length > 0 &&
-                  formData.skills.softSkills.map((skill, index) => (
-                    <span
-                      key={index}
-                      className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
-                        "softSkills"
-                      )}`}
+                {formData.skills.softSkills?.map((skill, index) => (
+                  <span
+                    key={index}
+                    className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
+                      "softSkills"
+                    )}`}
+                  >
+                    {skill}
+                    <button
+                      onClick={() => removeSkill("softSkills", index)}
+                      className="ml-2 text-current hover:text-red-600"
                     >
-                      {skill}
-                      <button
-                        onClick={() => removeSkill("softSkills", index)}
-                        className="ml-2 text-current hover:text-red-600"
-                      >
-                        <X size={12} />
-                      </button>
-                    </span>
-                  ))}
+                      <X size={12} />
+                    </button>
+                  </span>
+                ))}
               </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.softSkills}
-                  onChange={(e) =>
-                    handleSkillInputChange("softSkills", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "softSkills")}
-                  placeholder="VD: Teamwork, Communication"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <div className="flex gap-2 items-start">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    onFocus={() => handleFocus("softSkills")}
+                    onBlur={handleBlur}
+                    value={skillInputs.softSkills}
+                    onChange={(e) =>
+                      handleSkillInputChange("softSkills", e.target.value)
+                    }
+                    onKeyPress={(e) => handleSkillKeyPress(e, "softSkills")}
+                    placeholder="VD: Teamwork, Communication"
+                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {focusedInput === "softSkills" && (
+                    <div className="absolute flex items-center gap-1 left-0 mt-1 text-xs text-gray-600 bg-white border border-gray-300 rounded px-2 py-1 shadow z-10">
+                      <MdInfoOutline className="text-gray-500" size={16} />
+                      Nhập từng kỹ năng mềm rồi nhấn Enter
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => addSkill("softSkills")}
                   className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
@@ -1027,13 +1050,13 @@ const FormCV = () => {
               </div>
             </div>
 
-            {/* Languages */}
+            {/* Ngôn ngữ */}
             <div>
               <h3 className="text-sm font-medium text-gray-700 mb-3">
                 Ngôn ngữ
               </h3>
               <div className="flex flex-wrap gap-2 mb-3">
-                {formData.skills.languages.map((skill, index) => (
+                {formData.skills.languages?.map((skill, index) => (
                   <span
                     key={index}
                     className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getSkillBadgeColor(
@@ -1050,17 +1073,27 @@ const FormCV = () => {
                   </span>
                 ))}
               </div>
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={skillInputs.languages}
-                  onChange={(e) =>
-                    handleSkillInputChange("languages", e.target.value)
-                  }
-                  onKeyPress={(e) => handleSkillKeyPress(e, "languages")}
-                  placeholder="VD: Tiếng Anh (TOEIC 800)"
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
+              <div className="flex gap-2 items-start">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    onFocus={() => handleFocus("languages")}
+                    onBlur={handleBlur}
+                    value={skillInputs.languages}
+                    onChange={(e) =>
+                      handleSkillInputChange("languages", e.target.value)
+                    }
+                    onKeyPress={(e) => handleSkillKeyPress(e, "languages")}
+                    placeholder="VD: Tiếng Anh (TOEIC 800)"
+                    className="w-full px-3 py-2 pr-8 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  {focusedInput === "languages" && (
+                    <div className="absolute flex items-center gap-1 left-0 mt-1 text-xs text-gray-600 bg-white border border-gray-300 rounded px-2 py-1 shadow z-10">
+                      <MdInfoOutline className="text-gray-500" size={16} />
+                      Nhập từng ngôn ngữ rồi nhấn Enter
+                    </div>
+                  )}
+                </div>
                 <button
                   onClick={() => addSkill("languages")}
                   className={`px-4 py-2 text-white text-sm rounded-md ${getButtonColor(
@@ -1073,6 +1106,7 @@ const FormCV = () => {
             </div>
           </div>
         </div>
+        
 
         {/* Projects */}
         <div className="mb-8">
@@ -1136,6 +1170,36 @@ const FormCV = () => {
                     }
                     placeholder="VD: React, Node.js, MongoDB"
                     className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Ngày Bắt Đầu
+                  </label>
+                  <input
+                    type="date"
+                    max={project.start_date || undefined}
+                    value={project.end_date}
+                    onChange={(e) =>
+                      handleProjectChange(index, "start_date", e.target.value)
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-3">
+                    Ngày Kết Thúc
+                  </label>
+                  <input
+                    type="date"
+                    value={project.end_date}
+                    min={project.start_date || undefined}
+                    onChange={(e) =>
+                      handleProjectChange(index, "end_date", e.target.value)
+                    }
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               </div>

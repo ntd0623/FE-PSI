@@ -133,7 +133,7 @@ const CVManagement = () => {
   ];
 
   const handleUpdateStatus = async (student, status) => {
-    setLoading(true); // ✅ Bắt đầu loading
+    setLoading(true);
     try {
       const res = await updateStatusCV({ id: student.id, statusCv: status });
       if (res && res.errCode === 0) {
@@ -255,9 +255,7 @@ const CVManagement = () => {
                       />
                     ) : (
                       <div
-                        className={`${getAvatarColor(
-                          student.fullName
-                        )} w-full h-full flex items-center justify-center`}
+                        className={`w-full h-full bg-blue-500 flex items-center justify-center`}
                       >
                         {student?.fullName
                           ? student.fullName

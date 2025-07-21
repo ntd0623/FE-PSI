@@ -9,22 +9,26 @@ import gsap from "gsap";
 import toast from "react-hot-toast";
 import { getBase64 } from "../../../utils/CommonUtils";
 import Lightbox from "yet-another-react-lightbox";
+import QuestionTypeSelect from "./QuestionType";
 const QuizCreate = () => {
   const initialQuizSet = {
     title: "",
     description: "",
     timeLimit: 60,
-    maxScore: 100,
+    number_questions: 40,
     image: null,
     questions: [
       {
         content: "",
+        type: "QT1",
         options: ["", "", "", ""],
         correctAnswer: null,
         explanation: "",
+        images: [],
       },
     ],
   };
+
   const navigate = useNavigate();
   const { id } = useParams();
   const [quiz, setQuiz] = useState({});
@@ -32,22 +36,7 @@ const QuizCreate = () => {
   const [avatar, setAvatar] = useState("");
   const [imageFile, setImageFile] = useState(null);
   const [isOpenPreview, setIsOpenPreview] = useState(false);
-  const [quizSet, setQuizSet] = useState({
-    title: "",
-    description: "",
-    timeLimit: 60,
-    maxScore: 10,
-    image: null,
-    questions: [
-      {
-        content: "",
-        options: ["", "", "", ""],
-        correctAnswer: null,
-        explanation: "",
-      },
-    ],
-  });
-
+  const [quizSet, setQuizSet] = useState(initialQuizSet);
   const [expandedQuestions, setExpandedQuestions] = useState([true]);
   const questionRefs = useRef({});
   const hasFetched = useRef(false);
@@ -62,7 +51,6 @@ const QuizCreate = () => {
         }
       }
     };
-
     fetchQuizSet();
     hasFetched.current = true;
   }, [id]);
@@ -71,7 +59,6 @@ const QuizCreate = () => {
     expandedQuestions.forEach((expanded, index) => {
       const el = questionRefs.current[index];
       if (!el) return;
-
       if (expanded) {
         el.style.display = "block";
         gsap.fromTo(
@@ -92,9 +79,7 @@ const QuizCreate = () => {
           y: -10,
           duration: 0.3,
           ease: "power2.inOut",
-          onComplete: () => {
-            if (el) el.style.display = "none";
-          },
+          onComplete: () => el && (el.style.display = "none"),
         });
       }
     });
@@ -108,17 +93,8 @@ const QuizCreate = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-
-    setQuizSet((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-
-    // Xoá lỗi tương ứng
-    setErrors((prev) => ({
-      ...prev,
-      [name]: undefined,
-    }));
+    setQuizSet((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   const handleImageChange = async (event) => {
@@ -126,38 +102,19 @@ const QuizCreate = () => {
     if (file) {
       const objectUrl = URL.createObjectURL(file);
       const base64 = await getBase64(file);
-
       setAvatar(base64);
       setImageFile(objectUrl);
-      setQuizSet((prev) => ({
-        ...prev,
-        image: base64,
-      }));
-      setImageFile(objectUrl);
+      setQuizSet((prev) => ({ ...prev, image: base64 }));
     }
   };
 
-  //image
-  const openPreview = () => {
-    if (imageFile) {
-      setIsOpenPreview(true);
-    }
-  };
-
-  const removeImage = () => {
-    setQuizSet((prev) => ({ ...prev, image: null }));
-  };
+  const openPreview = () => imageFile && setIsOpenPreview(true);
+  const removeImage = () => setQuizSet((prev) => ({ ...prev, image: null }));
 
   const handleQuestionChange = (index, field, value) => {
     const updated = [...quizSet.questions];
     updated[index][field] = value;
-
-    setQuizSet((prev) => ({
-      ...prev,
-      questions: updated,
-    }));
-
-    // Xoá lỗi tương ứng nếu có
+    setQuizSet((prev) => ({ ...prev, questions: updated }));
     setErrors((prev) => {
       const clone = { ...prev };
       if (clone.questions?.[index]) {
@@ -174,6 +131,73 @@ const QuizCreate = () => {
   const handleOptionChange = (qIndex, oIndex, value) => {
     const updated = [...quizSet.questions];
     updated[qIndex].options[oIndex] = value;
+    setQuizSet((prev) => ({ ...prev, questions: updated }));
+    setErrors((prev) => {
+      const clone = { ...prev };
+      if (clone.questions?.[qIndex]?.optionErrors) {
+        clone.questions[qIndex].optionErrors[oIndex] = undefined;
+      }
+      return clone;
+    });
+  };
+
+  const handleQuestionImageChange = async (qIndex, event) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const newImages = [];
+    for (const file of files) {
+      const base64 = await getBase64(file);
+      newImages.push({ src: base64, caption: "" });
+    }
+
+    setQuizSet((prev) => {
+      const updatedQuestions = prev.questions.map((q, i) => {
+        if (i === qIndex) {
+          const existing = q.images ? [...q.images] : [];
+          return {
+            ...q,
+            images: [...existing, ...newImages],
+          };
+        }
+        return q;
+      });
+
+      return {
+        ...prev,
+        questions: updatedQuestions,
+      };
+    });
+
+    event.target.value = null;
+  };
+
+  const handleChangeType = (index, newType) => {
+    const updated = [...quizSet.questions];
+
+    if (newType === "QT3") {
+      // Loại Đúng/Sai
+      updated[index] = {
+        ...updated[index],
+        type: newType,
+        options: ["Đúng", "Sai"],
+        correctAnswer: null,
+      };
+    } else if (newType === "QT2") {
+      // Nhiều đáp án đúng - dùng mảng correctAnswer[]
+      updated[index] = {
+        ...updated[index],
+        type: newType,
+        correctAnswer: [], // nhiều đáp án đúng
+      };
+    } else {
+      // QT1 - 1 đáp án đúng
+      updated[index] = {
+        ...updated[index],
+        type: newType,
+        correctAnswer: null,
+      };
+    }
 
     setQuizSet((prev) => ({
       ...prev,
@@ -182,17 +206,22 @@ const QuizCreate = () => {
 
     setErrors((prev) => {
       const clone = { ...prev };
-      if (clone.questions?.[qIndex]?.optionErrors) {
+      if (clone.questions?.[index]) {
         clone.questions = [...clone.questions];
-        clone.questions[qIndex] = {
-          ...clone.questions[qIndex],
-          optionErrors: {
-            ...clone.questions[qIndex].optionErrors,
-            [oIndex]: undefined,
-          },
+        clone.questions[index] = {
+          ...clone.questions[index],
+          type: undefined,
         };
       }
       return clone;
+    });
+  };
+
+  const removeQuestionImage = (qIndex, imgIndex) => {
+    setQuizSet((prev) => {
+      const updated = [...prev.questions];
+      updated[qIndex].images.splice(imgIndex, 1);
+      return { ...prev, questions: updated };
     });
   };
 
@@ -210,9 +239,11 @@ const QuizCreate = () => {
         ...prev.questions,
         {
           content: "",
+          type: "QT1",
           options: ["", "", "", ""],
           correctAnswer: null,
           explanation: "",
+          images: [],
         },
       ],
     }));
@@ -226,6 +257,10 @@ const QuizCreate = () => {
   };
 
   const removeOption = (qIndex, oIndex) => {
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa lựa chọn này?"
+    );
+    if (!confirmDelete) return;
     const updated = [...quizSet.questions];
     updated[qIndex].options.splice(oIndex, 1);
     if (updated[qIndex].correctAnswer === oIndex) {
@@ -235,6 +270,10 @@ const QuizCreate = () => {
   };
 
   const removeQuestion = (qIndex) => {
+    const confirmDelete = window.confirm(
+      "Bạn có chắc chắn muốn xóa câu hỏi này?"
+    );
+    if (!confirmDelete) return;
     const updated = [...quizSet.questions];
     updated.splice(qIndex, 1);
     setQuizSet((prev) => ({ ...prev, questions: updated }));
@@ -264,11 +303,11 @@ const QuizCreate = () => {
       if (!Number.isInteger(Number(data.timeLimit)))
         newErrors.timeLimit = "Thời gian làm bài phải là số nguyên.";
 
-      const maxScore = Number(data.maxScore);
-      if (!maxScore || maxScore <= 0) {
-        newErrors.maxScore = "Điểm tối đa phải lớn hơn 0.";
-      } else if (!Number.isInteger(maxScore)) {
-        newErrors.maxScore = "Điểm tối đa phải là số nguyên.";
+      const number_questions = Number(data.number_questions);
+      if (!number_questions || number_questions <= 0) {
+        newErrors.number_questions = "Điểm tối đa phải lớn hơn 0.";
+      } else if (!Number.isInteger(number_questions)) {
+        newErrors.number_questions = "Điểm tối đa phải là số nguyên.";
       }
     }
     if (!Array.isArray(data.questions) || data.questions.length === 0) {
@@ -290,13 +329,26 @@ const QuizCreate = () => {
           }
         });
 
-        if (
-          q.correctAnswer === null ||
-          typeof q.correctAnswer !== "number" ||
-          q.correctAnswer < 0 ||
-          q.correctAnswer >= q.options.length
-        ) {
-          qErr.correctAnswer = "Cần chọn đáp án đúng hợp lệ.";
+        if (q.type === "QT2") {
+          if (
+            !Array.isArray(q.correctAnswer) ||
+            q.correctAnswer.length === 0 ||
+            q.correctAnswer.some(
+              (ans) =>
+                typeof ans !== "number" || ans < 0 || ans >= q.options.length
+            )
+          ) {
+            qErr.correctAnswer = "Cần chọn ít nhất một đáp án đúng hợp lệ.";
+          }
+        } else {
+          if (
+            q.correctAnswer === null ||
+            typeof q.correctAnswer !== "number" ||
+            q.correctAnswer < 0 ||
+            q.correctAnswer >= q.options.length
+          ) {
+            qErr.correctAnswer = "Cần chọn đáp án đúng hợp lệ.";
+          }
         }
 
         newErrors.questions[i] = qErr;
@@ -314,12 +366,33 @@ const QuizCreate = () => {
   };
 
   const handleSubmit = async () => {
-    console.log("Check submit: ", quizSet);
     const isValid = validateQuizSet(quizSet);
     if (!isValid) {
-      console.log("Dữ liệu không hợp lệ. Vui lòng kiểm tra lại.");
-      toast.error(`Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại !`);
+      toast.error("Dữ liệu chưa hợp lệ. Vui lòng kiểm tra lại!");
+      return;
     }
+
+    const formattedQuestions = quizSet.questions.map((q) => ({
+      content: q.content,
+      type: q.type,
+      explanation: q.explanation,
+      answers:
+        q.type === "QT2"
+          ? q.options.map((opt, index) => ({
+              content: opt,
+              isCorrect: Array.isArray(q.correctAnswer)
+                ? q.correctAnswer.includes(index)
+                : false,
+            }))
+          : q.options.map((opt, index) => ({
+              content: opt,
+              isCorrect: index === q.correctAnswer,
+            })),
+      images_question: q.images.map((img) => ({
+        image: img.src,
+        caption: img.caption || "",
+      })),
+    }));
 
     try {
       const res = await quizService.upsertQuizSets({
@@ -328,12 +401,12 @@ const QuizCreate = () => {
         description: quizSet.description,
         image: quizSet.image,
         duration_minute: parseInt(quizSet.timeLimit, 10),
-        score: parseInt(quizSet.maxScore, 10),
-        questions: quizSet.questions,
+        number_questions: parseInt(quizSet.number_questions, 10),
+        questions: formattedQuestions,
         action: CRUD_ACTIONS.ADD,
       });
       if (res && res.errCode === 0) {
-        toast.success("Tạo câu hỏi thành công ");
+        toast.success("Tạo câu hỏi thành công");
         setQuizSet(initialQuizSet);
         navigate(path.QUIZ);
       }
@@ -341,14 +414,17 @@ const QuizCreate = () => {
       toast.error("Lỗi hệ thống: " + e.message);
     }
   };
+
   const handleReturn = () => {
-    const confirm = window.confirm(
-      "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
-    );
-    if (confirm) {
+    if (
+      window.confirm(
+        "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
+      )
+    ) {
       navigate(path.QUIZ);
     }
   };
+
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
       <div className="flex justify-between items-center mb-6">
@@ -433,19 +509,21 @@ const QuizCreate = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                Điểm tối đa
+                Số lượng câu hỏi (Bao nhiêu câu hỏi khi kiểm tra)
               </label>
               <input
                 type="number"
-                name="maxScore"
+                name="number_questions"
                 className={`w-full p-2 border ${
-                  errors.maxScore ? "border-red-500" : "border-gray-200"
+                  errors.number_questions ? "border-red-500" : "border-gray-200"
                 } rounded focus:border-gray-400 focus:outline-none transition-all`}
-                value={quizSet.maxScore}
+                value={quizSet.number_questions}
                 onChange={handleInputChange}
               />
-              {errors.maxScore && (
-                <p className="text-red-500 text-sm mt-1">{errors.maxScore}</p>
+              {errors.number_questions && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.number_questions}
+                </p>
               )}
             </div>
           </div>
@@ -548,6 +626,12 @@ const QuizCreate = () => {
                 </button>
               </div>
 
+              {/* TYPE_QUESTION */}
+              <QuestionTypeSelect
+                value={question.type}
+                onChange={(newValue) => handleChangeType(qIndex, newValue)}
+              />
+
               <div ref={(el) => (questionRefs.current[qIndex] = el)}>
                 <label className="block text-sm font-medium text-gray-700 mb-3">
                   Nội dung câu hỏi
@@ -570,6 +654,61 @@ const QuizCreate = () => {
                   </p>
                 )}
 
+                {/* IMAGE */}
+                <label className="block cursor-pointer w-fit">
+                  <div className="border-2 border-dashed border-blue-300 rounded p-3 text-center hover:bg-blue-50 transition-all flex items-center gap-2">
+                    <FiUpload size={18} className="text-blue-600" />
+                    <span className="text-sm text-blue-600">
+                      Tải thêm hình ảnh
+                    </span>
+                  </div>
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={(e) => handleQuestionImageChange(qIndex, e)}
+                    className="hidden "
+                  />
+                </label>
+
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {(question.images || []).map((img, i) => (
+                    <div key={i} className="flex flex-col items-center w-24">
+                      <div className="relative group w-full h-24 border border-gray-300 rounded overflow-hidden">
+                        <img
+                          src={img.src}
+                          alt={`img-${i}`}
+                          className="w-full h-full object-cover"
+                        />
+                        <button
+                          onClick={() => removeQuestionImage(qIndex, i)}
+                          className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-[2px] text-xs hover:bg-red-600"
+                          title="Xóa ảnh"
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Nhập mô tả"
+                        className="mt-2 text-xs w-full border border-gray-200 rounded px-2 py-1"
+                        value={img.caption}
+                        onChange={(e) => {
+                          setQuizSet((prev) => {
+                            const updatedQuestions = [...prev.questions];
+                            updatedQuestions[qIndex].images[i].caption =
+                              e.target.value;
+                            return {
+                              ...prev,
+                              questions: updatedQuestions,
+                            };
+                          });
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
+
                 <div className="mb-4">
                   <div className="flex justify-between items-center mb-2">
                     <p className="font-medium mb-3">Các lựa chọn</p>
@@ -587,13 +726,39 @@ const QuizCreate = () => {
                   )}
                   {question.options.map((option, oIndex) => (
                     <div key={oIndex} className="flex items-center mb-5 gap-2">
-                      <input
-                        type="radio"
-                        name={`correct-${qIndex}`}
-                        checked={question.correctAnswer === oIndex}
-                        onClick={() => setCorrectAnswer(qIndex, oIndex)}
-                        className="accent-blue-600"
-                      />
+                      {question.type === "QT2" ? (
+                        <input
+                          type="checkbox"
+                          className="accent-blue-600"
+                          checked={
+                            Array.isArray(question.correctAnswer) &&
+                            question.correctAnswer.includes(oIndex)
+                          }
+                          onChange={(e) => {
+                            const updated = [...quizSet.questions];
+                            const corrects = new Set(
+                              updated[qIndex].correctAnswer || []
+                            );
+                            if (e.target.checked) corrects.add(oIndex);
+                            else corrects.delete(oIndex);
+                            updated[qIndex].correctAnswer =
+                              Array.from(corrects);
+                            setQuizSet((prev) => ({
+                              ...prev,
+                              questions: updated,
+                            }));
+                          }}
+                        />
+                      ) : (
+                        <input
+                          type="radio"
+                          name={`correct-${qIndex}`}
+                          checked={question.correctAnswer === oIndex}
+                          className="accent-blue-600"
+                          onChange={() => setCorrectAnswer(qIndex, oIndex)}
+                        />
+                      )}
+
                       <input
                         type="text"
                         className={`flex-1 p-2 rounded border ${

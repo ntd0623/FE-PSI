@@ -51,3 +51,16 @@ export const STATUS_CV_LABELS = {
     CV3: "Đã duyệt",
     CV4: "Từ chối",
 };
+
+export const QUESTION_TYPE_MAP = {
+    QT1: "Trắc nghiệm - 1 đáp án",
+    QT2: "Trắc nghiệm - nhiều đáp án",
+    QT3: "Đúng / Sai"
+}
+
+
+export const REVERSE_QUESTION_TYPE_MAP = {
+    SINGLE_QUESTION: "QT1",
+    MULTIPLE_QUESTION: "QT2",
+    TRUE_FALSE: "QT3",
+};

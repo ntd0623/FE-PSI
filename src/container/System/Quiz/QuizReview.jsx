@@ -11,7 +11,7 @@ const QuizReview = () => {
   const [questions, setQuestion] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [title, setTitle] = useState({});
+  const [quiz, setQuiz] = useState({});
   const limit = 5;
   const navigate = useNavigate();
   useEffect(() => {
@@ -26,16 +26,22 @@ const QuizReview = () => {
         if (res && res.errCode === 0) {
           const questions = res.data.map((q) => {
             const options = q.answers.map((a) => a.content);
-            const correctIndex = q.answers.findIndex((a) => a.isCorrect);
+            const correctAnswer =
+              q.type === "QT2"
+                ? q.answers.reduce((acc, a, i) => {
+                    if (a.isCorrect) acc.push(i);
+                    return acc;
+                  }, [])
+                : q.answers.findIndex((a) => a.isCorrect);
             return {
               ...q,
               options,
-              correctAnswer: correctIndex,
+              correctAnswer: correctAnswer,
             };
           });
           setQuestion(questions);
           setTotalPages(Math.ceil(res?.total / limit));
-          setTitle(res?.title);
+          setQuiz(res?.quiz);
         }
       } catch (e) {
         console.error("Lỗi khi fetch quiz: ", e);
@@ -50,27 +56,17 @@ const QuizReview = () => {
   const handlePageChange = (page) => {
     setPage(page);
   };
-  const handleReturn = () => {
-    const confirm = window.confirm(
-      "Bạn có chắc chắn muốn quay lại? Mọi thay đổi chưa lưu sẽ mất."
-    );
-    if (confirm) {
-      navigate(path.QUIZ);
-    }
-  };
   return (
     <div className="p-4 sm:p-6 bg-gray-50 min-h-screen rounded-lg">
       <button
-        onClick={handleReturn}
+        onClick={() => navigate(path.QUIZ)}
         className="flex items-center gap-2 text-gray-600 hover:text-blue-600 mb-6"
       >
         <ArrowLeft className="w-5 h-5" />
         Quay lại danh sách
       </button>
-      <h2 className="text-3xl font-bold text-gray-800 mb-4">{title.title}</h2>
-      <p className="text-gray-600 mb-6">
-        Kiến thức cơ bản về ngôn ngữ lập trình PHP
-      </p>
+      <h2 className="text-3xl font-bold text-gray-800 mb-4">{quiz?.title}</h2>
+      <p className="text-gray-600 mb-6">{quiz?.description}</p>
 
       {questions.length > 0 ? (
         questions.map((q, idx) => (

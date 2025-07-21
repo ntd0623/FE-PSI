@@ -114,9 +114,32 @@ const QuestionCard = ({ question, index }) => {
         className="overflow-hidden transition-all duration-300 ease-in-out"
         style={{ height: isExpanded ? "auto" : "0px" }}
       >
+        {/* Image */}
+        {Array.isArray(question.images_question) &&
+          question.images_question.length > 0 && (
+            <div className="mb-4 flex flex-wrap justify-center gap-6">
+              {question.images_question.map((img, idx) => (
+                <div key={idx} className="text-center">
+                  <img
+                    src={img.image}
+                    alt={img.caption || `Hình ${idx + 1}`}
+                    className="w-[150px] h-auto rounded object-contain mx-auto"
+                  />
+                  {img.caption && (
+                    <p className="text-sm text-gray-500 mt-1 italic">
+                      {img.caption}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        {/* ANSWER */}
         <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-5">
           {question.options.map((opt, i) => {
-            const isCorrect = i === question.correctAnswer;
+            const isCorrect = Array.isArray(question.correctAnswer)
+              ? question.correctAnswer.includes(i)
+              : i === question.correctAnswer;
             return (
               <div
                 key={i}

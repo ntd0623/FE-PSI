@@ -1,270 +1,654 @@
-import { FiMail, FiPhone, FiMapPin, FiCalendar } from "react-icons/fi";
+import React, { useRef } from "react";
+import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
 import { getAvatarColor } from "../../utils/statusHelper";
-import React, { useEffect, useRef, useState } from "react";
-import moment from "moment";
 import "./CVDetail.scss";
-import { getBase64 } from "../../utils/CommonUtils";
+import moment from "moment";
 const CVDetail = ({ cvData }) => {
   const skillGroups = groupSkillsByType(cvData?.skills || []);
-  console.log("Check cv data: ", cvData);
+  const componentRef = useRef();
+
   const handlePrint = () => {
-    window.print();
+    const printContent = componentRef.current.cloneNode(true);
+    const printWindow = window.open("", "_blank");
+    printWindow.document.open();
+    printWindow.document.write(`
+  <html>
+    <head>
+      <title>CV Detail</title>
+      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+      <style>
+        @page { 
+          size: A4; 
+          margin: 0; 
+        }
+        
+        * {
+          box-sizing: border-box;
+          margin: 0;
+          padding: 0;
+        }
+        
+        body { 
+          font-family: 'Cormorant Garamond', serif; 
+          margin: 0; 
+          padding: 0; 
+          width: 210mm;
+          height: 297mm;
+          -webkit-print-color-adjust: exact !important;
+          color-adjust: exact !important;
+        }
+        
+        .print-area {
+          display: grid !important;
+          grid-template-columns: 1fr 2fr !important;
+          width: 210mm !important;
+          height: 297mm !important;
+          max-width: 210mm !important;
+          margin: 0 auto !important;
+          box-sizing: border-box !important;
+          background: linear-gradient(90deg, #e3ecfa 0%, #fff 100%) !important;
+          overflow: hidden !important;
+        }
+        
+        .cv-left {
+          background: rgba(255, 255, 255, 0.6) !important;
+          padding: 40px 32px !important;
+          display: flex !important;
+          flex-direction: column !important;
+          align-items: center !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+        }
+        
+        .cv-right {
+          background: #e3ecfa !important;
+          padding: 40px !important;
+          box-sizing: border-box !important;
+          overflow: hidden !important;
+        }
+        
+        .cv-bg {
+          background: linear-gradient(90deg, #e3ecfa 0%, #fff 100%) !important;
+        }
+        
+        .cv-avatar {
+          width: 160px !important;
+          height: 160px !important;
+          border-radius: 50% !important;
+          border: 4px solid #fff !important;
+          box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.08) !important;
+          object-fit: cover !important;
+          margin-bottom: 24px !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 48px !important;
+          font-weight: bold !important;
+          color: white !important;
+          background-color: #6366f1 !important;
+        }
+        
+        /* Typography */
+        .cv-name {
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 60px !important;
+          font-weight: bold !important;
+          color: #1e3a8a !important;
+          margin-bottom: 8px !important;
+          letter-spacing: 0.05em !important;
+          line-height: 1.1 !important;
+        }
+        .skills-section {
+          width: 100% !important;
+          margin-bottom: 24px !important;
+        }
+
+        .skills-title {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important; 
+          font-size: 32px !important;
+          font-weight: bold !important;
+          text-align: center !important;
+          margin-bottom: 16px !important;
+        }
+
+        .skills-categories {
+          display: flex !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+          gap: 24px !important;
+        }
+
+        .skill-category {
+          flex: 1 !important;
+        }
+
+        .skill-category-title {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important;
+          font-size: 20px !important;
+          font-weight: 600 !important;
+          margin-bottom: 8px !important;
+        }
+
+        .skill-list {
+          list-style: none !important;
+          padding: 0 !important;
+          margin: 0 !important;
+        }
+
+        .skill-item {
+          font-family: 'Times New Roman', Times, serif;
+          color: #374151 !important;
+          font-size: 16px !important;
+          margin-bottom: 4px !important;
+          line-height: 1.4 !important;
+        }
+        .cv-title {
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 24px !important;
+          font-style: italic !important;
+          color: #1d4ed8 !important;
+          margin-bottom: 32px !important;
+          letter-spacing: 0.05em !important;
+        }
+        
+        /* Section Headings */
+        .cv-section-title {
+        font-family: 'Times New Roman', Times, serif;
+        color: #1e3a8a !important;
+        font-size: 32px !important;
+        font-weight: 700 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.2em !important;
+        margin: 16px 0 16px 0 !important;
+        text-align: center !important;
+      }
+        
+        .cv-section-heading {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important;
+          font-size: 20px !important;
+          font-weight: 600 !important;
+          letter-spacing: 0.05em !important;
+          margin: 24px 0 8px 0 !important;
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+        }
+        
+        .cv-section-heading span:last-child {
+          border-top: 1px solid #93c5fd !important;
+          display: block !important;
+          flex: 1 !important;
+        }
+        
+        /* Skills styling */
+        .skills-container {
+          width: 100% !important;
+          margin-bottom: 24px !important;
+        }
+        
+        .skills-grid {
+          display: grid !important;
+          grid-template-columns: 1fr 1fr 1fr !important;
+          gap: 16px !important;
+          width: 100% !important;
+        }
+        
+        .skill-category {
+          text-align: center !important;
+        }
+        
+        .skill-category-title {
+          font-weight: 600 !important;
+          color: #1e3a8a !important;
+          margin-bottom: 8px !important;
+          font-size: 16px !important;
+          font-family: 'Times New Roman', Times, serif;
+        }
+        /* Skills styling */
+        .skills-section {
+          width: 100% !important;
+          margin-bottom: 24px !important;
+        }
+            
+        .skills-categories {
+          display: flex !important;
+          flex-direction: row !important;
+          justify-content: space-between !important;
+          width: 100% !important;
+          gap: 24px !important;
+        }
+            
+        .skill-category {
+          flex: 1 !important;
+          text-align: center !important;
+        }
+            
+        .skill-category-title {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important;
+          font-size: 20px !important;
+          font-weight: 600 !important;
+          margin-bottom: 8px !important;
+        }
+            
+        .skill-list {
+          list-style-type: disc !important;
+          margin: 0 !important;
+          padding-left: 20px !important;
+          text-align: left !important;
+        }
+            
+        .skill-item {
+          margin-bottom: 4px !important;
+          color: #374151 !important;
+          font-size: 16px !important;
+          line-height: 1.4 !important;
+        }
+        
+        .skill-list {
+          list-style: disc !important;
+          margin: 0 !important;
+          padding-left: 20px !important;
+          text-align: left !important;
+        }
+        
+        .skill-item {
+          margin-bottom: 2px !important;
+          color: #374151 !important;
+          font-size: 14px !important;
+          line-height: 1.4 !important;
+        }
+        
+        /* Contact styling with icons */
+        .contact-container {
+          width: 100% !important;
+        }
+        
+        .contact-item {
+          display: flex !important;
+          align-items: center !important;
+          gap: 8px !important;
+          margin-bottom: 12px !important;
+          color: #374151 !important;
+          font-size: 16px !important;
+          margin-left: 8px !important;
+          font-family: 'Times New Roman', Times, serif;
+        }
+        
+        .contact-icon {
+          width: 16px !important;
+          height: 16px !important;
+          flex-shrink: 0 !important;
+          margin-right: 8px !important;
+        }
+        
+        /* Fallback icons using CSS symbols */
+        .contact-phone:before {
+          content: "📞" !important;
+          margin-right: 10px !important;
+        }
+        
+        .contact-email:before {
+          content: "✉️" !important;
+          margin-right: 10px !important;
+        }
+        
+        .contact-location:before {
+          content: "📍" !important;
+          margin-right: 10px !important;
+        }
+        
+        /* Content sections */
+        .content-text {
+          color: #374151 !important;
+          font-size: 16px !important;
+          line-height: 1.6 !important;
+          margin-bottom: 32px !important;
+        }
+        
+        .education-item, .experience-item {
+          margin-bottom: 24px !important;
+        }
+        
+        .education-header, .experience-header {
+          display: flex !important;
+          flex-wrap: wrap !important;
+          gap: 16px !important;
+          align-items: center !important;
+          font-size: 18px !important;
+          font-weight: 600 !important;
+          color: #1e3a8a !important;
+          font-family: 'Times New Roman', Times, serif;
+          margin-bottom: 4px !important;
+        }
+        
+        .education-details, .experience-position {
+          font-size: 16px !important;
+          font-style: italic !important;
+          color: #1d4ed8 !important;
+          font-family: 'Times New Roman', Times, serif;
+          margin-bottom: 4px !important;
+        }
+        
+        .experience-list {
+          list-style: none !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        
+        .experience-list li {
+          display: flex !important;
+          align-items: flex-start !important;
+          margin-bottom: 4px !important;
+          color: #374151 !important;
+          font-size: 16px !important;
+        }
+        
+        .experience-list li:before {
+          content: '•' !important;
+          color: #1d4ed8 !important;
+          margin-right: 8px !important;
+          margin-top: 8px !important;
+          font-size: 18px !important;
+          flex-shrink: 0 !important;
+        }
+        
+        /* Projects */
+        .project-item {
+          margin-bottom: 16px !important;
+        }
+        
+        .project-title {
+          font-weight: 600 !important;
+          color: #1e3a8a !important;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 18px !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .project-tech {
+          font-style: italic !important;
+          color: #1d4ed8 !important;
+          font-family: 'Times New Roman', Times, serif;
+          font-size: 16px !important;
+          margin-bottom: 4px !important;
+        }
+          .cv-project-title {
+    font-family: 'Times New Roman', Times, serif !important;
+    font-weight: 600 !important;
+    color: #1e3a8a !important;
+    font-size  : 1.125rem !important; /* 18px */
+          margin-bottom: 4px !important;
+
+}
+
+.cv-project-content {
+    font-family: 'Times New Roman', Times, serif !important;
+    font-style : italic !important;
+    color      : #1a73e8 !important;
+    font-size  : 1rem !important; /* 16px */
+    margin-bottom: 8px !important;
+}
+
+.cv-project-description {
+    font-family: 'Times New Roman', Times, serif !important;
+    color      : #374151 !important;
+    font-size  : 1rem !important; /* 16px */
+    line-height: 1.6 !important;
+    margin-bottom: 8px !important;
+}
+
+.edu-school {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important;
+          font-size: 18px !important;
+          font-weight: 600 !important;
+          margin-bottom: 4px !important;
+        }
+        .edu-graduation-year {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1d4ed8 !important;
+          font-size: 16px !important;
+          font-style: italic !important;
+          margin-bottom: 4px !important;
+          margin-left: 8px !important;
+        }
+        .edu-major-degree {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1d4ed8 !important;
+          font-size: 16px !important;
+          font-style: italic !important;
+          margin-bottom: 4px !important;
+        }
+        .edu-gpa {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1d4ed8 !important;
+          font-size: 16px !important;
+          font-weight: bold !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .exp-date {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1e3a8a !important;
+          font-size: 18px !important;
+          font-weight: 600 !important;
+          margin-bottom: 4px !important;
+        }
+        .exp-position {
+          font-family: 'Times New Roman', Times, serif;
+          color: #1d4ed8 !important;
+          font-size: 16px !important;
+          font-style: italic !important;
+          margin-bottom: 4px !important;
+        }
+        .exp-description {
+          font-family: 'Times New Roman', Times, serif;
+          color: #374151 !important;
+          font-size: 16px !important;
+          line-height: 1.6 !important;
+          margin-bottom: 4px !important;
+        }
+
+        .exp-company {
+          font-family: 'Times New Roman', Times, serif;
+          margin-left: 8px !important;
+    }
+        
+        .project-description {
+          color: #374151 !important;
+          font-size: 16px !important;
+          line-height: 1.6 !important;
+          margin-bottom: 4px !important;
+        }
+        
+        .project-link {
+          font-size: 12px !important;
+          color: #1d4ed8 !important;
+        }
+        
+        /* Dividers */
+        .cv-divider {
+          width: 100% !important;
+          height: 1px !important;
+          background-color: #93c5fd !important;
+          margin: 24px 0 !important;
+        }
+        
+        hr {
+          border: none !important;
+          border-top: 1px solid #93c5fd !important;
+          margin: 24px 0 !important;
+        }
+        
+        /* Hide elements that shouldn't print */
+        .print\\:hidden {
+          display: none !important;
+        }
+        
+        /* Responsive adjustments for print */
+        @media print {
+          .print-area {
+            width: 210mm !important;
+            height: 297mm !important;
+          }
+        }
+      </style>
+    </head>
+    <body>${printContent.outerHTML}</body>
+  </html>`);
+    printWindow.document.close();
+    printWindow.print();
+    printWindow.close();
   };
+
   return (
-    <React.Fragment>
+    <>
       <div
-        className="print-area w-full max-w-4xl mx-auto bg-white 
-                    print:w-[210mm] print:max-w-[210mm] 
-                    print:shadow-none print:rounded-none 
-                    print:p-0 print:m-0 print:mx-auto 
-                    print:break-inside-avoid print:block"
+        ref={componentRef}
+        className="print-area cv-bg w-full mx-auto grid grid-cols-1 md:grid-cols-[1fr_2fr]"
       >
-        {/* Header Info */}
-        <div className="header-section flex flex-col lg:flex-row print:flex-row  items-center lg:items-start print:items-start gap-6 mb-6 text-center lg:text-left print:text-left print:break-inside-avoid">
-          <div className="avatar-section flex-shrink-0">
+        <div className="cv-left bg-white bg-opacity-60 px-8 py-10 flex flex-col items-center print:bg-white print:break-inside-avoid">
+          <div className="mb-6">
             {cvData.image ? (
               <img
                 src={cvData.image}
                 alt="Avatar"
-                className="w-28 h-28 print:w-16 print:h-16 rounded-full object-cover"
+                className="w-40 h-40 rounded-full object-cover border-4 border-white shadow-md cv-avatar"
               />
             ) : (
               <div
-                className={`w-28 h-28 print:w-16 print:h-16 rounded-full ${getAvatarColor(
+                className={`w-40 h-40 rounded-full ${getAvatarColor(
                   cvData.fullName
-                )} text-white flex items-center justify-center text-2xl print:text-lg font-bold`}
+                )} text-white flex items-center justify-center text-4xl font-bold cv-avatar`}
               >
                 {cvData?.fullName
-                  ? cvData?.fullName
+                  ? cvData.fullName
                       .split(" ")
-                      .map((word) => word[0])
+                      .map((w) => w[0])
                       .join("")
                       .toUpperCase()
-                  : "N/A"}
+                  : ""}
               </div>
             )}
           </div>
-
-          <div className="info-section flex-1 space-y-3 print:space-y-2">
-            <h1 className="text-3xl print:text-2xl font-semibold text-gray-800">
-              {cvData?.fullName || "Họ tên"}
-            </h1>
-            <div className="contact-grid grid grid-cols-1 md:grid-cols-2 print:grid-cols-2 gap-2 print:gap-1 text-sm text-gray-600">
-              <div className="flex items-center gap-2">
-                <FiMail className="text-gray-500 flex-shrink-0" />
-                <span className="break-all">{cvData?.email || "Email"}</span>
+          <div className="cv-divider mb-6"></div>
+          {skillGroups.programming.length > 0 ||
+          skillGroups.softSkills.length > 0 ||
+          skillGroups.languages.length > 0 ? (
+            <>
+              <SectionTitle title="Skills" />
+              <SkillList
+                programming={skillGroups.programming}
+                softSkills={skillGroups.softSkills}
+                languages={skillGroups.languages}
+              />
+              <div className="cv-divider my-6"></div>
+            </>
+          ) : null}
+          {(cvData.phoneNumber || cvData.email || cvData.address) && (
+            <>
+              <SectionTitle title="Contact" />
+              <div className="flex flex-col font-serif gap-3 text-gray-700 text-base mt-2 w-full">
+                {cvData.phoneNumber && (
+                  <InfoRow icon={<FiPhone />} text={cvData.phoneNumber} />
+                )}
+                {cvData.email && (
+                  <InfoRow icon={<FiMail />} text={cvData.email} />
+                )}
+                {cvData.address && (
+                  <InfoRow icon={<FiMapPin />} text={cvData.address} />
+                )}
               </div>
-              <div className="flex items-center gap-2">
-                <FiPhone className="text-gray-500 flex-shrink-0" />
-                <span>{cvData?.phoneNumber || "Số điện thoại"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiMapPin className="text-gray-500 flex-shrink-0" />
-                <span>{cvData?.address || "Địa chỉ"}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <FiCalendar className="text-gray-500 flex-shrink-0" />
-                <span>
-                  {moment(cvData?.birthDay).format("DD/MM/YYYY") || "Ngày sinh"}
-                </span>
-              </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
-
-        {/* Sections */}
-        <Section title="MỤC TIÊU NGHỀ NGHIỆP">
-          {cvData?.career_objective || "Chưa nhập mục tiêu"}
-        </Section>
-
-        <Section title="HỌC VẤN">
-          <SubSection>
-            <p className="text-xs print:text-xs text-gray-600 italic text-right">
-              {`Năm tốt nghiệp: ${
-                cvData?.graduationYear || "Chưa có năm tốt nghiệp"
-              }`}
-            </p>
-            <div className="grid grid-cols-[120px_1fr] gap-y-1 text-sm print:text-xs text-gray-700">
-              <div className="font-semibold">Tên trường:</div>
-              <div>{cvData?.schoolName || "Chưa nhập tên trường"}</div>
-
-              <div className="font-semibold">Chuyên ngành:</div>
-              <div>{cvData?.major || "Chưa nhập chuyên ngành"}</div>
-
-              <div className="font-semibold">Bằng cấp:</div>
-              <div>{cvData?.dataDegree?.value_VI || "Chưa nhập bằng cấp"}</div>
-
-              <div className="font-semibold">GPA:</div>
-              <div>{cvData?.gpa || "Chưa nhập GPA"}</div>
+        <div className="cv-right px-10 py-10 print:break-inside-avoid">
+          {cvData.fullName && (
+            <h1 className="cv-name text-5xl font-serif font-bold text-blue-900 mb-2 tracking-wide">
+              {cvData.fullName}
+            </h1>
+          )}
+          {cvData.career_title && (
+            <div className="cv-title text-2xl font-serif italic text-blue-700 mb-8 tracking-wide">
+              {cvData.career_title}
             </div>
-          </SubSection>
-        </Section>
-
-        <Section title="KINH NGHIỆM LÀM VIỆC">
-          {cvData?.experiences?.length > 0
-            ? cvData.experiences.map((item, index) => {
-                const timeRange =
-                  item.start_date && item.end_date
-                    ? `Thời gian: ${item.start_date} - ${item.end_date}`
-                    : "Thời gian";
-
-                return (
-                  <SubSection key={index}>
-                    <p className="text-xs print:text-xs text-gray-600 italic text-right">
-                      {item.start_date && item.end_date
-                        ? `${timeRange}`
-                        : "Thời gian"}
-                    </p>
-
-                    <div className="grid grid-cols-[120px_1fr] gap-y-1 text-sm print:text-xs text-gray-700">
-                      <div className="font-semibold">Tên công ty:</div>
-                      <div>{item.company || "Chưa nhập tên công ty"}</div>
-
-                      <div className="font-semibold">Vị trí:</div>
-                      <div>{item.position || "Chưa nhập vị trí"}</div>
-
-                      <div className="font-semibold">Mô tả công việc:</div>
-                      <div>
-                        {item.description || "Chưa nhập mô tả công việc"}
-                      </div>
-                    </div>
-                  </SubSection>
-                );
-              })
-            : "Chưa có kinh nghiệm làm việc"}
-        </Section>
-
-        <Section title="KỸ NĂNG">
-          <div className="skills-container space-y-4 print:space-y-3">
-            <SkillColumn
-              title="Kỹ năng kỹ thuật"
-              skills={skillGroups.programming}
-              color="bg-purple-700"
-            />
-            <SkillColumn
-              title="Kỹ năng mềm"
-              skills={skillGroups.softSkills}
-              color="bg-green-600"
-            />
-            <SkillColumn
-              title="Ngôn ngữ"
-              skills={skillGroups.languages}
-              color="bg-yellow-500"
-            />
-          </div>
-        </Section>
-
-        <Section title="DỰ ÁN">
-          {cvData?.projects?.length > 0
-            ? cvData.projects.map((project, index) => (
-                <Project
-                  key={index}
-                  title={project.name || "Tên dự án"}
-                  techs={project.technologies || ""}
-                  link={project.link || "#"}
-                  description={project.description || ""}
-                />
-              ))
-            : "Chưa có dự án"}
-        </Section>
-
-        <Section title="THÀNH TÍCH & GIẢI THƯỞNG">
-          {cvData?.archivement || "Chưa có thành tích"}
-        </Section>
-
-        <Section title="NGƯỜI THAM KHẢO">
-          {cvData?.references || "Chưa có người tham khảo"}
-        </Section>
+          )}
+          <hr className="border-t border-blue-200 mb-6" />
+          {cvData.career_objective && (
+            <>
+              <SectionHeading title="Profile" />
+              <div className="text-gray-700 text-base mb-8">
+                {cvData.career_objective}
+              </div>
+            </>
+          )}
+          {(cvData.schoolName ||
+            cvData.graduationYear ||
+            cvData.major ||
+            cvData.dataDegree ||
+            cvData.gpa) && (
+            <>
+              <SectionHeading title="Education History" />
+              <div className="mb-8">
+                <EduList education={cvData} />
+              </div>
+            </>
+          )}
+          {cvData.experiences && cvData.experiences.length > 0 && (
+            <>
+              <SectionHeading title="Work Experience" />
+              <div>
+                <ExpList experiences={cvData.experiences} />
+              </div>
+            </>
+          )}
+          {cvData.projects && cvData.projects.length > 0 && (
+            <>
+              <SectionHeading title="Projects" />
+              <div className="mb-8">
+                {cvData.projects.map((p, i) => (
+                  <Project
+                    key={i}
+                    title={p.name}
+                    techs={p.technologies}
+                    link={p.github_url}
+                    description={p.description}
+                  />
+                ))}
+              </div>
+            </>
+          )}
+        </div>
       </div>
-
-      {/* Print Button */}
-      <div className="flex justify-end mt-4 print:hidden">
+      <div className="flex justify-end w-full mt-4 print:hidden">
         <button
           onClick={handlePrint}
-          className="bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition-all text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-md"
+          className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-5 py-2 rounded-lg text-sm font-semibold shadow-md"
         >
           In hoặc Lưu PDF
         </button>
       </div>
-    </React.Fragment>
+    </>
   );
 };
 
 export default CVDetail;
 
-// =================== COMPONENT SUPPORT ===================
-
-function Section({ title, children }) {
+function SectionTitle({ title }) {
   return (
-    <div className="section mb-6 print:mb-4 print:break-inside-avoid print:block">
-      <h3 className="text-lg print:text-base font-bold uppercase border-b-2 border-purple-700 mb-2 print:mb-2 text-gray-800 ">
-        {title}
-      </h3>
-      <div className="text-sm text-gray-700 leading-relaxed print:leading-normal">
-        {children}
-      </div>
-    </div>
+    <div className="cv-section-title text-3xl mb-3 text-blue-900">{title}</div>
   );
 }
 
-function SubSection({ title, subtitle, children }) {
+function SectionHeading({ title }) {
   return (
-    <div className="subsection mb-2 print:mb-2 print:break-inside-avoid">
-      <div className="flex flex-col print:flex-col">
-        <p className="font-semibold text-gray-800 text-sm print:text-sm">
-          {title}
-        </p>
-        <p className="text-xs print:text-xs text-gray-600 italic">{subtitle}</p>
-      </div>
-      <div className="text-sm print:text-xs text-gray-700">{children}</div>
-    </div>
-  );
-}
-
-function SkillColumn({ title, skills, color }) {
-  if (!skills || skills.length === 0) return null;
-
-  return (
-    <div className="skill-column print:break-inside-avoid">
-      <p className="font-semibold mb-2 print:mb-1 text-sm print:text-sm text-gray-800">
-        {title}
-      </p>
-      <div className="flex flex-wrap gap-2 print:gap-1">
-        {skills.map((skill, idx) => (
-          <span
-            key={idx}
-            className={`text-white text-xs print:text-xs px-2 py-1 print:px-1 print:py-0.5 rounded-full ${color}`}
-          >
-            {skill}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function Project({ title, techs, link, description }) {
-  return (
-    <div className="project mb-4 print:mb-3 print:break-inside-avoid">
-      <div className="flex flex-col print:flex-col gap-1 mb-1">
-        <p className="font-semibold text-sm print:text-sm text-gray-800">
-          {title}
-        </p>
-        <a
-          href={link}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs print:text-xs text-blue-600 hover:underline print:text-blue-800"
-        >
-          {link !== "#" ? "Xem dự án" : ""}
-        </a>
-      </div>
-      <p className="text-xs print:text-xs text-blue-800 italic mb-1">
-        Công nghệ: {techs}
-      </p>
-      <p className="text-sm print:text-xs text-gray-700 leading-relaxed">
-        {description}
-      </p>
+    <div className="font-serif text-blue-900 text-xl mb-2 mt-6 font-semibold tracking-wide flex items-center gap-2 cv-section-heading">
+      <span>{title}</span>
+      <span className="flex-1 border-t border-blue-200"></span>
     </div>
   );
 }
@@ -278,21 +662,156 @@ function InfoRow({ icon, text }) {
   );
 }
 
-// Process skill
+function SkillList({ programming, softSkills, languages }) {
+  return (
+    <div className="w-full mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {/* Technical Skills */}
+        <div className="flex flex-col">
+          <h3 className="font-serif text-blue-900 font-semibold mb-2">
+            Technical
+          </h3>
+          <ul className="list-inside font-serif text-gray-700">
+            {programming.map((skill, idx) => (
+              <li key={idx} className="mb-1">
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Soft Skills */}
+        <div className="flex flex-col">
+          <h3 className="font-serif text-blue-900 font-serif font-semibold mb-2">
+            Soft Skills
+          </h3>
+          <ul className="text-gray-700">
+            {softSkills.map((skill, idx) => (
+              <li key={idx} className="mb-1">
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Languages */}
+        <div className="flex flex-col">
+          <h3 className="font-serif text-blue-900 font-serif font-semibold mb-2">
+            Languages
+          </h3>
+          <ul className="text-gray-700">
+            {languages.map((skill, idx) => (
+              <li key={idx} className="mb-1">
+                {skill}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function EduList({ education }) {
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="flex gap-4 items-center text-lg font-serif font-semibold text-blue-900">
+          <span className="edu-school">
+            {education?.schoolName || "Tên trường"}
+          </span>
+          <span className="edu-graduation-year text-base text-blue-700 font-normal">
+            Năm tốt nghiệp:
+            {education?.graduationYear ? `${education.graduationYear}` : ""}
+          </span>
+        </div>
+        <div className="edu-major-degree text-base text-blue-700 font-serif italic">
+          {education?.major || "Chuyên ngành"}{" "}
+          {education?.dataDegree?.value_VI
+            ? ` | ${education.dataDegree.value_VI}`
+            : ""}
+        </div>
+        <div className="edu-gpa text-base text-blue-700 font-serif font-semibold">
+          GPA: {education?.gpa || "Chưa nhập GPA"}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function ExpList({ experiences }) {
+  if (!experiences || experiences.length === 0)
+    return <div className="text-gray-500">Chưa có kinh nghiệm làm việc</div>;
+  return (
+    <div className="space-y-6">
+      {experiences.map((item, i) => (
+        <div key={i}>
+          <div className="exp-date flex gap-4 items-center text-lg font-serif font-semibold text-blue-900 print:break-inside-avoid">
+            <span>
+              {moment(item.start_date).format("DD/MM/YYYY") || "?"} -{" "}
+              {moment(item.end_date).format("DD/MM/YYYY") || "?"}
+            </span>
+            <span className="exp-company">{item.company || "Tên công ty"}</span>
+          </div>
+          <div className="exp-position text-base text-blue-700 font-serif italic mb-1">
+            Vị trí: {item.position || "Vị trí"}
+          </div>
+          <ul
+            className="exp-description text-gray-700 text-base font-serif"
+            style={{ listStyleType: "none" }}
+          >
+            {item.description ? (
+              item.description
+                .split("\n")
+                .map((d, idx) => <li key={idx}>{d}</li>)
+            ) : (
+              <li>Chưa nhập mô tả công việc</li>
+            )}
+          </ul>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Project({ title, techs, link, description, start_date, end_date }) {
+  return (
+    <div className="project mb-4 print:mb-3 print:break-inside-avoid">
+      <div className="cv-project-title font-serif font-semibold text-blue-900 text-lg mb-1">
+        {title}
+      </div>
+      <div className="cv-project-content text-base text-blue-700 font-serif italic mb-1">
+        Thời gian: {moment(start_date).format("DD/MM/YYYY")} -
+        {moment(end_date).format("DD/MM/YYYY")}
+      </div>
+      <div className="cv-project-content text-base text-blue-700 font-serif italic mb-1">
+        Công nghệ: {techs}
+      </div>
+      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1 font-serif ">
+        {description}
+      </div>
+      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1 font-serif">
+        Link github:{" "}
+        {link && (
+          <a
+            href={link}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-normal"
+          >
+            {link}
+          </a>
+        )}
+      </div>
+    </div>
+  );
+}
+
 const groupSkillsByType = (skills) => {
-  const grouped = {
-    programming: [],
-    softSkills: [],
-    languages: [],
-  };
-
+  const grouped = { programming: [], softSkills: [], languages: [] };
   if (!Array.isArray(skills)) return grouped;
-
   skills.forEach((skill) => {
-    if (grouped[skill.type]) {
-      grouped[skill.type].push(skill.name);
-    }
+    if (grouped[skill.type]) grouped[skill.type].push(skill.name);
   });
-
   return grouped;
 };

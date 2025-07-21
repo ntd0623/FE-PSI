@@ -54,7 +54,7 @@ const QuizManagement = () => {
 
     const fetchData = async () => {
       try {
-        const res = await quizService.getQuizSets();
+        const res = await quizService.getQuizSets("latest");
         if (res && res.errCode === 0) {
           setQuizSets(res.data);
           setStatistics(res.statistics);

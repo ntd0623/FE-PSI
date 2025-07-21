@@ -18,7 +18,6 @@ const CandidateEvaluationQuiz = () => {
   const timerRef = useRef(null);
   const user = useSelector((state) => state.user?.userInfo);
   const navigate = useNavigate();
-
   useEffect(() => {
     if (hasFetched.current) return;
     (async () => {
@@ -26,7 +25,7 @@ const CandidateEvaluationQuiz = () => {
         const res = await quizService.getQuestionByQuizID(
           id,
           1,
-          40,
+          "",
           USER_ROLE.STUDENT
         );
         if (res?.errCode === 3) {
@@ -35,7 +34,10 @@ const CandidateEvaluationQuiz = () => {
         }
         if (res?.errCode === 0 && Array.isArray(res.data)) {
           setQuestions(res.data);
-          setQuizDuration((res?.data?.duration_minutes || 60) * 60);
+          const duration = (res?.duration_minutes || 60) * 60;
+          setQuizDuration(duration);
+          localStorage.setItem("quiz_duration", duration);
+          localStorage.setItem("quiz_total_question", res.data.length);
         }
       } catch (e) {
         console.error("Lỗi lấy dữ liệu câu hỏi:", e);
@@ -43,6 +45,53 @@ const CandidateEvaluationQuiz = () => {
     })();
     hasFetched.current = true;
   }, [id]);
+
+  // prevent devtool
+  useEffect(() => {
+    const detectDevTools = setInterval(() => {
+      const threshold = 160;
+      const widthDiff = window.outerWidth - window.innerWidth > threshold;
+      const heightDiff = window.outerHeight - window.innerHeight > threshold;
+      const isOpen = widthDiff || heightDiff;
+
+      if (isOpen) {
+        document.body.innerHTML =
+          "<div style='text-align:center;margin-top:20vh;font-size:2rem;color:red;'>🚫 Không được mở Developer Tools!</div>";
+      }
+    }, 1000);
+
+    return () => clearInterval(detectDevTools);
+  }, []);
+
+  //prevent click right mouse
+  useEffect(() => {
+    const handleContextMenu = (e) => e.preventDefault();
+    document.addEventListener("contextmenu", handleContextMenu);
+    return () => {
+      document.removeEventListener("contextmenu", handleContextMenu);
+    };
+  }, []);
+
+  const tabSwitchCount = useRef(0);
+
+  useEffect(() => {
+    const handleVisibilityChange = async () => {
+      if (document.hidden) {
+        tabSwitchCount.current++;
+        alert(`🚨 Bạn đã chuyển tab lần ${tabSwitchCount.current}`);
+
+        if (tabSwitchCount.current >= 2) {
+          await forceSubmit();
+        }
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
 
   const currentQuestion = questions[currentIndex];
 
@@ -81,13 +130,27 @@ const CandidateEvaluationQuiz = () => {
   }, [selectedAnswers, reviewMarked, timeLeft]);
 
   useEffect(() => {
-    if (timeLeft === 0 && Object.keys(selectedAnswers).length > 0) {
+    if (timeLeft === 0 && questions.length > 0) {
       handleSubmit();
     }
   }, [timeLeft]);
 
-  const handleSelectAnswer = (questionId, answerId) => {
-    const updated = { ...selectedAnswers, [questionId]: answerId };
+  const handleSelectAnswer = (questionId, answerId, isMulti = false) => {
+    const prevAnswers = selectedAnswers[questionId];
+    let updated;
+
+    if (isMulti) {
+      let newAnswers = Array.isArray(prevAnswers) ? [...prevAnswers] : [];
+      if (newAnswers.includes(answerId)) {
+        newAnswers = newAnswers.filter((id) => id !== answerId);
+      } else {
+        newAnswers.push(answerId);
+      }
+      updated = { ...selectedAnswers, [questionId]: newAnswers };
+    } else {
+      updated = { ...selectedAnswers, [questionId]: answerId };
+    }
+
     setSelectedAnswers(updated);
     saveStateToLocal(timeLeft, updated, reviewMarked);
   };
@@ -137,6 +200,7 @@ const CandidateEvaluationQuiz = () => {
         clearInterval(timerRef.current);
         alert("✅ Nộp bài thành công!");
         localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("quiz_duration");
         setTimeout(() => {
           navigate(path.HOME);
         }, 100);
@@ -153,6 +217,60 @@ const CandidateEvaluationQuiz = () => {
     const m = String(Math.floor(seconds / 60)).padStart(2, "0");
     const s = String(seconds % 60).padStart(2, "0");
     return `${m}:${s}`;
+  };
+  const getDurationUsed = () => {
+    const savedDuration = Number(localStorage.getItem("quiz_duration")) || 0;
+    const realDuration = quizDuration > 0 ? quizDuration : savedDuration;
+    return Math.max(realDuration - timeLeft, 0);
+  };
+  const forceSubmit = async () => {
+    try {
+      const formattedAnswers = Object.entries(selectedAnswers).map(
+        ([question_id, answer_id]) => ({
+          question_id: Number(question_id),
+          answer_id,
+        })
+      );
+
+      const totalQuestion =
+        questions.length > 0
+          ? questions.length
+          : Number(localStorage.getItem("quiz_total_question")) || 0;
+
+      const durationUsed =
+        quizDuration > 0
+          ? quizDuration - timeLeft
+          : Number(localStorage.getItem("quiz_duration")) - timeLeft || 0;
+
+      const payload = {
+        quiz_id: id,
+        answers: formattedAnswers,
+        user_id: user.id,
+        total_question: totalQuestion,
+        duration_used: durationUsed,
+      };
+
+      const res = await quizService.submittedQuiz(payload);
+
+      if (res && res.errCode === 0) {
+        clearInterval(timerRef.current);
+        localStorage.removeItem(STORAGE_KEY);
+        localStorage.removeItem("quiz_duration");
+        localStorage.removeItem("quiz_total_question");
+
+        alert(
+          "🚨 Bài đã được nộp tự động do vi phạm quy tắc!\n✅ Nộp bài thành công!"
+        );
+        setTimeout(() => {
+          navigate(path.HOME);
+        }, 300);
+      } else {
+        alert("❌ Có lỗi khi nộp bài: " + res?.message);
+      }
+    } catch (e) {
+      console.error("❌ Force submit error:", e);
+      alert("❌ Lỗi hệ thống khi ép nộp bài.");
+    }
   };
 
   const goTo = (dir) => {
@@ -256,28 +374,57 @@ const CandidateEvaluationQuiz = () => {
           <p className="text-base font-medium text-gray-800 mb-4">
             {currentQuestion.content}
           </p>
+          {Array.isArray(currentQuestion.images_question) &&
+            currentQuestion.images_question.length > 0 && (
+              <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {currentQuestion.images_question.map((img, idx) => (
+                  <div key={idx} className="text-center">
+                    <img
+                      src={img.image}
+                      alt={img.caption || `Hình ${idx + 1}`}
+                      className="max-h-64 object-contain border rounded mx-auto"
+                    />
+                    {img.caption && (
+                      <p className="text-sm text-gray-500 mt-1 italic">
+                        {img.caption}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+
           <div className="space-y-3">
-            {currentQuestion.answers.map((ans) => (
-              <label
-                key={ans.id}
-                className={`block border px-4 py-3 rounded cursor-pointer transition ${
-                  selectedAnswers[currentQuestion.id] === ans.id
-                    ? "border-blue-600 bg-blue-50"
-                    : "hover:border-blue-400"
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={`question-${currentQuestion.id}`}
-                  className="mr-3 accent-blue-600"
-                  checked={selectedAnswers[currentQuestion.id] === ans.id}
-                  onChange={() =>
-                    handleSelectAnswer(currentQuestion.id, ans.id)
-                  }
-                />
-                {ans.content}
-              </label>
-            ))}
+            {currentQuestion.answers.map((ans) => {
+              const isQT2 = currentQuestion.type === "QT2";
+              const selected =
+                selectedAnswers[currentQuestion.id] || (isQT2 ? [] : null);
+              const isChecked = isQT2
+                ? selected.includes(ans.id)
+                : selected === ans.id;
+
+              return (
+                <label
+                  key={ans.id}
+                  className={`block border px-4 py-3 rounded cursor-pointer transition ${
+                    isChecked
+                      ? "border-blue-600 bg-blue-50"
+                      : "hover:border-blue-400"
+                  }`}
+                >
+                  <input
+                    type={isQT2 ? "checkbox" : "radio"}
+                    name={`question-${currentQuestion.id}`}
+                    className="mr-3 accent-blue-600"
+                    checked={isChecked}
+                    onChange={() =>
+                      handleSelectAnswer(currentQuestion.id, ans.id, isQT2)
+                    }
+                  />
+                  {ans.content}
+                </label>
+              );
+            })}
           </div>
 
           <button
