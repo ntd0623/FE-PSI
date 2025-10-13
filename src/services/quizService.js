@@ -11,7 +11,7 @@ const quizService = {
         return axios.post(`/api/upsert-quiz-set`, data)
     },
     getQuestionByQuizID: (id, page = 1, limit = 5, role = "R1") => {
-        return axios.get(`/api/get-question-by-quizID?id=${id}&page=${page}&limit=${limit}&role=${role}`)
+        return axios.get(`/api/get-question-by-quiz-id?id=${id}&page=${page}&limit=${limit}&role=${role}`)
     },
     deleteQuizSet: (id) => {
         return axios.delete(`/api/delete-quiz-set?id=${id}`)
@@ -21,6 +21,9 @@ const quizService = {
     },
     getQuizResult: () => {
         return axios.get(`/api/get-quiz-result`)
+    },
+    getQuiz: () => {
+        return axios.get(`/api/get-quiz`)
     }
 };
 

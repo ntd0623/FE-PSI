@@ -55,7 +55,7 @@ export default function QuestionTypeSelect({ value, onChange }) {
                     className={`relative flex items-center gap-2 cursor-pointer select-none py-2 px-4 ${
                       active ? "bg-indigo-100 text-indigo-900" : "text-gray-900"
                     } ${selected ? "font-medium" : "font-normal"}`}
-                    style={{ listStyleType: "none" }} // NGĂN hiển thị dấu chấm
+                    style={{ listStyleType: "none" }}
                   >
                     {type.icon}
                     {type.label}

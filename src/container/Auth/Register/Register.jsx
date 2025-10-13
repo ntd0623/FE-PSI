@@ -13,7 +13,7 @@ const Register = () => {
   const recaptchaRef = useRef();
   const navigate = useNavigate();
 
-  const [fullName, setFullName] = useState("");
+  const [full_name, setfull_name] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -42,10 +42,10 @@ const Register = () => {
   const validate = () => {
     const newErrors = {};
 
-    if (!fullName.trim()) {
-      newErrors.fullName = "Họ và tên không được để trống.";
-    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(fullName)) {
-      newErrors.fullName =
+    if (!full_name.trim()) {
+      newErrors.full_name = "Họ và tên không được để trống.";
+    } else if (!/^[a-zA-ZÀ-ỹ\s]+$/.test(full_name)) {
+      newErrors.full_name =
         "Họ và tên chỉ được chứa chữ cái, không chứa số hoặc ký tự đặc biệt.";
     }
 
@@ -88,7 +88,7 @@ const Register = () => {
 
     try {
       const res = await authService.register({
-        name: fullName,
+        name: full_name,
         email: email,
         password: password,
         captcha: captchaToken,
@@ -96,7 +96,7 @@ const Register = () => {
 
       if (res && res.errCode === 3) {
         setCaptchaError(res.message);
-        recaptchaRef.current.reset(); 
+        recaptchaRef.current.reset();
         return;
       }
       if (res && res.errCode === 4) {
@@ -137,20 +137,20 @@ const Register = () => {
             </label>
             <input
               type="text"
-              value={fullName}
+              value={full_name}
               onChange={(e) => {
-                setFullName(e.target.value);
-                setErrors((prev) => ({ ...prev, fullName: "" }));
+                setfull_name(e.target.value);
+                setErrors((prev) => ({ ...prev, full_name: "" }));
               }}
               className={`w-full border ${
-                errors.fullName ? "border-red-500" : "border-gray-300"
+                errors.full_name ? "border-red-500" : "border-gray-300"
               } rounded-md px-3 py-2 focus:outline-none focus:ring-2 ${
-                errors.fullName ? "focus:ring-red-500" : "focus:ring-blue-500"
+                errors.full_name ? "focus:ring-red-500" : "focus:ring-blue-500"
               }`}
               placeholder="Nguyễn Văn A"
             />
-            {errors.fullName && (
-              <p className="text-sm text-red-600 mt-1">{errors.fullName}</p>
+            {errors.full_name && (
+              <p className="text-sm text-red-600 mt-1">{errors.full_name}</p>
             )}
           </div>
 

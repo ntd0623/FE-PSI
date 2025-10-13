@@ -28,6 +28,17 @@ import CandidateEvaluationQuiz from "./Home/Exam/CandidateEvaluationQuiz";
 import QuizListExam from "./Home/Exam/QuizListExam";
 import StudentSubmissions from "./System/Quiz/StudentSubmisstion";
 import AboutPage from "./Home/About/AboutPage";
+import NotFound from "./components/ProtectedRoute/NotFound";
+import EditProfile from "./Home/Profile/EditProfile";
+import QuizSchedules from "./System/Quiz/Schedule/QuizSchedule";
+import QuizScheduleForm from "./System/Quiz/Schedule/CreateScheduleQuiz";
+import UpdateQuizSchedule from "./System/Quiz/Schedule/UpdateSchedule";
+import ClassManagement from "./System/Class/ClassManagement";
+import ClassForm from "./System/Class/CreateClass";
+import ClassUpdate from "./System/Class/UpdateClass";
+import StudentManagement from "./System/Student/StudentManagent";
+import StudentForm from "./System/Student/CreateStudent";
+import StudentUpdateForm from "./System/Student/UpdateStudent";
 export default function App() {
   return (
     <>
@@ -35,11 +46,6 @@ export default function App() {
         <Route path={path.HOME} element={<HomePage />} /> {/* ROUTE LOGIN */}
         <Route path={path.LOGIN} element={<Login />} />{" "}
         <Route path={path.ABOUT} element={<AboutPage />} />{" "}
-        {/* ROUTE LOGIN WITH FACEBOOK */}
-        <Route
-          path={path.FACEBOOK_CALLBACK}
-          element={<FacebookCallback />}
-        />{" "}
         {/* ROUTE REGISTER */}
         <Route path={path.REGISTER} element={<Register />} />{" "}
         {/* Protected route Admin */}
@@ -56,6 +62,24 @@ export default function App() {
             <Route path={path.QUIZ_CREATE} element={<QuizCreate />} />
             <Route path={path.QUIZ_UPDATE} element={<QuizUpdate />} />
             <Route path={path.QUIZ_REVIEW} element={<QuizReview />} />
+            <Route path={path.QUIZ_SCHEDULE} element={<QuizSchedules />} />
+            <Route path={path.CLASS_MANAGEMENT} element={<ClassManagement />} />
+            <Route path={path.CREATE_CLASS} element={<ClassForm />} />
+            <Route path={path.UPDATE_CLASS} element={<ClassUpdate />} />
+            <Route
+              path={path.STUDENT_MANAGEMENT}
+              element={<StudentManagement />}
+            />
+            <Route path={path.CREATE_STUDENT} element={<StudentForm />} />
+            <Route path={path.UPDATE_STUDENT} element={<StudentUpdateForm />} />
+            <Route
+              path={path.UPDATE_QUIZ_SCHEDULE}
+              element={<UpdateQuizSchedule />}
+            />
+            <Route
+              path={path.CREATE_QUIZ_SCHEDULE}
+              element={<QuizScheduleForm />}
+            />
             <Route
               path={path.STUDENT_SUBMISSTION}
               element={<StudentSubmissions />}
@@ -72,6 +96,7 @@ export default function App() {
             <Route path={path.FORM_CV} element={<FormCV />} />{" "}
             <Route path={path.MY_CV} element={<MyCV />} />{" "}
             <Route path={path.PROFILE} element={<Profile />} />{" "}
+            <Route path={path.EIDT_PROFILE} element={<EditProfile />} />{" "}
             <Route path={path.VIEW_CV} element={<UpdateCV />} />{" "}
             <Route
               path={path.QUIZ_EVALUATION}
@@ -83,6 +108,7 @@ export default function App() {
         </Route>
         {/* Unauthorized when it not role */}
         <Route path={path.UNAUTHORIZED} element={<Unauthorized />} />{" "}
+        <Route path="*" element={<NotFound />} />
       </Routes>
       <Toaster position="top-right" />
     </>

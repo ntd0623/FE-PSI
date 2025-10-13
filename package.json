@@ -18,6 +18,8 @@
     "@reduxjs/toolkit": "^2.8.2",
     "axios": "^1.9.0",
     "dayjs": "^1.11.13",
+    "exceljs": "^4.4.0",
+    "file-saver": "^2.0.5",
     "flatpickr": "^4.6.13",
     "gsap": "^3.13.0",
     "html2pdf.js": "^0.10.3",

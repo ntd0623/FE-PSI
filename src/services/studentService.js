@@ -12,7 +12,7 @@ const upsertCV = (data) => {
     return axios.post(`/api/upsert-cv`, data)
 }
 const updateStatusCV = (data) => {
-    return axios.put(`/api/update-cv-by-userId`, data)
+    return axios.put(`/api/update-cv-by-user-id`, data)
 }
 
 const getCVByStudentID = (data) => {
@@ -23,10 +23,33 @@ const getCV = (data) => {
     return axios.get(`/api/get-cv-by-studentID-and-idCv?studentID=${data.studentID}&cvID=${data.cvID}`)
 }
 
+const getAllUser = (current = 1, pageSize = 5, filters = {}) => {
+    return axios.get(`/api/get-user?current=${current}&pageSize=${pageSize}`, { params: { ...filters } })
+}
+
 const deleteCVStudent = (id) => {
     return axios.delete(`/api/delete-cv?id=${id}`)
 }
 
+const getClassForStudent = () => {
+    return axios.get(`/api/get-class-for-student`)
+}
+const createStudent = (data) => {
+    return axios.post(`/api/create-student`, data)
+}
+
+const importExcel = (data) => {
+    return axios.post(`/api/import-students`, data)
+}
+const getStudentById = (id) => {
+    return axios.get(`/api/get-student-by-id?id=${id}`)
+}
+const updateStudent = (data) => {
+    return axios.put(`/api/update-students`, data)
+}
+const deleteStudent = (id) => {
+    return axios.delete(`/api/delete-student?id=${id}`)
+}
 export {
     getInfoCvStudent,
     getAllCode,
@@ -34,5 +57,12 @@ export {
     updateStatusCV,
     getCVByStudentID,
     getCV,
-    deleteCVStudent
+    deleteCVStudent,
+    getAllUser,
+    getClassForStudent,
+    createStudent,
+    importExcel,
+    getStudentById,
+    updateStudent,
+    deleteStudent
 }

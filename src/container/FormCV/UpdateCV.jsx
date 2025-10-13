@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { User, Plus, X } from "lucide-react";
 import { getBase64 } from "../../utils/CommonUtils";
-import { CRUD_ACTIONS } from "../../utils/constant";
+import { CRUD_ACTIONS, path } from "../../utils/constant";
 import { useNavigate, useParams } from "react-router-dom";
 import { navigateToCVPreview } from "../../utils/navigateWithState";
 import { getAllCode, upsertCV, getCV } from "../../services/studentService";
@@ -11,7 +11,7 @@ import "yet-another-react-lightbox/styles.css";
 import toast from "react-hot-toast";
 const UpdateCV = () => {
   const defaultFormData = {
-    fullName: "",
+    full_name: "",
     email: "",
     phone: "",
     birthDay: "",
@@ -21,7 +21,7 @@ const UpdateCV = () => {
     university: "",
     major: "",
     gpa: "",
-    graduationYear: "",
+    graduation_year: "",
     careerGoal: "",
     achievements: "",
     references: "",
@@ -46,7 +46,7 @@ const UpdateCV = () => {
   const hasFetched = useRef(false);
   // Form data
   const [formData, setFormData] = useState({
-    fullName: "",
+    full_name: "",
     email: "",
     phone: "",
     gender: "",
@@ -55,7 +55,7 @@ const UpdateCV = () => {
     major: "",
     degree: "",
     gpa: "",
-    graduationYear: "",
+    graduation_year: "",
     projects: [
       {
         name: "",
@@ -152,7 +152,7 @@ const UpdateCV = () => {
     if (source) {
       if (source === data) {
         setFormData({
-          fullName: source?.formData?.fullName || "",
+          full_name: source?.formData?.full_name || "",
           email: source?.formData?.email || "",
           phone: source?.formData?.phone || "",
           gender: source?.formData?.gender || "",
@@ -161,7 +161,7 @@ const UpdateCV = () => {
           major: source?.formData?.major || "",
           degree: source?.formData?.degree || "",
           gpa: source?.formData?.gpa || "",
-          graduationYear: source?.formData?.graduationYear || "",
+          graduation_year: source?.formData?.graduation_year || "",
           projects: source?.formData?.projects?.map((p) => ({
             name: p.name || "",
             technologies: p.technologies || "",
@@ -209,16 +209,16 @@ const UpdateCV = () => {
         setAvatar(source.avatar || "");
       } else {
         setFormData({
-          fullName: source.fullName || "",
+          full_name: source.full_name || "",
           email: source.email || "",
-          phone: source.phoneNumber || "",
+          phone: source.phone_number || "",
           gender: source.genderID || "",
           address: source.address || "",
-          university: source.schoolName || "",
+          university: source.school_name || "",
           major: source.major || "",
           degree: source.degreeID || "",
           gpa: source.gpa || "",
-          graduationYear: source.graduationYear || "",
+          graduation_year: source.graduation_year || "",
           projects: source.projects?.map((p) => ({
             name: p.name || "",
             technologies: p.technologies || "",
@@ -419,10 +419,10 @@ const UpdateCV = () => {
     const errors = {};
 
     // Full Name
-    if (!formData.fullName.trim()) {
-      errors.fullName = "Họ và tên không được để trống !";
-    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.fullName)) {
-      errors.fullName = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
+    if (!formData.full_name.trim()) {
+      errors.full_name = "Họ và tên không được để trống !";
+    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.full_name)) {
+      errors.full_name = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
     }
 
     // Email
@@ -488,14 +488,14 @@ const UpdateCV = () => {
     }
 
     // graduation Year
-    if (!formData.graduationYear) {
-      errors.graduationYear =
+    if (!formData.graduation_year) {
+      errors.graduation_year =
         "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
     } else if (
-      formData.graduationYear &&
-      !/^[0-9]{4}$/.test(formData.graduationYear)
+      formData.graduation_year &&
+      !/^[0-9]{4}$/.test(formData.graduation_year)
     ) {
-      errors.graduationYear = "Năm tốt nghiệp phải là 4 chữ số !";
+      errors.graduation_year = "Năm tốt nghiệp phải là 4 chữ số !";
     }
 
     //Career objective
@@ -517,46 +517,79 @@ const UpdateCV = () => {
     setFormErrors(errors);
 
     if (Object.keys(errors).length > 0) {
+      toast.error("Vui lòng kiểm tra lại dữ liệu !");
       return;
     }
+
     const confirmed = window.confirm(
       "Bạn có chắc muốn cập nhập lại CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
     );
     if (!confirmed) return;
-    const cv = await upsertCV({
-      cvID: id,
-      userID: user.id,
-      fullName: formData.fullName,
-      email: formData.email,
-      phoneNumber: formData.phone,
-      birthDay: birthDay,
-      genderID: formData.gender,
-      degreeID: formData.degree,
-      address: formData.address,
-      school_name: formData.university,
-      major: formData.major,
-      gpa: formData.gpa,
-      graduationYear: formData.graduationYear,
-      career_objective: formData.careerGoal,
-      archivements: formData.achievements,
-      references: formData.references,
-      skills: formData.skills,
-      experience: formData.experience,
-      projects: formData.projects,
-      image: avatar,
-      action: CRUD_ACTIONS.EDIT,
+    // Clean experience data
+    const cleanedExperience = formData.experience.filter((exp) => {
+      return (
+        exp.nameCompany ||
+        exp.position ||
+        exp.startDate ||
+        exp.endDate ||
+        exp.description ||
+        exp.link
+      );
     });
-    if (cv && cv.errCode === 0) {
-      toast.success("Cập nhập CV thành công !");
-      setFormData(defaultFormData);
-      setAvatar(null);
-      setImageFile(null);
-      setBirthDay(null);
-      localStorage.removeItem("cvData");
-    } else {
-      toast.error("Tạo CV thất bại. Vui lòng thử lại.");
+
+    // Clean projects data
+    const cleanedProjects = formData.projects.filter((proj) => {
+      return (
+        proj.name ||
+        proj.technologies ||
+        proj.description ||
+        proj.link ||
+        proj.start_date ||
+        proj.end_date
+      );
+    });
+    try {
+      const cv = await upsertCV({
+        cvID: id,
+        userID: user.id,
+        full_name: formData.full_name,
+        email: formData.email,
+        phone_number: formData.phone,
+        birthDay: birthDay,
+        genderID: formData.gender,
+        degreeID: formData.degree,
+        address: formData.address,
+        school_name: formData.university,
+        major: formData.major,
+        gpa: formData.gpa,
+        graduation_year: formData.graduation_year,
+        career_objective: formData.careerGoal,
+        archivements: formData.achievements,
+        references: formData.references,
+        skills: formData.skills,
+        experience: cleanedExperience,
+        projects: cleanedProjects,
+        image: avatar,
+        action: CRUD_ACTIONS.EDIT,
+      });
+
+      if (cv && cv.errCode === 0) {
+        toast.success("Cập nhập CV thành công !");
+        setFormData(defaultFormData);
+        setAvatar(null);
+        setImageFile(null);
+        setBirthDay(null);
+        localStorage.removeItem("cvData");
+        navigate(path.MY_CV);
+      } else {
+        toast.error("Sửa CV thất bại. Vui lòng thử lại.");
+      }
+    } catch (error) {
+      console.error("Lỗi hệ thống khi cập nhật CV: ", error);
+      toast.error("Đã xảy ra lỗi hệ thống. Vui lòng thử lại sau.");
     }
   };
+
   // get color skill
   const getSkillBadgeColor = (category) => {
     switch (category) {
@@ -672,18 +705,18 @@ const UpdateCV = () => {
               </label>
               <input
                 type="text"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                value={formData.full_name}
+                onChange={(e) => handleInputChange("full_name", e.target.value)}
                 placeholder="Nhập họ và tên"
                 className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-                  formErrors.fullName
+                  formErrors.full_name
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
               />
-              {formErrors.fullName && (
+              {formErrors.full_name && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.fullName}
+                  {formErrors.full_name}
                 </p>
               )}
             </div>
@@ -934,22 +967,22 @@ const UpdateCV = () => {
               </label>
               <input
                 type="text"
-                value={formData.graduationYear}
+                value={formData.graduation_year}
                 onChange={(e) =>
-                  handleInputChange("graduationYear", e.target.value)
+                  handleInputChange("graduation_year", e.target.value)
                 }
                 placeholder="2024"
                 className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
                   ${
-                    formErrors.graduationYear
+                    formErrors.graduation_year
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:ring-blue-500"
                   }
                   `}
               />
-              {formErrors.graduationYear && (
+              {formErrors.graduation_year && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.graduationYear}
+                  {formErrors.graduation_year}
                 </p>
               )}
             </div>

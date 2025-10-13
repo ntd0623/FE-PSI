@@ -4,7 +4,7 @@ import { FcGoogle } from "react-icons/fc";
 import { FaGithub } from "react-icons/fa";
 import { Eye, EyeOff } from "lucide-react";
 import { GoogleLogin } from "@react-oauth/google";
-import { FaFacebook } from "react-icons/fa";
+// import { FaFacebook } from "react-icons/fa";
 import {
   userLoginSuccess,
   userLoginFail,
@@ -50,7 +50,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isLoggedIn && user) {
-      if (user.roleID === USER_ROLE.ADMIN) {
+      if (user.role_id === USER_ROLE.ADMIN) {
         navigate(path.CV_MANAGEMENT);
       } else {
         navigate(from, { replace: true });
@@ -59,32 +59,32 @@ const Login = () => {
   }, [isLoggedIn, user, navigate]);
 
   // hanlde login facebook
-  useEffect(() => {
-    let isHandled = false;
-    const handleMessage = async (event) => {
-      if (isHandled) return;
-      if (event.data?.type === "facebook-auth-success") {
-        isHandled = true;
-        const token = event.data.accessToken;
-        try {
-          const res = await authService.facebookAuth(token);
-          if (res.errCode === 0 && res.data) {
-            dispatch(userLoginSuccess(res.data));
-            toast.success("Đăng nhập Facebook thành công!");
-            navigate("/");
-          } else {
-            dispatch(userLoginFail());
-            toast.error("Đăng nhập Facebook thất bại!");
-          }
-        } catch (error) {
-          dispatch(userLoginFail());
-          toast.error("Lỗi xác thực Facebook!");
-        }
-      }
-    };
-    window.addEventListener("message", handleMessage);
-    return () => window.removeEventListener("message", handleMessage);
-  }, [dispatch, navigate]);
+  // useEffect(() => {
+  //   let isHandled = false;
+  //   const handleMessage = async (event) => {
+  //     if (isHandled) return;
+  //     if (event.data?.type === "facebook-auth-success") {
+  //       isHandled = true;
+  //       const token = event.data.accessToken;
+  //       try {
+  //         const res = await authService.facebookAuth(token);
+  //         if (res.errCode === 0 && res.data) {
+  //           dispatch(userLoginSuccess(res.data));
+  //           toast.success("Đăng nhập Facebook thành công!");
+  //           navigate("/");
+  //         } else {
+  //           dispatch(userLoginFail());
+  //           toast.error("Đăng nhập Facebook thất bại!");
+  //         }
+  //       } catch (error) {
+  //         dispatch(userLoginFail());
+  //         toast.error("Lỗi xác thực Facebook!");
+  //       }
+  //     }
+  //   };
+  //   window.addEventListener("message", handleMessage);
+  //   return () => window.removeEventListener("message", handleMessage);
+  // }, [dispatch, navigate]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -98,7 +98,7 @@ const Login = () => {
         dispatch(userLoginSuccess(res.data));
         toast.success("Đăng nhập thành công!");
 
-        if (res.data.roleID === USER_ROLE.ADMIN) {
+        if (res?.data?.role_id === USER_ROLE.ADMIN) {
           navigate(path.CV_MANAGEMENT);
         } else {
           navigate(from, { replace: true });
@@ -144,23 +144,23 @@ const Login = () => {
     console.error("Google login thất bại");
   };
 
-  const handleFacebookLogin = () => {
-    const facebookAppId = import.meta.env.VITE_APP_FB_ID;
-    const redirectUri = `https://psi.plt.pro.vn${path.FACEBOOK_CALLBACK}`;
+  // const handleFacebookLogin = () => {
+  //   const facebookAppId = import.meta.env.VITE_APP_FB_ID;
+  //   const redirectUri = `https://psi.plt.pro.vn${path.FACEBOOK_CALLBACK}`;
 
-    const fbLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${facebookAppId}&redirect_uri=${redirectUri}&response_type=token&scope=email,public_profile`;
+  //   const fbLoginUrl = `https://www.facebook.com/v18.0/dialog/oauth?client_id=${facebookAppId}&redirect_uri=${redirectUri}&response_type=token&scope=email,public_profile`;
 
-    const width = 500;
-    const height = 600;
-    const left = window.screenX + (window.innerWidth - width) / 2;
-    const top = window.screenY + (window.innerHeight - height) / 2;
+  //   const width = 500;
+  //   const height = 600;
+  //   const left = window.screenX + (window.innerWidth - width) / 2;
+  //   const top = window.screenY + (window.innerHeight - height) / 2;
 
-    window.open(
-      fbLoginUrl,
-      "Facebook Login",
-      `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
-    );
-  };
+  //   window.open(
+  //     fbLoginUrl,
+  //     "Facebook Login",
+  //     `width=${width},height=${height},left=${left},top=${top},resizable=yes,scrollbars=yes`
+  //   );
+  // };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-200 via-white to-blue-100 px-4">
@@ -299,13 +299,13 @@ const Login = () => {
               useOneTap
             />
           </div>
-          <button
+          {/* <button
             onClick={handleFacebookLogin}
             className="flex-1 flex items-center justify-center gap-2 border border-gray-300 py-2 rounded-md hover:bg-gray-50 transition"
           >
             <FaFacebook className="text-xl text-blue-600" />
             <span className="text-sm font-medium text-blue-600">Facebook</span>
-          </button>
+          </button> */}
         </div>
       </div>
     </div>

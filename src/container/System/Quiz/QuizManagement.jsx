@@ -197,12 +197,12 @@ const QuizManagement = () => {
               key={set.id}
               ref={(el) => (cardRefs.current[index] = el)}
               className="bg-white border cursor-pointer
-            border-gray-200 rounded-xl shadow-md 
-             hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]
-             hover:ring-2 hover:ring-blue-300 
-             hover:scale-105 hover:-translate-y-1 
-             transform transition-all duration-300 ease-in-out
-             p-5 flex flex-col justify-between"
+                          border-gray-200 rounded-xl shadow-md 
+                          hover:shadow-[0_0_20px_rgba(59,130,246,0.4)]
+                          hover:ring-2 hover:ring-blue-300 
+                          hover:scale-105 hover:-translate-y-1 
+                          transform transition-all duration-300 ease-in-out
+                          p-5 flex flex-col justify-between"
             >
               <div
                 onClick={() =>
@@ -211,10 +211,11 @@ const QuizManagement = () => {
                 className="flex items-center gap-4 mb-3"
               >
                 <img
-                  src={set.image}
-                  alt={set.title}
+                  src={set.image || "/default-avatar.png"}
+                  alt="/default-avatar.svg"
                   className="w-14 h-14 rounded-full object-cover border-2 border-blue-500 shadow"
                 />
+
                 <div>
                   <p className="text-lg font-semibold text-gray-800">
                     {set.title}

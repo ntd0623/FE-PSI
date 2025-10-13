@@ -21,9 +21,15 @@ const AdminSideBar = ({ isSidebarOpen, setIsSidebarOpen, menuItems = [] }) => {
   };
 
   const handleLogout = () => {
+    const confirmed = window.confirm("Bạn có chắc chắn muốn đăng xuất?");
+    if (!confirmed) return;
+
     dispatch(processLogout());
-    toast.success("Đăng xuất thành công");
-    navigate(path.LOGIN);
+    toast.success("Đăng xuất thành công", { autoClose: 1500 });
+
+    setTimeout(() => {
+      navigate(path.LOGIN);
+    }, 1500);
   };
 
   useEffect(() => {

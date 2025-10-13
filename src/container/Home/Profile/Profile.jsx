@@ -1,111 +1,102 @@
-import React, { useEffect, useRef } from "react";
-import { useSelector } from "react-redux";
-import { getAvatarColor } from "../../../utils/statusHelper";
-import {
-  FaUser,
-  FaEnvelope,
-  FaUserShield,
-  FaKey,
-  FaIdBadge,
-  FaLock,
-  FaFileAlt,
-  FaBriefcase,
-} from "react-icons/fa";
-import gsap from "gsap";
+import React from "react";
+import { FiMail, FiPhone, FiMapPin } from "react-icons/fi";
+import { useNavigate } from "react-router-dom";
+import { path } from "../../../utils/constant";
 
-const Profile = () => {
-  const user = useSelector((state) => state.user.userInfo);
-  const profileRef = useRef(null);
-
-  useEffect(() => {
-    if (profileRef.current) {
-      gsap.fromTo(
-        profileRef.current,
-        { opacity: 0, y: 30 },
-        { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
-      );
-    }
-  }, []);
-
-  if (!user)
-    return (
-      <div className="text-center py-10">
-        <div className="w-8 h-8 border-4 border-blue-500 border-dashed rounded-full animate-spin mx-auto"></div>
-      </div>
-    );
+const ProfilePage = () => {
+  const navigate = useNavigate();
 
   return (
-    <div className="bg-gray-50 min-h-screen py-10 px-4">
-      <div
-        ref={profileRef}
-        className="max-w-md mx-auto p-6 bg-white shadow-lg rounded-xl"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
-          Thông tin người dùng
-        </h2>
-
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-28 h-28 rounded-full overflow-hidden border-2 border-gray-300">
-            {user?.avatar ? (
-              <img
-                src={user.avatar}
-                alt="avatar"
-                className="w-full h-full object-cover"
-              />
-            ) : (
-              <div
-                className={`${getAvatarColor(
-                  user.name
-                )} w-full h-full flex items-center justify-center text-white font-semibold`}
-              >
-                {user?.name
-                  ? user.name
-                      .split(" ")
-                      .map((word) => word[0])
-                      .join("")
-                      .toUpperCase()
-                  : "N/A"}
-              </div>
-            )}
+    <div className="p-20 bg-gray-50 min-h-screen text-sm text-gray-800 mt-25">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Sidebar */}
+        <div className="bg-white p-6 rounded-xl shadow col-span-1">
+          <div className="w-20 h-20 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+            NM
+          </div>
+          <div className="text-center mb-4">
+            <h2 className="font-semibold text-base">Nguyễn Văn Minh</h2>
+            <p className="text-sm text-gray-400">PLT Solutions</p>
+          </div>
+          <div className="text-center mb-4">
+            <p className="text-gray-600 flex items-center justify-center gap-1 text-sm">
+              <FiMapPin size={14} /> Hồ Chí Minh, Việt Nam
+            </p>
+          </div>
+          <div className="text-center mb-4">
+            <button
+              onClick={() => navigate(path.EIDT_PROFILE)}
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-full text-sm"
+            >
+              Chỉnh sửa hồ sơ
+            </button>
           </div>
 
-          <div className="w-full space-y-4 mt-4">
-            <div className="flex items-center gap-2">
-              <FaUser className="text-blue-500" />
-              <span className="text-gray-600">{user.name}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaEnvelope className="text-green-500" />
-              <span className="text-gray-600">{user.email}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <FaKey className="text-purple-500" />
-              <span className="text-gray-600">{user.provider}</span>
-            </div>
+          {/* Contact */}
+          <div className="text-sm mt-6">
+            <h3 className="font-medium text-gray-700 mb-2">
+              Thông tin liên hệ
+            </h3>
+            <p className="flex items-center gap-2 text-gray-600">
+              <FiMail size={14} /> minh.nguyen@email.com
+            </p>
+            <p className="flex items-center gap-2 mt-1 text-gray-600">
+              <FiPhone size={14} /> 0123 456 789
+            </p>
           </div>
 
-          {/* Stats */}
-          <div className="grid grid-cols-2 gap-4 mt-6 w-full">
-            <div className="bg-gray-100 p-4 rounded text-center shadow">
-              <FaFileAlt className="text-indigo-500 text-xl mx-auto mb-1" />
-              <p className="text-sm font-semibold text-gray-700">3 CV đã gửi</p>
+          {/* Skills */}
+          <div className="mt-6">
+            <h3 className="font-medium text-gray-700 mb-2">Kỹ năng</h3>
+            <div className="flex flex-wrap gap-2">
+              {[
+                "ReactJS",
+                "Vue.js",
+                "JavaScript",
+                "TypeScript",
+                "Tailwind CSS",
+                "Node.js",
+              ].map((skill, i) => (
+                <span
+                  key={i}
+                  className="bg-gray-100 text-gray-700 px-2 py-1 text-xs rounded-full"
+                >
+                  {skill}
+                </span>
+              ))}
             </div>
-            <div className="bg-gray-100 p-4 rounded text-center shadow">
-              <FaBriefcase className="text-yellow-500 text-xl mx-auto mb-1" />
-              <p className="text-sm font-semibold text-gray-700">
-                2 vị trí ứng tuyển
+          </div>
+        </div>
+
+        {/* Main content */}
+        <div className="bg-white p-6 rounded-xl shadow col-span-2">
+          <h2 className="text-base font-semibold mb-4">Hồ sơ cá nhân</h2>
+          <p className="text-sm text-gray-600 mb-6">
+            Đây là hồ sơ cá nhân của bạn trên hệ thống PLT Solutions. Vui lòng
+            đảm bảo thông tin luôn chính xác để nhà tuyển dụng có thể liên hệ và
+            đánh giá chính xác năng lực của bạn.
+          </p>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Hồ sơ ứng tuyển */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Hồ sơ ứng tuyển</h3>
+              <p className="text-sm text-gray-600 mb-1">Số CV đã gửi</p>
+              <p className="text-3xl font-bold text-indigo-600">1</p>
+              <p className="text-sm text-gray-500 mt-2">
+                Cập nhật cuối: <strong>Hôm nay</strong>
               </p>
             </div>
-          </div>
 
-          {/* CTA */}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded mt-6">
-            Cập nhật thông tin cá nhân
-          </button>
-
-          {/* Message */}
-          <div className="mt-4 bg-blue-50 text-blue-700 p-3 rounded text-sm italic">
-            Hãy cập nhật hồ sơ đầy đủ để gia tăng khả năng được tuyển!
+            {/* Trạng thái hồ sơ */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <h3 className="font-medium mb-2">Trạng thái hồ sơ</h3>
+              <ul className="list-disc list-inside space-y-1 text-sm text-gray-600">
+                <li>CV đã gửi thành công</li>
+                <li>Đang chờ nhà tuyển dụng xem</li>
+                <li>Đã nhận được bài đánh giá</li>
+              </ul>
+            </div>
           </div>
         </div>
       </div>
@@ -113,4 +104,4 @@ const Profile = () => {
   );
 };
 
-export default Profile;
+export default ProfilePage;

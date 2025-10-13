@@ -29,10 +29,10 @@ const QuizReview = () => {
             const correctAnswer =
               q.type === "QT2"
                 ? q.answers.reduce((acc, a, i) => {
-                    if (a.isCorrect) acc.push(i);
+                    if (a.is_correct) acc.push(i);
                     return acc;
                   }, [])
-                : q.answers.findIndex((a) => a.isCorrect);
+                : q.answers.findIndex((a) => a.is_correct);
             return {
               ...q,
               options,

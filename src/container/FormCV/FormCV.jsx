@@ -3,7 +3,7 @@ import { User, Plus, X } from "lucide-react";
 import { MdInfoOutline } from "react-icons/md";
 import { getBase64 } from "../../utils/CommonUtils";
 import { useNavigate } from "react-router-dom";
-import { CRUD_ACTIONS } from "../../utils/constant";
+import { CRUD_ACTIONS, path } from "../../utils/constant";
 import { navigateToCVPreview } from "../../utils/navigateWithState";
 import { getAllCode, upsertCV } from "../../services/studentService";
 import { useSelector } from "react-redux";
@@ -12,7 +12,7 @@ import "yet-another-react-lightbox/styles.css";
 import toast from "react-hot-toast";
 const FormCV = () => {
   const defaultFormData = {
-    fullName: "",
+    full_name: "",
     email: "",
     phone: "",
     birthDay: "",
@@ -22,7 +22,7 @@ const FormCV = () => {
     university: "",
     major: "",
     gpa: "",
-    graduationYear: "",
+    graduation_year: "",
     careerGoal: "",
     achievements: "",
     references: "",
@@ -44,7 +44,7 @@ const FormCV = () => {
   const hasFetched = useRef(false);
   // Form data
   const [formData, setFormData] = useState({
-    fullName: "",
+    full_name: "",
     email: "",
     phone: "",
     gender: "",
@@ -53,7 +53,7 @@ const FormCV = () => {
     major: "",
     degree: "",
     gpa: "",
-    graduationYear: "",
+    graduation_year: "",
     projects: [
       {
         name: "",
@@ -263,10 +263,10 @@ const FormCV = () => {
     const errors = {};
 
     // Full Name
-    if (!formData.fullName.trim()) {
-      errors.fullName = "Họ và tên không được để trống !";
-    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.fullName)) {
-      errors.fullName = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
+    if (!formData.full_name.trim()) {
+      errors.full_name = "Họ và tên không được để trống !";
+    } else if (!/^[a-zA-ZÀ-ỹ\s'.-]+$/.test(formData.full_name)) {
+      errors.full_name = "Họ và tên không được chứa số hoặc ký tự đặc biệt !";
     }
 
     // Email
@@ -332,14 +332,14 @@ const FormCV = () => {
     }
 
     // graduation Year
-    if (!formData.graduationYear) {
-      errors.graduationYear =
+    if (!formData.graduation_year) {
+      errors.graduation_year =
         "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
     } else if (
-      formData.graduationYear &&
-      !/^[0-9]{4}$/.test(formData.graduationYear)
+      formData.graduation_year &&
+      !/^[0-9]{4}$/.test(formData.graduation_year)
     ) {
-      errors.graduationYear = "Năm tốt nghiệp phải là 4 chữ số !";
+      errors.graduation_year = "Năm tốt nghiệp phải là 4 chữ số !";
     }
 
     //Career objective
@@ -367,11 +367,36 @@ const FormCV = () => {
       "Bạn có chắc muốn gửi CV không? Hãy chắc rằng bạn đã xem lại toàn bộ thông tin."
     );
     if (!confirmed) return;
+
+    // Clean experience data
+    const cleanedExperience = formData.experience.filter((exp) => {
+      return (
+        exp.nameCompany ||
+        exp.position ||
+        exp.startDate ||
+        exp.endDate ||
+        exp.description ||
+        exp.link
+      );
+    });
+
+    // Clean projects data
+    const cleanedProjects = formData.projects.filter((proj) => {
+      return (
+        proj.name ||
+        proj.technologies ||
+        proj.description ||
+        proj.link ||
+        proj.start_date ||
+        proj.end_date
+      );
+    });
+
     const cv = await upsertCV({
       userID: user.id,
-      fullName: formData.fullName,
+      full_name: formData.full_name,
       email: formData.email,
-      phoneNumber: formData.phone,
+      phone_number: formData.phone,
       birthDay: birthDay,
       genderID: formData.gender,
       degreeID: formData.degree,
@@ -379,13 +404,13 @@ const FormCV = () => {
       school_name: formData.university,
       major: formData.major,
       gpa: formData.gpa,
-      graduationYear: formData.graduationYear,
+      graduation_year: formData.graduation_year,
       career_objective: formData.careerGoal,
       archivements: formData.achievements,
       references: formData.references,
       skills: formData.skills,
-      experience: formData.experience,
-      projects: formData.projects,
+      experience: cleanedExperience,
+      projects: cleanedProjects,
       image: avatar,
       action: CRUD_ACTIONS.ADD,
     });
@@ -396,6 +421,7 @@ const FormCV = () => {
       setImageFile(null);
       setBirthDay(" ");
       localStorage.removeItem("cvData");
+      navigate(path.MY_CV);
     } else {
       toast.error("Tạo CV thất bại. Vui lòng thử lại.");
     }
@@ -514,18 +540,18 @@ const FormCV = () => {
               </label>
               <input
                 type="text"
-                value={formData.fullName}
-                onChange={(e) => handleInputChange("fullName", e.target.value)}
+                value={formData.full_name}
+                onChange={(e) => handleInputChange("full_name", e.target.value)}
                 placeholder="Nhập họ và tên"
                 className={`w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 ${
-                  formErrors.fullName
+                  formErrors.full_name
                     ? "border-red-500 focus:ring-red-500"
                     : "border-gray-300 focus:ring-blue-500"
                 }`}
               />
-              {formErrors.fullName && (
+              {formErrors.full_name && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.fullName}
+                  {formErrors.full_name}
                 </p>
               )}
             </div>
@@ -776,22 +802,22 @@ const FormCV = () => {
               </label>
               <input
                 type="text"
-                value={formData.graduationYear}
+                value={formData.graduation_year}
                 onChange={(e) =>
-                  handleInputChange("graduationYear", e.target.value)
+                  handleInputChange("graduation_year", e.target.value)
                 }
                 placeholder="2024"
                 className={`w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500
                   ${
-                    formErrors.graduationYear
+                    formErrors.graduation_year
                       ? "border-red-500 focus:ring-red-500"
                       : "border-gray-300 focus:ring-blue-500"
                   }
                   `}
               />
-              {formErrors.graduationYear && (
+              {formErrors.graduation_year && (
                 <p className="text-red-500 text-sm mt-1">
-                  {formErrors.graduationYear}
+                  {formErrors.graduation_year}
                 </p>
               )}
             </div>
@@ -1106,7 +1132,6 @@ const FormCV = () => {
             </div>
           </div>
         </div>
-        
 
         {/* Projects */}
         <div className="mb-8">

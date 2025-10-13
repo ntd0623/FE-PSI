@@ -82,19 +82,19 @@ const CVManagement = () => {
     SUBMITTED:
       listStudent &&
       listStudent.length > 0 &&
-      listStudent.filter((s) => s.statusCv === STATUS_CV.SUBMITTED).length,
+      listStudent.filter((s) => s.status_cv === STATUS_CV.SUBMITTED).length,
     APPROVED:
       listStudent &&
       listStudent.length > 0 &&
-      listStudent.filter((s) => s.statusCv === STATUS_CV.APPROVED).length,
+      listStudent.filter((s) => s.status_cv === STATUS_CV.APPROVED).length,
     REJECT:
       listStudent &&
       listStudent.length > 0 &&
-      listStudent.filter((s) => s.statusCv === STATUS_CV.REJECT).length,
+      listStudent.filter((s) => s.status_cv === STATUS_CV.REJECT).length,
     IN_REVIEW:
       listStudent &&
       listStudent.length > 0 &&
-      listStudent.filter((s) => s.statusCv === STATUS_CV.IN_REVIEW).length,
+      listStudent.filter((s) => s.status_cv === STATUS_CV.IN_REVIEW).length,
   };
 
   const statusCards = [
@@ -103,7 +103,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.SUBMITTED)?.value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.SUBMITTED)?.value_vi,
       color: "bg-yellow-100 text-yellow-800",
     },
     {
@@ -111,7 +111,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.APPROVED)?.value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.APPROVED)?.value_vi,
       color: "bg-green-100 text-green-800",
     },
     {
@@ -119,7 +119,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.REJECT)?.value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.REJECT)?.value_vi,
       color: "bg-red-100 text-red-800",
     },
     {
@@ -127,7 +127,7 @@ const CVManagement = () => {
       label:
         listStatusCV &&
         listStatusCV.length > 0 &&
-        listStatusCV.find((item) => item.key === STATUS_CV.IN_REVIEW)?.value_VI,
+        listStatusCV.find((item) => item.key === STATUS_CV.IN_REVIEW)?.value_vi,
       color: "bg-blue-100 text-blue-800",
     },
   ];
@@ -135,21 +135,21 @@ const CVManagement = () => {
   const handleUpdateStatus = async (student, status) => {
     setLoading(true);
     try {
-      const res = await updateStatusCV({ id: student.id, statusCv: status });
+      const res = await updateStatusCV({ id: student.id, status_cv: status });
       if (res && res.errCode === 0) {
         if (status === "CV2") {
           toast.success(
-            `CV của ${student.fullName} đã chuyển sang trạng thái đang xem xét`
+            `CV của ${student.full_name} đã chuyển sang trạng thái đang xem xét`
           );
         }
         if (status === "CV3") {
           toast.success(
-            `CV của ${student.fullName} đã chuyển sang trạng thái đạt yêu cầu`
+            `CV của ${student.full_name} đã chuyển sang trạng thái đạt yêu cầu`
           );
         }
         if (status === "CV4") {
           toast.success(
-            `CV của ${student.fullName} đã chuyển sang trạng thái bị từ chối`
+            `CV của ${student.full_name} đã chuyển sang trạng thái bị từ chối`
           );
         }
         await fetchFilteredStudents(selectedStatus, selectedFilter, page);
@@ -199,7 +199,7 @@ const CVManagement = () => {
             listIntership.map((item, index) => {
               return (
                 <option key={index} value={item.key}>
-                  {item.value_VI}
+                  {item.value_vi}
                 </option>
               );
             })}
@@ -215,7 +215,7 @@ const CVManagement = () => {
             listStatusCV.map((item, index) => {
               return (
                 <option key={index} value={item.key}>
-                  {item.value_VI}
+                  {item.value_vi}
                 </option>
               );
             })}
@@ -257,8 +257,8 @@ const CVManagement = () => {
                       <div
                         className={`w-full h-full bg-blue-500 flex items-center justify-center`}
                       >
-                        {student?.fullName
-                          ? student.fullName
+                        {student?.full_name
+                          ? student.full_name
                               .split(" ")
                               .map((word) => word[0])
                               .join("")
@@ -269,7 +269,7 @@ const CVManagement = () => {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                      {student.fullName}
+                      {student.full_name}
                     </h3>
                     <p className="text-sm text-gray-600 mb-3">
                       {student.email}
@@ -279,7 +279,7 @@ const CVManagement = () => {
                         <span className="text-gray-500 font-medium block">
                           TRƯỜNG
                         </span>
-                        <p className="text-gray-900">{student.schoolName}</p>
+                        <p className="text-gray-900">{student.school_name}</p>
                       </div>
                       <div>
                         <span className="text-gray-500 font-medium block">
@@ -305,19 +305,19 @@ const CVManagement = () => {
                     <div className="grid grid-cols-1 md:grid-cols-1 gap-4 text-sm mb-4">
                       <div className="flex items-center gap-5">
                         <span className="text-gray-600 bg-gray-100 px-3 py-1 rounded-3xl text-sm font-medium">
-                          {student?.internshipBatch?.dataInternship.value_VI}
+                          {student?.internshipBatch?.dataInternship.value_vi}
                         </span>
                         <span
                           className={`inline-block px-2 py-1 text-xs font-medium rounded-3xl ${getStatusColor(
                             student?.statusCv
                           )}`}
                         >
-                          {student?.dataStatus?.value_VI}
+                          {student?.dataStatus?.value_vi}
                         </span>
                       </div>
                     </div>
-                    {(student.statusCv === STATUS_CV.SUBMITTED ||
-                      student.statusCv === STATUS_CV.IN_REVIEW) && (
+                    {(student.status_cv === STATUS_CV.SUBMITTED ||
+                      student.status_cv === STATUS_CV.IN_REVIEW) && (
                       <div className="flex flex-wrap gap-6 my-8">
                         <button
                           onClick={() =>
@@ -345,7 +345,7 @@ const CVManagement = () => {
                   </span>
                   <div className="bg-white border border-gray-200 rounded-md h-40 flex items-center justify-center mb-4">
                     <span className="text-sm font-semibold text-gray-700 text-center">
-                      CV {student.fullName}
+                      CV {student.full_name}
                     </span>
                   </div>
                   <div className="flex flex-col space-y-1">

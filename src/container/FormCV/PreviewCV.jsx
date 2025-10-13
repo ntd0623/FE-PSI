@@ -63,8 +63,8 @@ export default function CVPreview() {
 
   const validateForm = () => {
     const errors = {};
-    if (!cvData.formData.fullName.trim()) {
-      errors.fullName = "Họ và tên không được để trống !";
+    if (!cvData.formData.full_name.trim()) {
+      errors.full_name = "Họ và tên không được để trống !";
     }
     if (!cvData.formData.email.trim()) {
       errors.email = "Email không được để trống !";
@@ -94,8 +94,8 @@ export default function CVPreview() {
       errors.gpa =
         "Điểm số không được bỏ trống. Có thể lấy tổng điểm gần nhất!";
     }
-    if (!cvData.formData.graduationYear) {
-      errors.graduationYear =
+    if (!cvData.formData.graduation_year) {
+      errors.graduation_year =
         "Năm tốt nghiệp không được bỏ trống. Có thể để năm tốt nghiệp dự kiến";
     }
     if (!cvData.formData.careerGoal) {
@@ -107,9 +107,6 @@ export default function CVPreview() {
     return errors;
   };
 
-
-
-  
   const handleSubmit = async () => {
     const errors = validateForm();
     setFormErrors(errors);
@@ -121,9 +118,9 @@ export default function CVPreview() {
 
     const cv = await upsertCV({
       userID: user.id,
-      fullName: cvData.formData.fullName,
+      full_name: cvData.formData.full_name,
       email: cvData.formData.email,
-      phoneNumber: cvData.formData.phone,
+      phone_number: cvData.formData.phone,
       birthDay: cvData.birthDay,
       genderID: cvData.formData.gender,
       degreeID: cvData.formData.degree,
@@ -131,7 +128,7 @@ export default function CVPreview() {
       school_name: cvData.formData.university,
       major: cvData.formData.major,
       gpa: cvData.formData.gpa,
-      graduationYear: cvData.formData.graduationYear,
+      graduation_year: cvData.formData.graduation_year,
       career_objective: cvData.formData.careerGoal,
       archivements: cvData.formData.achievements,
       references: cvData.formData.references,
@@ -156,8 +153,8 @@ export default function CVPreview() {
     printWindow.document.write(`
   <html>
     <head>
-      <title>CV Preview</title>
-      <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&display=swap" rel="stylesheet">
+      <title>CV Detail</title>
+      <link href="https://fonts.googleapis.com/css2?family=Times+New+Roman:wght@400;600;700&display=swap" rel="stylesheet">
       <style>
         @page { 
           size: A4; 
@@ -171,7 +168,7 @@ export default function CVPreview() {
         }
         
         body { 
-          font-family: 'Cormorant Garamond', serif; 
+          font-family: 'Times New Roman', Times, serif; 
           margin: 0; 
           padding: 0; 
           width: 210mm;
@@ -230,9 +227,10 @@ export default function CVPreview() {
           background-color: #6366f1 !important;
         }
         
+        /* Typography - Fixed font declarations */
         .cv-name {
-          font-family: 'Times New Roman', Times, serif;
-          font-size: 60px !important;
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 24px !important;
           font-weight: bold !important;
           color: #1e3a8a !important;
           margin-bottom: 8px !important;
@@ -241,7 +239,7 @@ export default function CVPreview() {
         }
         
         .cv-title {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           font-size: 24px !important;
           font-style: italic !important;
           color: #1d4ed8 !important;
@@ -249,10 +247,11 @@ export default function CVPreview() {
           letter-spacing: 0.05em !important;
         }
         
+        /* Section Headings */
         .cv-section-title {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1e3a8a !important;
-          font-size: 16px !important;
+          font-size: 24px !important;
           font-weight: 700 !important;
           text-transform: uppercase !important;
           letter-spacing: 0.2em !important;
@@ -261,7 +260,7 @@ export default function CVPreview() {
         }
         
         .cv-section-heading {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1e3a8a !important;
           font-size: 20px !important;
           font-weight: 600 !important;
@@ -278,60 +277,88 @@ export default function CVPreview() {
           flex: 1 !important;
         }
         
+        /* Skills styling */
         .skills-section {
           width: 100% !important;
           margin-bottom: 24px !important;
         }
-        
+
+        .skills-title {
+          font-family: 'Times New Roman', Times, serif !important;
+          color: #1e3a8a !important; 
+          font-size: 32px !important;
+          font-weight: bold !important;
+          text-align: center !important;
+          margin-bottom: 16px !important;
+        }
+
         .skills-categories {
           display: flex !important;
-          flex-direction: row !important;
           justify-content: space-between !important;
           width: 100% !important;
           gap: 24px !important;
         }
-        
+
         .skill-category {
           flex: 1 !important;
           text-align: center !important;
         }
-        
+
         .skill-category-title {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1e3a8a !important;
           font-size: 20px !important;
           font-weight: 600 !important;
           margin-bottom: 8px !important;
         }
-        
+
         .skill-list {
           list-style-type: disc !important;
           margin: 0 !important;
           padding-left: 20px !important;
           text-align: left !important;
         }
-        
+
+          .cv-skill-content {
+          font-family: 'Times New Roman', Times, serif;
+          text-align: left !important;
+          padding:10px !important;
+          margin-left: 20px !important;
+        }
+
+        .cv-skill-content li {
+          line-height: 1.6 !important;
+        }
+
         .skill-item {
-          margin-bottom: 4px !important;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #374151 !important;
           font-size: 16px !important;
+          margin-bottom: 4px !important;
           line-height: 1.4 !important;
         }
         
+        /* Contact styling with icons */
         .contact-container {
           width: 100% !important;
         }
+
         
-        .contact-item {
-          display: flex !important;
-          align-items: center !important;
-          gap: 8px !important;
-          margin-bottom: 12px !important;
-          color: #374151 !important;
-          font-size: 16px !important;
-          margin-left: 8px !important;
-          font-family: 'Times New Roman', Times, serif;
-        }
+        
+.contact-item {
+  display: grid !important;
+  grid-template-columns: auto 1fr !important;
+  align-items: start !important;
+  column-gap: 8px !important;
+  margin-bottom: 12px !important;
+  font-family: 'Times New Roman', Times, serif !important;
+  font-size: 16px !important;
+  color: #374151 !important;
+  margin-left: 8px !important;
+  overflow-wrap: break-word !important;
+   whitespace-normal !important;
+  word-break: break-word !important;
+}
         
         .contact-icon {
           width: 16px !important;
@@ -340,6 +367,7 @@ export default function CVPreview() {
           margin-right: 8px !important;
         }
         
+        /* Fallback icons using CSS symbols */
         .contact-phone:before {
           content: "📞" !important;
           margin-right: 10px !important;
@@ -355,7 +383,9 @@ export default function CVPreview() {
           margin-right: 10px !important;
         }
         
+        /* Content sections */
         .content-text {
+          font-family: 'Times New Roman', Times, serif !important;
           color: #374151 !important;
           font-size: 16px !important;
           line-height: 1.6 !important;
@@ -374,15 +404,15 @@ export default function CVPreview() {
           font-size: 18px !important;
           font-weight: 600 !important;
           color: #1e3a8a !important;
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           margin-bottom: 4px !important;
         }
         
         .education-details, .experience-position {
+          font-family: 'Times New Roman', Times, serif !important;
           font-size: 16px !important;
           font-style: italic !important;
           color: #1d4ed8 !important;
-          font-family: 'Times New Roman', Times, serif;
           margin-bottom: 4px !important;
         }
         
@@ -398,6 +428,7 @@ export default function CVPreview() {
           margin-bottom: 4px !important;
           color: #374151 !important;
           font-size: 16px !important;
+          font-family: 'Times New Roman', Times, serif !important;
         }
         
         .experience-list li:before {
@@ -409,6 +440,7 @@ export default function CVPreview() {
           flex-shrink: 0 !important;
         }
         
+        /* Projects */
         .project-item {
           margin-bottom: 16px !important;
         }
@@ -416,7 +448,7 @@ export default function CVPreview() {
         .project-title {
           font-weight: 600 !important;
           color: #1e3a8a !important;
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           font-size: 18px !important;
           margin-bottom: 4px !important;
         }
@@ -424,7 +456,7 @@ export default function CVPreview() {
         .project-tech {
           font-style: italic !important;
           color: #1d4ed8 !important;
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           font-size: 16px !important;
           margin-bottom: 4px !important;
         }
@@ -433,28 +465,28 @@ export default function CVPreview() {
           font-family: 'Times New Roman', Times, serif !important;
           font-weight: 600 !important;
           color: #1e3a8a !important;
-          font-size: 1.125rem !important;
+          font-size: 1.125rem !important; /* 18px */
           margin-bottom: 4px !important;
         }
-        
+
         .cv-project-content {
           font-family: 'Times New Roman', Times, serif !important;
           font-style: italic !important;
           color: #1a73e8 !important;
-          font-size: 1rem !important;
+          font-size: 1rem !important; /* 16px */
           margin-bottom: 8px !important;
         }
-        
+
         .cv-project-description {
           font-family: 'Times New Roman', Times, serif !important;
           color: #374151 !important;
-          font-size: 1rem !important;
+          font-size: 1rem !important; /* 16px */
           line-height: 1.6 !important;
           margin-bottom: 8px !important;
         }
-        
+
         .edu-school {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1e3a8a !important;
           font-size: 18px !important;
           font-weight: 600 !important;
@@ -462,7 +494,7 @@ export default function CVPreview() {
         }
         
         .edu-graduation-year {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1d4ed8 !important;
           font-size: 16px !important;
           font-style: italic !important;
@@ -471,7 +503,7 @@ export default function CVPreview() {
         }
         
         .edu-major-degree {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1d4ed8 !important;
           font-size: 16px !important;
           font-style: italic !important;
@@ -479,7 +511,7 @@ export default function CVPreview() {
         }
         
         .edu-gpa {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1d4ed8 !important;
           font-size: 16px !important;
           font-weight: bold !important;
@@ -487,7 +519,7 @@ export default function CVPreview() {
         }
         
         .exp-date {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1e3a8a !important;
           font-size: 18px !important;
           font-weight: 600 !important;
@@ -495,7 +527,7 @@ export default function CVPreview() {
         }
         
         .exp-position {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
           color: #1d4ed8 !important;
           font-size: 16px !important;
           font-style: italic !important;
@@ -503,18 +535,33 @@ export default function CVPreview() {
         }
         
         .exp-description {
-          font-family: 'Times New Roman', Times, serif;
+          font-family: 'Times New Roman', Times, serif !important;
+          color: #374151 !important;
+          font-size: 16px !important;
+          line-height: 1.6 !important;
+          margin-bottom: 4px !important;
+        }
+
+        .exp-company {
+          font-family: 'Times New Roman', Times, serif !important;
+          margin-left: 8px !important;
+        }
+        
+        .project-description {
+          font-family: 'Times New Roman', Times, serif !important;
           color: #374151 !important;
           font-size: 16px !important;
           line-height: 1.6 !important;
           margin-bottom: 4px !important;
         }
         
-        .exp-company {
-          font-family: 'Times New Roman', Times, serif;
-          margin-left: 8px !important;
+        .project-link {
+          font-family: 'Times New Roman', Times, serif !important;
+          font-size: 12px !important;
+          color: #1d4ed8 !important;
         }
         
+        /* Dividers */
         .cv-divider {
           width: 100% !important;
           height: 1px !important;
@@ -528,10 +575,12 @@ export default function CVPreview() {
           margin: 24px 0 !important;
         }
         
+        /* Hide elements that shouldn't print */
         .print\\:hidden {
           display: none !important;
         }
         
+        /* Responsive adjustments for print */
         @media print {
           .print-area {
             width: 210mm !important;
@@ -617,14 +666,21 @@ export default function CVPreview() {
               <div
                 className={`w-40 h-40 rounded-full text-white flex items-center justify-center text-4xl font-bold cv-avatar`}
               >
-                {cvData?.formData?.fullName
-                  ? cvData.formData.fullName
+                {cvData?.formData?.full_name
+                  ? cvData.formData.full_name
                       .split(" ")
                       .map((w) => w[0])
                       .join("")
                       .toUpperCase()
                   : ""}
               </div>
+            )}
+          </div>
+          <div className="mb-6">
+            {cvData?.formData?.full_name && (
+              <h1 className="cv-name text-3xl font-serif font-bold text-blue-900 mb-2 tracking-wide">
+                {cvData.formData.full_name}
+              </h1>
             )}
           </div>
 
@@ -635,7 +691,7 @@ export default function CVPreview() {
             skillGroups.softSkills.length > 0 ||
             skillGroups.languages.length > 0) && (
             <>
-              <SectionTitle title="Skills" />
+              <SectionTitle title="Kỹ Năng" />
               <SkillList
                 programming={skillGroups.programming}
                 softSkills={skillGroups.softSkills}
@@ -650,7 +706,7 @@ export default function CVPreview() {
             cvData?.formData?.email ||
             cvData?.formData?.address) && (
             <>
-              <SectionTitle title="Contact" />
+              <SectionTitle title="Liên Hệ" />
               <div className="flex flex-col font-serif gap-3 text-gray-700 text-base mt-2 w-full">
                 {cvData?.formData?.phone && (
                   <InfoRow icon={<FiPhone />} text={cvData.formData.phone} />
@@ -668,26 +724,10 @@ export default function CVPreview() {
 
         {/* Right Panel */}
         <div className="cv-right px-10 py-10 print:break-inside-avoid">
-          {/* Name */}
-          {cvData?.formData?.fullName && (
-            <h1 className="cv-name text-5xl font-serif font-bold text-blue-900 mb-2 tracking-wide">
-              {cvData.formData.fullName}
-            </h1>
-          )}
-
-          {/* Title - Career Goal as title */}
-          {cvData?.formData?.careerGoal && (
-            <div className="cv-title text-2xl font-serif italic text-blue-700 mb-8 tracking-wide">
-              {cvData.formData.careerGoal.slice(0, 50)}...
-            </div>
-          )}
-
-          <hr className="border-t border-blue-200 mb-6" />
-
           {/* Profile/Career Objective */}
           {cvData?.formData?.careerGoal && (
             <>
-              <SectionHeading title="Profile" />
+              <SectionHeading title="Mục Tiêu Nghề Nghiệp" />
               <div className="text-gray-700 text-base mb-8">
                 {cvData.formData.careerGoal}
               </div>
@@ -696,17 +736,17 @@ export default function CVPreview() {
 
           {/* Education */}
           {(cvData?.formData?.university ||
-            cvData?.formData?.graduationYear ||
+            cvData?.formData?.graduation_year ||
             cvData?.formData?.major ||
             cvData?.degreeValue ||
             cvData?.formData?.gpa) && (
             <>
-              <SectionHeading title="Education History" />
+              <SectionHeading title="Học Vấn" />
               <div className="mb-8">
                 <EduList
                   education={{
-                    schoolName: cvData?.formData?.university,
-                    graduationYear: cvData?.formData?.graduationYear,
+                    school_name: cvData?.formData?.university,
+                    graduation_year: cvData?.formData?.graduation_year,
                     major: cvData?.formData?.major,
                     dataDegree: cvData?.degreeValue,
                     gpa: cvData?.formData?.gpa,
@@ -719,7 +759,7 @@ export default function CVPreview() {
           {/* Work Experience */}
           {transformedExperiences && transformedExperiences.length > 0 && (
             <>
-              <SectionHeading title="Work Experience" />
+              <SectionHeading title="Kinh Nghiệm Làm Việc" />
               <div>
                 <ExpList experiences={transformedExperiences} />
               </div>
@@ -729,7 +769,7 @@ export default function CVPreview() {
           {/* Projects */}
           {transformedProjects && transformedProjects.length > 0 && (
             <>
-              <SectionHeading title="Projects" />
+              <SectionHeading title="Dự Án Nổi Bật" />
               <div className="mb-8">
                 {transformedProjects.map((p, i) => (
                   <Project
@@ -749,7 +789,7 @@ export default function CVPreview() {
           {/* Achievements */}
           {cvData?.formData?.achievements?.trim() && (
             <>
-              <SectionHeading title="Achievements" />
+              <SectionHeading title="Thành tựu" />
               <div className="text-gray-700 text-base mb-8">
                 {cvData.formData.achievements}
               </div>
@@ -759,7 +799,7 @@ export default function CVPreview() {
           {/* References */}
           {cvData?.formData?.references?.trim() && (
             <>
-              <SectionHeading title="References" />
+              <SectionHeading title="Người Tham Khảo" />
               <div className="text-gray-700 text-base mb-8">
                 {cvData.formData.references}
               </div>
@@ -777,7 +817,7 @@ export default function CVPreview() {
           </p>
           <div className="bg-gray-100 p-3 rounded mb-3">
             <p className="text-sm text-gray-700">
-              {cvData?.formData?.fullName}
+              {cvData?.formData?.full_name}
             </p>
             <p className="text-sm text-gray-700">{cvData?.formData?.email}</p>
             <p className="text-sm text-gray-700">
@@ -816,8 +856,8 @@ function SectionTitle({ title }) {
 
 function SectionHeading({ title }) {
   return (
-    <div className="font-serif text-blue-900 text-xl mb-2 mt-6 font-semibold tracking-wide flex items-center gap-2 cv-section-heading">
-      <span>{title}</span>
+    <div className="text-blue-900 text-xl mb-2 mt-6 font-semibold tracking-wide flex items-center gap-2 cv-section-heading">
+      <span className="text-3xl">{title}</span>
       <span className="flex-1 border-t border-blue-200"></span>
     </div>
   );
@@ -825,9 +865,11 @@ function SectionHeading({ title }) {
 
 function InfoRow({ icon, text }) {
   return (
-    <div className="flex items-center gap-2">
-      {icon}
-      <span>{text}</span>
+    <div className="flex items-start gap-2 w-full break-words contact-item">
+      <div className="w-5 h-5 text-blue-600 shrink-0 mt-[2px]">{icon}</div>
+      <div className="text-sm text-gray-800 leading-snug break-words">
+        {text}
+      </div>
     </div>
   );
 }
@@ -837,46 +879,50 @@ function SkillList({ programming, softSkills, languages }) {
     <div className="w-full mb-6">
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {/* Technical Skills */}
-        <div className="flex flex-col">
-          <h3 className="font-serif text-blue-900 font-semibold mb-2">
-            Technical
-          </h3>
-          <ul className="list-inside font-serif text-gray-700">
-            {programming.map((skill, idx) => (
-              <li key={idx} className="mb-1">
-                {skill}
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        {programming.length > 0 && (
+          <div className="flex flex-col">
+            <h3 className="cv-skill-title text-blue-900 font-semibold mb-2">
+              Kỹ Năng Kỹ Thuật
+            </h3>
+            <ul className="cv-skill-content text-gray-700">
+              {programming.map((skill, idx) => (
+                <li key={idx} className="mb-1">
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {/* Soft Skills */}
-        <div className="flex flex-col">
-          <h3 className="font-serif text-blue-900 font-serif font-semibold mb-2">
-            Soft Skills
-          </h3>
-          <ul className="text-gray-700">
-            {softSkills.map((skill, idx) => (
-              <li key={idx} className="mb-1">
-                {skill}
-              </li>
-            ))}
-          </ul>
-        </div>
-
+        {softSkills.length > 0 && (
+          <div className="flex flex-col">
+            <h3 className="cv-skill-title text-blue-900 font-semibold mb-2">
+              Kỹ Năng Mềm
+            </h3>
+            <ul className="cv-skill-content text-gray-700">
+              {softSkills.map((skill, idx) => (
+                <li key={idx} className="mb-1">
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {/* Languages */}
-        <div className="flex flex-col">
-          <h3 className="font-serif text-blue-900 font-serif font-semibold mb-2">
-            Languages
-          </h3>
-          <ul className="text-gray-700">
-            {languages.map((skill, idx) => (
-              <li key={idx} className="mb-1">
-                {skill}
-              </li>
-            ))}
-          </ul>
-        </div>
+        {languages.length > 0 && (
+          <div className="flex flex-col">
+            <h3 className="cv-skill-title text-blue-900 font-semibold mb-2">
+              Ngôn Ngữ
+            </h3>
+            <ul className="cv-skill-content text-gray-700">
+              {languages.map((skill, idx) => (
+                <li key={idx} className="mb-1">
+                  {skill}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -886,22 +932,22 @@ function EduList({ education }) {
   return (
     <div className="space-y-4">
       <div>
-        <div className="flex gap-4 items-center text-lg font-serif font-semibold text-blue-900">
+        <div className="flex gap-4 items-center text-lg font-semibold text-blue-900">
           <span className="edu-school">
-            {education?.schoolName || "Tên trường"}
+            {education?.school_name || "Tên trường"}
           </span>
           <span className="edu-graduation-year text-base text-blue-700 font-normal">
             Năm tốt nghiệp:
-            {education?.graduationYear ? `${education.graduationYear}` : ""}
+            {education?.graduation_year ? `${education.graduation_year}` : ""}
           </span>
         </div>
-        <div className="edu-major-degree text-base text-blue-700 font-serif italic">
+        <div className="edu-major-degree text-base text-blue-700 italic">
           {education?.major || "Chuyên ngành"}{" "}
           {education?.dataDegree?.value_VI
             ? ` | ${education.dataDegree.value_VI}`
             : ""}
         </div>
-        <div className="edu-gpa text-base text-blue-700 font-serif font-semibold">
+        <div className="edu-gpa text-base text-blue-700 font-semibold">
           GPA: {education?.gpa || "Chưa nhập GPA"}
         </div>
       </div>
@@ -916,18 +962,18 @@ function ExpList({ experiences }) {
     <div className="space-y-6">
       {experiences.map((item, i) => (
         <div key={i}>
-          <div className="exp-date flex gap-4 items-center text-lg font-serif font-semibold text-blue-900 print:break-inside-avoid">
+          <div className="exp-date flex gap-4 items-center text-lg font-semibold text-blue-900 print:break-inside-avoid">
             <span>
               {moment(item.start_date).format("DD/MM/YYYY") || "?"} -{" "}
               {moment(item.end_date).format("DD/MM/YYYY") || "?"}
             </span>
             <span className="exp-company">{item.company || "Tên công ty"}</span>
           </div>
-          <div className="exp-position text-base text-blue-700 font-serif italic mb-1">
+          <div className="exp-position text-base text-blue-700 italic mb-1">
             Vị trí: {item.position || "Vị trí"}
           </div>
           <ul
-            className="exp-description text-gray-700 text-base font-serif"
+            className="exp-description text-gray-700 text-base"
             style={{ listStyleType: "none" }}
           >
             {item.description ? (
@@ -947,23 +993,20 @@ function ExpList({ experiences }) {
 function Project({ title, techs, link, description, start_date, end_date }) {
   return (
     <div className="project mb-4 print:mb-3 print:break-inside-avoid">
-      <div className="cv-project-title font-serif font-semibold text-blue-900 text-lg mb-1">
+      <div className="cv-project-title font-semibold text-blue-900 text-lg mb-1">
         {title}
       </div>
-      <div className="cv-project-content text-base text-blue-700 font-serif italic mb-1">
-        <span>
-          Thời gian:
-          {moment(start_date).format("DD/MM/YYYY") || "?"} -{" "}
-          {moment(end_date).format("DD/MM/YYYY") || "?"}
-        </span>
+      <div className="cv-project-content text-base text-blue-700 italic mb-1">
+        Thời gian: {moment(start_date).format("DD/MM/YYYY")} -
+        {moment(end_date).format("DD/MM/YYYY")}
       </div>
-      <div className="cv-project-content text-base text-blue-700 font-serif italic mb-1">
+      <div className="cv-project-content text-base text-blue-700 italic mb-1">
         Công nghệ: {techs}
       </div>
-      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1 font-serif ">
+      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1">
         {description}
       </div>
-      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1 font-serif">
+      <div className="cv-project-description text-base text-gray-700 leading-relaxed mb-1">
         Link github:{" "}
         {link && (
           <a

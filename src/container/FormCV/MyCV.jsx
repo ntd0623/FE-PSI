@@ -73,10 +73,6 @@ const MyCV = () => {
     },
   ];
 
-  useEffect(() => {
-    console.log("Check listCV:", listCV);
-  }, [listCV]);
-
   const fetchData = async (id, statusCv, page) => {
     try {
       let res = await getCVByStudentID({ id, statusCv, page, limit });

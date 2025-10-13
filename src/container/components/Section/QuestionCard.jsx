@@ -137,14 +137,14 @@ const QuestionCard = ({ question, index }) => {
         {/* ANSWER */}
         <div className="grid grid-cols-1 sm:grid-cols-1 gap-4 mb-5">
           {question.options.map((opt, i) => {
-            const isCorrect = Array.isArray(question.correctAnswer)
+            const is_correct = Array.isArray(question.correctAnswer)
               ? question.correctAnswer.includes(i)
               : i === question.correctAnswer;
             return (
               <div
                 key={i}
                 className={`border p-4 rounded text-sm sm:text-base ${
-                  isCorrect
+                  is_correct
                     ? "bg-green-100 border-green-400 text-green-800 font-medium"
                     : "bg-gray-50 border-gray-200 text-gray-800"
                 }`}

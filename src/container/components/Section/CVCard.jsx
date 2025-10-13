@@ -17,7 +17,7 @@ const CVCard = ({ data, onView, onDelete, canEdit, canDelete }) => {
           </div>
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-800 mb-2 group-hover:text-blue-600 transition-colors">
-              {`CV của ${data?.fullName} - ${data?.career_objective}` ||
+              {`CV của ${data?.full_name} - ${data?.career_objective}` ||
                 "CV chưa có tiêu đề"}
             </h3>
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
@@ -28,7 +28,7 @@ const CVCard = ({ data, onView, onDelete, canEdit, canDelete }) => {
             </div>
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
               <p className="text-sm text-gray-600">
-                🎓 {data?.schoolName} - {data?.major}
+                🎓 {data?.school_name} - {data?.major}
               </p>
             </div>
 

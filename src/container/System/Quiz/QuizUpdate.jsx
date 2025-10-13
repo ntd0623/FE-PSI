@@ -36,10 +36,10 @@ const QuizUpdate = () => {
               const correctAnswer =
                 q.type === "QT2"
                   ? q.answers.reduce((acc, a, i) => {
-                      if (a.isCorrect) acc.push(i);
+                      if (a.is_correct) acc.push(i);
                       return acc;
                     }, [])
-                  : q.answers.findIndex((a) => a.isCorrect);
+                  : q.answers.findIndex((a) => a.is_correct);
               const images = (q.images_question || []).map((img) => ({
                 src: img.image,
                 caption: img.caption || "",
@@ -234,48 +234,29 @@ const QuizUpdate = () => {
     event.target.value = null;
   };
 
-  const handleChangeType = (index, newType) => {
-    const updated = [...quizSet.questions];
+  const handleChangeType = (qIndex, newType) => {
+    setQuizSet((prev) => {
+      const updatedQuestions = [...prev.questions];
+      const current = updatedQuestions[qIndex];
 
-    if (newType === "QT3") {
-      // Loại Đúng/Sai
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        options: ["Đúng", "Sai"],
-        correctAnswer: null,
-      };
-    } else if (newType === "QT2") {
-      // Nhiều đáp án đúng - dùng mảng correctAnswer[]
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        correctAnswer: [], // nhiều đáp án đúng
-      };
-    } else {
-      // QT1 - 1 đáp án đúng
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        correctAnswer: null,
-      };
-    }
-
-    setQuizSet((prev) => ({
-      ...prev,
-      questions: updated,
-    }));
-
-    setErrors((prev) => {
-      const clone = { ...prev };
-      if (clone.questions?.[index]) {
-        clone.questions = [...clone.questions];
-        clone.questions[index] = {
-          ...clone.questions[index],
-          type: undefined,
-        };
+      if (!current._originalOptions) {
+        current._originalOptions = current.options;
       }
-      return clone;
+
+      if (newType === "QT3") {
+        current.options = ["Đúng", "Sai"];
+        current.correctAnswer = null;
+      } else if (newType === "QT1") {
+        current.options = current._originalOptions || ["", "", "", ""];
+        current.correctAnswer = null;
+      } else if (newType === "QT2") {
+        current.options = current._originalOptions || ["", "", "", ""];
+        current.correctAnswer = [];
+      }
+
+      current.type = newType;
+      updatedQuestions[qIndex] = current;
+      return { ...prev, questions: updatedQuestions };
     });
   };
 
@@ -447,25 +428,26 @@ const QuizUpdate = () => {
   const handleSubmit = async () => {
     const formattedQuestions = quizSet.questions.map((q) => ({
       content: q.content,
-      type: q.type,
+      type: q.type || "QT1",
       explanation: q.explanation,
       answers:
         q.type === "QT2"
           ? q.options.map((opt, index) => ({
               content: opt,
-              isCorrect: Array.isArray(q.correctAnswer)
+              is_correct: Array.isArray(q.correctAnswer)
                 ? q.correctAnswer.includes(index)
                 : false,
             }))
           : q.options.map((opt, index) => ({
               content: opt,
-              isCorrect: index === q.correctAnswer,
+              is_correct: index === q.correctAnswer,
             })),
       images_question: q.images.map((img) => ({
         image: img.src,
         caption: img.caption || "",
       })),
     }));
+    console.log("Payload gửi lên:", formattedQuestions);
 
     const dataToValidate = {
       ...quizSet,
@@ -861,6 +843,7 @@ const QuizUpdate = () => {
                         }`}
                         placeholder={`Lựa chọn ${oIndex + 1}`}
                         value={option}
+                        disabled={question.type === "QT3"}
                         onChange={(e) =>
                           handleOptionChange(qIndex, oIndex, e.target.value)
                         }

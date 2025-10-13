@@ -172,48 +172,29 @@ const QuizCreate = () => {
     event.target.value = null;
   };
 
-  const handleChangeType = (index, newType) => {
-    const updated = [...quizSet.questions];
+  const handleChangeType = (qIndex, newType) => {
+    setQuizSet((prev) => {
+      const updatedQuestions = [...prev.questions];
+      const current = updatedQuestions[qIndex];
 
-    if (newType === "QT3") {
-      // Loại Đúng/Sai
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        options: ["Đúng", "Sai"],
-        correctAnswer: null,
-      };
-    } else if (newType === "QT2") {
-      // Nhiều đáp án đúng - dùng mảng correctAnswer[]
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        correctAnswer: [], // nhiều đáp án đúng
-      };
-    } else {
-      // QT1 - 1 đáp án đúng
-      updated[index] = {
-        ...updated[index],
-        type: newType,
-        correctAnswer: null,
-      };
-    }
-
-    setQuizSet((prev) => ({
-      ...prev,
-      questions: updated,
-    }));
-
-    setErrors((prev) => {
-      const clone = { ...prev };
-      if (clone.questions?.[index]) {
-        clone.questions = [...clone.questions];
-        clone.questions[index] = {
-          ...clone.questions[index],
-          type: undefined,
-        };
+      if (!current._originalOptions) {
+        current._originalOptions = current.options;
       }
-      return clone;
+
+      if (newType === "QT3") {
+        current.options = ["Đúng", "Sai"];
+        current.correctAnswer = null;
+      } else if (newType === "QT1") {
+        current.options = current._originalOptions || ["", "", "", ""];
+        current.correctAnswer = null;
+      } else if (newType === "QT2") {
+        current.options = current._originalOptions || ["", "", "", ""];
+        current.correctAnswer = [];
+      }
+
+      current.type = newType;
+      updatedQuestions[qIndex] = current;
+      return { ...prev, questions: updatedQuestions };
     });
   };
 
@@ -380,13 +361,13 @@ const QuizCreate = () => {
         q.type === "QT2"
           ? q.options.map((opt, index) => ({
               content: opt,
-              isCorrect: Array.isArray(q.correctAnswer)
+              is_correct: Array.isArray(q.correctAnswer)
                 ? q.correctAnswer.includes(index)
                 : false,
             }))
           : q.options.map((opt, index) => ({
               content: opt,
-              isCorrect: index === q.correctAnswer,
+              is_correct: index === q.correctAnswer,
             })),
       images_question: q.images.map((img) => ({
         image: img.src,
@@ -768,6 +749,7 @@ const QuizCreate = () => {
                         }`}
                         placeholder={`Lựa chọn ${oIndex + 1}`}
                         value={option}
+                        disabled={question.type === "QT3"}
                         onChange={(e) =>
                           handleOptionChange(qIndex, oIndex, e.target.value)
                         }

@@ -12,6 +12,9 @@ import {
   NotebookText,
   FilePlus,
   UserCheck,
+  Calendar,
+  School,
+  User2Icon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { path } from "../../utils/constant";
@@ -36,6 +39,18 @@ const CVManagementSystem = () => {
       onClick: () => navigate(path.CV_MANAGEMENT),
     },
     {
+      icon: () => <User2Icon className="text-violet-600" />,
+      label: "Quản lý Sinh Viên",
+      active: location.pathname.startsWith(path.STUDENT_MANAGEMENT),
+      onClick: () => navigate(path.STUDENT_MANAGEMENT),
+    },
+    {
+      icon: () => <School className="text-emerald-600" />,
+      label: "Lớp học",
+      active: location.pathname.startsWith(path.CLASS_MANAGEMENT),
+      onClick: () => navigate(path.CLASS_MANAGEMENT),
+    },
+    {
       icon: () => <ClipboardList className="text-emerald-600" />,
       label: "Trắc Nghiệm",
       active: location.pathname.startsWith(path.QUIZ),
@@ -47,9 +62,15 @@ const CVManagementSystem = () => {
           onClick: () => navigate(path.QUIZ),
         },
         {
+          icon: () => <Calendar className="text-green-600" />,
+          label: "Quản lý lịch kiểm tra",
+          active: location.pathname.startsWith(path.QUIZ_SCHEDULE),
+          onClick: () => navigate(path.QUIZ_SCHEDULE),
+        },
+        {
           icon: () => <UserCheck className="text-amber-600" />,
           label: "Sinh viên đã làm bài",
-          active: location.pathname === path.QUIZ_CREATE,
+          active: location.pathname.startsWith(path.STUDENT_SUBMISSTION),
           onClick: () => navigate(path.STUDENT_SUBMISSTION),
         },
       ],
